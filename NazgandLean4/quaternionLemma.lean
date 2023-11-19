@@ -64,13 +64,19 @@ lemma equalSetsSoqtstn1₁AndSoqtstn1₂ : soqtstn1₁ = soqtstn1₂ := by
   intros h
   rcases h with ⟨rx,ry,rz,hx,hSphere⟩
   rcases hx with ⟨hr0, hxrx, hyry, hzrz⟩
-  constructor
+  simp_rw [hr0]
+  simp only [and_true]
+  simp_rw [←hxrx, ←hyry, ←hzrz] at hSphere
   sorry
-  exact hr0
   intros h₀
   rcases h₀ with ⟨hNorm1, hr0⟩
   use x
   use y
   use z
   simp only [hr0, and_self, true_and]
-  sorry
+  let hNormSquare1 := congrArg (λ (r₀ : ℝ)=>r₀*r₀) hNorm1
+  simp only [mul_one] at hNormSquare1
+  rw [←Quaternion.normSq_eq_norm_mul_self, hr0, Quaternion.normSq_def'] at hNormSquare1
+  rw [←hNormSquare1]
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow', zero_add]
+  ring_nf

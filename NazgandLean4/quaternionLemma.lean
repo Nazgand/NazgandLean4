@@ -67,7 +67,13 @@ lemma equalSetsSoqtstn1₁AndSoqtstn1₂ : soqtstn1₁ = soqtstn1₂ := by
   simp_rw [hr0]
   simp only [and_true]
   simp_rw [←hxrx, ←hyry, ←hzrz] at hSphere
-  sorry
+  let hNorm1 := congrArg Real.sqrt hSphere
+  simp only [Real.sqrt_one] at hNorm1
+  simp_rw [←hNorm1]
+  let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (@QuaternionAlgebra.mk ℝ (-1) (-1) 0 x y z))
+  simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
+  simp_rw [←hSqrtNormSquare, Quaternion.normSq_def']
+  ring_nf
   intros h₀
   rcases h₀ with ⟨hNorm1, hr0⟩
   use x

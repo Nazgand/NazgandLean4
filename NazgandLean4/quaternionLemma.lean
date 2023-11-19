@@ -4,9 +4,10 @@ open Quaternion Classical
 
 --declare a Set Of Quaternions That Square To Negative 1
 def soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
-def soqtstn1₁ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₀ = ⟨0, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 1)}
+def soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 1)}
+def soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
 
-lemma equalSets : soqtstn1₀ = soqtstn1₁ := by
+lemma equalSetsSoqtstn1₀AndSoqtstn1₁ : soqtstn1₀ = soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [soqtstn1₀, soqtstn1₁]
   simp [Quaternion.ext_iff]
@@ -54,3 +55,22 @@ lemma equalSets : soqtstn1₀ = soqtstn1₁ := by
   simp only [neg_add_rev] at hSphere2
   rw [←hSphere2]
   ring
+
+lemma equalSetsSoqtstn1₁AndSoqtstn1₂ : soqtstn1₁ = soqtstn1₂ := by
+  ext ⟨r, x, y, z⟩
+  dsimp [soqtstn1₁, soqtstn1₂]
+  simp [Quaternion.ext_iff]
+  constructor
+  intros h
+  rcases h with ⟨rx,ry,rz,hx,hSphere⟩
+  rcases hx with ⟨hr0, hxrx, hyry, hzrz⟩
+  constructor
+  sorry
+  exact hr0
+  intros h₀
+  rcases h₀ with ⟨hNorm1, hr0⟩
+  use x
+  use y
+  use z
+  simp only [hr0, and_self, true_and]
+  sorry

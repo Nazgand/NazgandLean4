@@ -3,14 +3,16 @@ set_option maxHeartbeats 0
 open Quaternion Classical
 
 --declare a Set Of Quaternions That Square To Negative 1
-def soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
-def soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 1)}
-def soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
+def Soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
+def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 1)}
+def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
 
-lemma equalSetsSoqtstn1₀AndSoqtstn1₁ : soqtstn1₀ = soqtstn1₁ := by
+lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
-  dsimp [soqtstn1₀, soqtstn1₁]
-  simp [Quaternion.ext_iff]
+  dsimp [Soqtstn1₀, Soqtstn1₁]
+  simp only [ext_iff, neg_re, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
+    neg_zero, mul_imI, neg_imJ, QuaternionAlgebra.one_imJ, mul_imJ, neg_imK,
+    QuaternionAlgebra.one_imK, mul_imK]
   constructor
   · intros ha
     use x
@@ -56,10 +58,10 @@ lemma equalSetsSoqtstn1₀AndSoqtstn1₁ : soqtstn1₀ = soqtstn1₁ := by
     rw [←hSphere2]
     ring
 
-lemma equalSetsSoqtstn1₁AndSoqtstn1₂ : soqtstn1₁ = soqtstn1₂ := by
+lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
   ext ⟨r, x, y, z⟩
-  dsimp [soqtstn1₁, soqtstn1₂]
-  simp [Quaternion.ext_iff]
+  dsimp [Soqtstn1₁, Soqtstn1₂]
+  simp only [ext_iff]
   constructor
   · intros h
     rcases h with ⟨rx,ry,rz,hx,hSphere⟩
@@ -86,3 +88,55 @@ lemma equalSetsSoqtstn1₁AndSoqtstn1₂ : soqtstn1₁ = soqtstn1₂ := by
     rw [←hNormSquare1]
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow', zero_add]
     ring_nf
+
+--declare a Set Of Quaternions q That Square To q Minus 1
+def Soqqtstqm1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | q₀ - 1 = q₀ * q₀}
+def Soqqtstqm1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨1/2, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 3/4)}
+def Soqqtstqm1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 1/2}
+def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qim ∈ Soqtstn1₁ ∧ q₃ = 1/2 + qim * (Real.sqrt 3) / 2)}
+
+lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
+  ext ⟨r, x, y, z⟩
+  dsimp [Soqqtstqm1₀, Soqqtstqm1₁]
+  simp only [ext_iff, sub_re, QuaternionAlgebra.one_re, mul_re, sub_imI, QuaternionAlgebra.one_imI,
+    sub_zero, mul_imI, sub_imJ, QuaternionAlgebra.one_imJ, mul_imJ, sub_imK,
+    QuaternionAlgebra.one_imK, mul_imK, one_div]
+  ring_nf
+  simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
+    Int.int_cast_ofNat]
+  constructor
+  · intros h₀
+    use x
+    use y
+    use z
+    simp only [and_self, and_true]
+    rcases h₀ with ⟨h₁,hx,hy,hz⟩
+    have hr₀ : (¬ r = 1/2) → False := by
+      intros hrn0
+      sorry
+    have hr₁ : r = 1/2 := by_contra hr₀
+    rw [hr₁]
+    simp only [one_div, true_and]
+    rw [hr₁] at h₁
+    let hSphere := congrArg (λ (x₀ : ℝ) => 1/4 - x₀) h₁
+    ring_nf at hSphere
+    rw [←hSphere]
+    simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat]
+  · intros h₀
+    rcases h₀ with ⟨rx,ry,rz,hx,hSphere⟩
+    rcases hx with ⟨hr,hx,hy,hz⟩
+    simp_rw [hr]
+    ring_nf
+    simp only [Int.cast_negOfNat, Nat.cast_one, Int.ofNat_eq_coe, Int.cast_one, Nat.cast_ofNat,
+      one_div, neg_mul, one_mul, and_self, and_true]
+    rw [←hx, ←hy, ←hz] at hSphere
+    let hXSquare := congrArg (λ (x₀ : ℝ) => x₀ - y ^ 2 - z ^ 2) hSphere
+    ring_nf at hXSquare
+    rw [hXSquare]
+    ring
+
+lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
+  sorry
+
+lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
+  sorry

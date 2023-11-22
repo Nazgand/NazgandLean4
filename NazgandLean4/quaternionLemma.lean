@@ -4,7 +4,7 @@ open Quaternion Classical
 
 --declare a Set Of Quaternions That Square To Negative 1
 def Soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
-def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 1)}
+def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 1)}
 def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
@@ -19,7 +19,7 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     use y
     use z
     simp only [and_self, and_true]
-    rcases ha with ⟨hSphere3,h0x,h0y,h0z⟩
+    rcases ha with ⟨hSphere3, h0x, h0y, h0z⟩
     ring_nf at h0x
     ring_nf at h0y
     ring_nf at h0z
@@ -47,9 +47,9 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
       ring_nf
   · intros h₀
     ring_nf
-    rcases h₀ with ⟨rx,ry,rz,hx⟩
-    rcases hx with ⟨hx₀,hSphere⟩
-    rcases hx₀ with ⟨hr,hrx,hry,hrz⟩
+    rcases h₀ with ⟨rx, ry, rz, hx⟩
+    rcases hx with ⟨hx₀, hSphere⟩
+    rcases hx₀ with ⟨hr, hrx, hry, hrz⟩
     simp_rw [hr]
     simp only [ne_eq, zero_pow', zero_sub, zero_mul, and_self, and_true]
     simp_rw [hrx,hry,hrz]
@@ -64,7 +64,7 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
   simp only [ext_iff]
   constructor
   · intros h
-    rcases h with ⟨rx,ry,rz,hx,hSphere⟩
+    rcases h with ⟨rx, ry, rz, hx, hSphere⟩
     rcases hx with ⟨hr0, hxrx, hyry, hzrz⟩
     simp_rw [hr0]
     simp only [and_true]
@@ -82,7 +82,7 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
     use y
     use z
     simp only [hr0, and_self, true_and]
-    let hNormSquare1 := congrArg (λ (r₀ : ℝ)=>r₀*r₀) hNorm1
+    let hNormSquare1 := congrArg (λ (r₀ : ℝ) => r₀ * r₀) hNorm1
     simp only [mul_one] at hNormSquare1
     rw [←Quaternion.normSq_eq_norm_mul_self, hr0, Quaternion.normSq_def'] at hNormSquare1
     rw [←hNormSquare1]
@@ -91,8 +91,8 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
 
 --declare a Set Of Quaternions q That Square To q Minus 1
 def Soqqtstqm1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | q₀ - 1 = q₀ * q₀}
-def Soqqtstqm1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨1/2, rx, ry, rz⟩ ∧ rx*rx + ry*ry + rz*rz = 3/4)}
-def Soqqtstqm1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 1/2}
+def Soqqtstqm1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨1 / 2, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 3 / 4)}
+def Soqqtstqm1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 1 / 2}
 def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qim ∈ Soqtstn1₁ ∧ q₃ = 1/2 + qim * (Real.sqrt 3) / 2)}
 
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
@@ -110,21 +110,40 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     use y
     use z
     simp only [and_self, and_true]
-    rcases h₀ with ⟨h₁,hx,hy,hz⟩
+    rcases h₀ with ⟨h₁, hx, hy, hz⟩
+    have EqSplit : ∀ (x₀ : ℝ), x₀ = r * x₀ * 2 → (x₀ = 0 ∨ r = 1 / 2) := by
+      intro x₀ h
+      have hFactored : x₀ * (1 - r * 2) = 0 := by linarith
+      simp at hFactored
+      apply hFactored.imp_right
+      intro h
+      field_simp
+      linarith
+    let hx₂ := EqSplit x hx
+    let hy₂ := EqSplit y hy
+    let hz₂ := EqSplit z hz
     have hr₀ : (¬ r = 1/2) → False := by
       intros hrn0
-      sorry
+      simp only [one_div] at hrn0
+      simp only [one_div, hrn0, or_false] at hx₂
+      simp only [one_div, hrn0, or_false] at hy₂
+      simp only [one_div, hrn0, or_false] at hz₂
+      simp [hx₂, hy₂, hz₂] at h₁
+      let h₂ := congrArg (λ (x₀ : ℝ) => x₀ - r + 1) h₁
+      simp only [add_sub_cancel, add_left_neg] at h₂
+      have hSquareNn := mul_self_nonneg (r - 1 / 2)
+      linarith
     have hr₁ : r = 1/2 := by_contra hr₀
     rw [hr₁]
     simp only [one_div, true_and]
     rw [hr₁] at h₁
-    let hSphere := congrArg (λ (x₀ : ℝ) => 1/4 - x₀) h₁
+    let hSphere := congrArg (λ (x₀ : ℝ) => 1 / 4 - x₀) h₁
     ring_nf at hSphere
     rw [←hSphere]
     simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat]
   · intros h₀
-    rcases h₀ with ⟨rx,ry,rz,hx,hSphere⟩
-    rcases hx with ⟨hr,hx,hy,hz⟩
+    rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
+    rcases hx with ⟨hr, hx, hy, hz⟩
     simp_rw [hr]
     ring_nf
     simp only [Int.cast_negOfNat, Nat.cast_one, Int.ofNat_eq_coe, Int.cast_one, Nat.cast_ofNat,
@@ -136,7 +155,15 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     ring
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
-  sorry
+  ext ⟨r, x, y, z⟩
+  dsimp [Soqqtstqm1₁, Soqqtstqm1₂]
+  simp only [one_div, ext_iff]
+  constructor
+  · intros h₀
+    rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
+    rcases hx with ⟨hr, hx, hy, hz⟩
+    sorry
+  · sorry
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   sorry

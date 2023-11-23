@@ -162,8 +162,28 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
     rcases hx with ⟨hr, hx, hy, hz⟩
+    rw [←hx, ←hy, ←hz] at hSphere
+    have hrSquare := congrArg (λ (x₀ : ℝ) => x₀ ^ 2) hr
+    simp only [inv_pow] at hrSquare
+    have hNormSq := congrArg (λ (x₀ : ℝ) => x₀ + r ^ 2) hSphere
+    nth_rewrite 2 [hrSquare] at hNormSq
+    simp only at hNormSq
+    ring_nf at hNormSq
+    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (@QuaternionAlgebra.mk ℝ (-1) (-1) r x y z))
+    simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
+    rw [←hSqrtNormSquare, Quaternion.normSq_def']
+    simp only [Real.sqrt_eq_one]
+    constructor
+    · rw [←hNormSq]
+      ring_nf
+    · exact hr
+  · intros h₀
+    use x
+    use y
+    use z
+    rcases h₀ with ⟨hNorm, hr⟩
+    simp only [hr, and_self, true_and]
     sorry
-  · sorry
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   sorry

@@ -191,4 +191,34 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     rw [hNormSqMr]
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
-  sorry
+  ext ⟨r, x, y, z⟩
+  dsimp [Soqqtstqm1₁, Soqqtstqm1₃, Soqtstn1₁]
+  simp only [one_div, ext_iff, add_re, add_imI, add_imJ, add_imK]
+  constructor
+  · intros h₀
+    rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
+    rcases hx with ⟨hr, hx, hy, hz⟩
+    use (@QuaternionAlgebra.mk ℝ (-1) (-1) 0 (rx * 2 / Real.sqrt 3) (ry * 2 / Real.sqrt 3) (rz * 2 / Real.sqrt 3))
+    simp only [true_and]
+    constructor
+    · use rx * 2 / Real.sqrt 3
+      use ry * 2 / Real.sqrt 3
+      use rz * 2 / Real.sqrt 3
+      constructor
+      · simp only [and_self]
+      · ring_nf
+        simp only [inv_pow]
+        sorry
+    · sorry
+  · intros h₀
+    rcases h₀ with ⟨qim, hx₁, hx₂⟩
+    rcases hx₁ with ⟨rx, ry, rz, hQim, hSphere⟩
+    rcases hx₂ with ⟨hr, hx, hy, hz⟩
+    rcases hQim with ⟨hQimR, hQimI, hQimJ, hQimK⟩
+    use x
+    use y
+    use z
+    simp only [and_self, and_true]
+    constructor
+    · sorry
+    · sorry

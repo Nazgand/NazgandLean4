@@ -183,6 +183,15 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     use z
     rcases h₀ with ⟨hNorm, hr⟩
     simp only [hr, and_self, true_and]
+    have hNormSqMr := congrArg (λ (x₀ : ℝ) => x₀ ^ 2 - 1 / 4) hNorm
+    ring_nf at hNormSqMr
+    simp only [Int.cast_negOfNat, Nat.cast_one, Int.ofNat_eq_coe, Int.cast_one, Nat.cast_ofNat,
+      one_div, neg_mul, one_mul, Int.int_cast_ofNat] at hNormSqMr
+    rw [←hNormSqMr]
+    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (@QuaternionAlgebra.mk ℝ (-1) (-1) r x y z))
+    simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
+    rw [←hSqrtNormSquare, Quaternion.normSq_def']
+    simp only
     sorry
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by

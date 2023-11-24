@@ -207,9 +207,19 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
       constructor
       · simp only [and_self]
       · ring_nf
-        simp only [inv_pow]
-        sorry
-    · sorry
+        have h3g0 : (0 : ℝ) ≤ 3 := by linarith
+        simp only [inv_pow, Real.sq_sqrt h3g0]
+        have hSphere₂ := congrArg (λ (x₀ : ℝ) => x₀ * 4 / 3) hSphere
+        simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_mul_cancel, div_self] at hSphere₂
+        rw [←hSphere₂]
+        ring
+    · constructor
+      · sorry
+      · constructor
+        · sorry
+        · constructor
+          · sorry
+          · sorry
   · intros h₀
     rcases h₀ with ⟨qim, hx₁, hx₂⟩
     rcases hx₁ with ⟨rx, ry, rz, hQim, hSphere⟩

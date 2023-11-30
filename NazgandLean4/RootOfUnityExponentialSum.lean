@@ -81,7 +81,14 @@ lemma RuesDiffDeriv (n : ℕ+) (m : ℤ) : deriv (RuesDiff n m) = (RuesDiff n (m
   sorry
 
 lemma RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (RuesDiff n m) = RuesDiff n (k + m) := by
-  sorry
+  induction' k with K Kih
+  · simp only [Nat.zero_eq, iteratedDeriv_zero, CharP.cast_eq_zero, zero_add]
+  · have h₀ := congrArg deriv Kih
+    rw [iteratedDeriv_succ, h₀, RuesDiffDeriv]
+    have h₁ : ↑K + m + 1 = ↑(Nat.succ K) + m := by
+      simp only [Nat.cast_succ]
+      ring
+    rw [h₁]
 
 lemma RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
   sorry

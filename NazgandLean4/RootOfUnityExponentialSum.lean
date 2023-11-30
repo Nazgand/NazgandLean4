@@ -41,7 +41,9 @@ lemma RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 
   simp only [h₀, h₁, h, one_pow, mul_one]
 
 lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
-  sorry
+  by_contra h₁
+  rw [h₁] at h
+  simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow', zero_ne_one] at h
 
 lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m in range n, cexp (z * cexp (2 * π * (m / n) * I))) / n := by
   sorry

@@ -105,6 +105,7 @@ lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + 
     have h₁ : ↑K + (m + k * ↑↑n) = (↑K + m) + k * ↑↑n := by
       ring
     rw [h₁, Int.add_mul_emod_self]
+  rw [h₀]
 
 lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ in range k, RuesDiff (n * k) (n * k₀ + m) z := by
   sorry

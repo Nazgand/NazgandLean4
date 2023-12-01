@@ -94,7 +94,19 @@ lemma RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
   sorry
 
 lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) : RuesDiff n m (z * rou) = rou ^ (-m) * RuesDiff n m z := by
-  sorry
+  simp_rw [RuesDiff, ←tsum_mul_left]
+  congr
+  ext1 k
+  simp only [zpow_neg, mul_ite, mul_zero]
+  have h₀ := Classical.em ((↑k + m) % ↑↑n = 0)
+  rcases h₀ with h₀a | h₀b
+  · simp_rw [if_pos h₀a]
+    rw [mul_pow z rou k]
+    have h₁ : rou ^ k = (rou ^ m)⁻¹ := by
+      sorry
+    rw [h₁]
+    ring
+  · simp_rw [if_neg h₀b]
 
 lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + k * n) := by
   ext1 z

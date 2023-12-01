@@ -97,13 +97,24 @@ lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou 
   simp_rw [RuesDiff, ←tsum_mul_left]
   congr
   ext1 k
-  simp only [zpow_neg, mul_ite, mul_zero]
-  have h₀ := Classical.em ((↑k + m) % ↑↑n = 0)
+  simp only [EuclideanDomain.mod_eq_zero, zpow_neg, mul_ite, mul_zero]
+  have h₀ := Classical.em (↑↑n ∣ ↑k + m)
   rcases h₀ with h₀a | h₀b
   · simp_rw [if_pos h₀a]
     rw [mul_pow z rou k]
     have h₁ : rou ^ k = (rou ^ m)⁻¹ := by
-      sorry
+      obtain ⟨k₂, kmDiv⟩ := h₀a
+      have h₂ : rou ^ (↑k + m) = 1 := by
+        rw [kmDiv, zpow_mul]
+        simp only [zpow_coe_nat, h, one_zpow]
+      have h₃ := congrArg (λ (z₀ : ℂ) => z₀ * (rou ^ m)⁻¹) h₂
+      simp only [one_mul, ne_eq, inv_eq_zero] at h₃
+      have h₄ := RouNot0 n rou h
+      rw [zpow_add₀ h₄ ↑k m] at h₃
+      rw [←h₃]
+      have h₅ : rou ^ m ≠ 0 := by
+        exact zpow_ne_zero m h₄
+      field_simp
     rw [h₁]
     ring
   · simp_rw [if_neg h₀b]

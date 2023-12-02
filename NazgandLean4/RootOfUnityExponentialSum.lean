@@ -45,27 +45,6 @@ lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
   rw [h₁] at h
   simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow', zero_ne_one] at h
 
-lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m in range n, cexp (z * cexp (2 * π * (m / n) * I))) / n := by
-  sorry
-
-lemma RuesZ0Equals1 (n : ℕ+) : Rues n 0 = 1 := by
-  rw [RuesNEqualsExpSum]
-  simp only [zero_mul, Complex.exp_zero, sum_const, card_range, nsmul_eq_mul, mul_one, ne_eq,
-    Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, div_self]
-
-lemma RuesN1EqualsExp : Rues 1 = cexp := by
-  ext1 z
-  rw [Rues, ExpTsumForm]
-  simp only [PNat.one_coe, one_mul]
-
-lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
-  ext1 z
-  rw [RuesNEqualsExpSum, Complex.cosh]
-  sorry
-
-lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
-  sorry
-
 -- (RuesDiff n m) is the mth derivative of (Rues n)
 noncomputable
 def RuesDiff (n : ℕ+) (m : ℤ) (z : ℂ) : ℂ :=
@@ -143,6 +122,13 @@ lemma RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff 
   sorry
 
 lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ in range n, cexp (z * cexp (2 * π * (k₀ / n) * I) + m * 2 * π * (k₀ / n) * I)) / n := by
+  simp_rw [Complex.exp_add]
+  have h₀ : ∀ (k : ℕ), cexp (z * cexp (2 * ↑π * (↑k / ↑↑n) * I)) = ∑' (k_1 : ℕ), (z * cexp (2 * ↑π * (↑k / ↑↑n) * I)) ^ k_1 / ↑(Nat.factorial k_1) := by
+    intros k
+    exact ExpTsumForm (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))
+  simp_rw [h₀]
+  clear h₀
+  simp_rw [←tsum_mul_right]
   sorry
 
 lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
@@ -152,10 +138,51 @@ lemma EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) : (f = iteratedDeri
   sorry
 
 lemma RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff n m := by
-  sorry
+  rw [←RuesDiffM0EqualsRues, RuesDiffIteratedDeriv]
+  simp only [add_zero]
 
 lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
   sorry
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
+  sorry
+
+lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m in range n, cexp (z * cexp (2 * π * (m / n) * I))) / n := by
+  rw [←RuesDiffM0EqualsRues, RuesDiffEqualsExpSum]
+  congr
+  ext1 k
+  simp only [Int.cast_zero, zero_mul, add_zero]
+
+lemma RuesZ0Equals1 (n : ℕ+) : Rues n 0 = 1 := by
+  rw [RuesNEqualsExpSum]
+  simp only [zero_mul, Complex.exp_zero, sum_const, card_range, nsmul_eq_mul, mul_one, ne_eq,
+    Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, div_self]
+
+lemma RuesN1EqualsExp : Rues 1 = cexp := by
+  ext1 z
+  rw [Rues, ExpTsumForm]
+  simp only [PNat.one_coe, one_mul]
+
+lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
+  ext1 z
+  rw [RuesNEqualsExpSum, Complex.cosh]
+  have h₀ : range (2 : ℕ+) = {0, 1} := by
+    rfl
+  simp_rw [h₀, Finset.sum]
+  simp only [mem_singleton, insert_val, singleton_val, Multiset.mem_singleton, not_false_eq_true,
+    Multiset.ndinsert_of_not_mem, Multiset.map_cons, CharP.cast_eq_zero, zero_div, mul_zero,
+    zero_mul, Complex.exp_zero, mul_one, Multiset.map_singleton, Nat.cast_one, one_div,
+    Multiset.sum_cons, Multiset.sum_singleton]
+  have h₁ : cexp (2 * ↑π * (↑↑(2 : ℕ+))⁻¹ * I) = -1 := by
+    have h₂ : 2 * (π : ℂ) * (↑↑(2 : ℕ+))⁻¹ = π := by
+      field_simp
+      ring
+      congr
+    rw [h₂]
+    simp only [exp_pi_mul_I]
+  simp_rw [h₁]
+  simp only [mul_neg, mul_one]
+  congr
+
+lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
   sorry

@@ -229,19 +229,23 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
     Int.cast_negOfNat, mul_neg, mul_one, neg_mul]
   have h₅ : cexp (z * 2⁻¹) * cexp (-(z * I * 2⁻¹)) ^ 2 * cexp (-(z * 2⁻¹)) = cexp (-(z * I)) := by
-    sorry
+    rw [←Complex.exp_nat_mul, ←Complex.exp_add, ←Complex.exp_add]
+    ring_nf
   rw [h₅]
   clear h₅
   have h₆ : cexp (z * 2⁻¹) * cexp (z * I * 2⁻¹) ^ 2 * cexp (-(z * 2⁻¹)) = cexp (z * I) := by
-    sorry
+    rw [←Complex.exp_nat_mul, ←Complex.exp_add, ←Complex.exp_add]
+    ring_nf
   rw [h₆]
   clear h₆
   have h₇ : cexp (z * 2⁻¹) ^ 2 * cexp (-(z * I * 2⁻¹)) * cexp (z * I * 2⁻¹) = cexp z := by
-    sorry
+    rw [←Complex.exp_nat_mul, ←Complex.exp_add, ←Complex.exp_add]
+    ring_nf
   rw [h₇]
   clear h₇
   have h₈ : cexp (-(z * I * 2⁻¹)) * cexp (z * I * 2⁻¹) * cexp (-(z * 2⁻¹)) ^ 2 = cexp (-z) := by
-    sorry
+    rw [←Complex.exp_nat_mul, ←Complex.exp_add, ←Complex.exp_add]
+    ring_nf
   rw [h₈]
   clear h₈
   ring

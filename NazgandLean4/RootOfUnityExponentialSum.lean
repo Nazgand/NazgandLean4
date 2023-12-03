@@ -185,4 +185,63 @@ lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
   congr
 
 lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
-  sorry
+  rw [RuesNEqualsExpSum, Complex.cosh, Complex.cosh]
+  have h₀ : (4 : ℕ+) = (4 : ℕ) := by
+    rfl
+  simp_rw [h₀, Finset.sum]
+  clear h₀
+  simp only [range_val, Multiset.range_succ, Multiset.range_zero, Multiset.cons_zero,
+    Nat.cast_ofNat, Multiset.map_cons, Nat.cast_one, one_div, Multiset.map_singleton,
+    CharP.cast_eq_zero, zero_div, mul_zero, zero_mul, Complex.exp_zero, mul_one, Multiset.sum_cons,
+    Multiset.sum_singleton]
+  ring_nf
+  simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat, Nat.cast_one, Int.cast_one,
+    one_div, exp_pi_mul_I, mul_neg, mul_one]
+  have h₁ : cexp (↑π * I * (3 / 2)) = -I := by
+    sorry
+  rw [h₁]
+  clear h₁
+  have h₂ : cexp (↑π * I * 2⁻¹) = I := by
+    sorry
+  rw [h₂]
+  clear h₂
+  have h₃ : (1 + I)⁻¹ = (1 - I) / 2 := by
+    rw [Inv.inv, instInvComplex, normSq]
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, ofReal_inv, ofReal_add, ofReal_mul,
+      map_add, map_one, conj_I, add_re, one_re, I_re, add_zero, ofReal_one, mul_one, add_im, one_im,
+      I_im, zero_add]
+    ring_nf
+  rw [h₃]
+  clear h₃
+  have h₄ : (1 - I)⁻¹ = (1 + I) / 2 := by
+    rw [Inv.inv, instInvComplex, normSq]
+    simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, ofReal_inv, ofReal_add, ofReal_mul,
+      map_sub, map_one, conj_I, sub_neg_eq_add, sub_re, one_re, I_re, sub_zero, ofReal_one, mul_one,
+      sub_im, one_im, I_im, zero_sub, ofReal_neg, mul_neg, neg_neg]
+    ring_nf
+  rw [h₄]
+  clear h₄
+  ring_nf
+  simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
+    Int.cast_negOfNat, mul_neg, mul_one, neg_mul]
+  simp_rw [Complex.exp_add]
+  ring_nf
+  simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
+    Int.cast_negOfNat, mul_neg, mul_one, neg_mul]
+  have h₅ : cexp (z * 2⁻¹) * cexp (-(z * I * 2⁻¹)) ^ 2 * cexp (-(z * 2⁻¹)) = cexp (-(z * I)) := by
+    sorry
+  rw [h₅]
+  clear h₅
+  have h₆ : cexp (z * 2⁻¹) * cexp (z * I * 2⁻¹) ^ 2 * cexp (-(z * 2⁻¹)) = cexp (z * I) := by
+    sorry
+  rw [h₆]
+  clear h₆
+  have h₇ : cexp (z * 2⁻¹) ^ 2 * cexp (-(z * I * 2⁻¹)) * cexp (z * I * 2⁻¹) = cexp z := by
+    sorry
+  rw [h₇]
+  clear h₇
+  have h₈ : cexp (-(z * I * 2⁻¹)) * cexp (z * I * 2⁻¹) * cexp (-(z * 2⁻¹)) ^ 2 = cexp (-z) := by
+    sorry
+  rw [h₈]
+  clear h₈
+  ring

@@ -147,6 +147,26 @@ lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   sorry
 
+lemma ExpPiMulIHalf : cexp (↑(π / 2) * I) = I := by
+  rw [exp_mul_I]
+  simp only [ofReal_div, ofReal_ofNat, Complex.cos_pi_div_two, Complex.sin_pi_div_two, one_mul,
+    zero_add]
+
+lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
+  induction' k with K Kih
+  · simp only [Nat.zero_eq, CharP.cast_eq_zero, mul_zero, zero_div, Complex.exp_zero, pow_zero]
+  · simp_rw [Nat.cast_succ]
+    have h₀ : ↑π * I * (↑K + 1) / 2 = ↑π * I * ↑K / 2 + ↑(π / 2) * I := by
+      simp only [ofReal_div, ofReal_ofNat]
+      ring_nf
+    rw [h₀]
+    clear h₀
+    rw [Complex.exp_add, Kih, ExpPiMulIHalf]
+    have h₁ : Nat.succ K = K + 1 := by
+      exact rfl
+    rw [h₁]
+    sorry
+
 lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m in range n, cexp (z * cexp (2 * π * (m / n) * I))) / n := by
   rw [←RuesDiffM0EqualsRues, RuesDiffEqualsExpSum]
   congr
@@ -202,7 +222,10 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   rw [h₁]
   clear h₁
   have h₂ : cexp (↑π * I * 2⁻¹) = I := by
-    sorry
+    nth_rw 2 [←ExpPiMulIHalf]
+    congr 1
+    simp only [ofReal_div, ofReal_ofNat]
+    ring_nf
   rw [h₂]
   clear h₂
   have h₃ : (1 + I)⁻¹ = (1 - I) / 2 := by

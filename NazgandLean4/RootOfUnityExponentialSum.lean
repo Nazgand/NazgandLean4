@@ -165,7 +165,10 @@ lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
     have h₁ : Nat.succ K = K + 1 := by
       exact rfl
     rw [h₁]
-    sorry
+    have h₂ := zpow_add₀ I_ne_zero K 1
+    simp only [zpow_coe_nat, zpow_one] at h₂
+    rw [←h₂]
+    exact rfl
 
 lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m in range n, cexp (z * cexp (2 * π * (m / n) * I))) / n := by
   rw [←RuesDiffM0EqualsRues, RuesDiffEqualsExpSum]
@@ -218,6 +221,13 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat, Nat.cast_one, Int.cast_one,
     one_div, exp_pi_mul_I, mul_neg, mul_one]
   have h₁ : cexp (↑π * I * (3 / 2)) = -I := by
+    have h₁b := ExpToNatPowersOfI 3
+    simp only [Nat.cast_ofNat] at h₁b
+    have h₁b₁ : ↑π * I * 3 / 2 = ↑π * I * (3 / 2) := by
+      ring
+    rw [h₁b₁] at h₁b
+    rw [h₁b]
+    clear h₁b h₁b₁
     sorry
   rw [h₁]
   clear h₁

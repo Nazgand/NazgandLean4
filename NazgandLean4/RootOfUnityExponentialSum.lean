@@ -228,7 +228,21 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
     rw [h₁b₁] at h₁b
     rw [h₁b]
     clear h₁b h₁b₁
-    sorry
+    have h₅ : I ^ (3 : ℕ) = I ^ (3 : ℤ) := by
+      exact rfl
+    rw [h₅]
+    clear h₅
+    have h₆ : (3 : ℤ) = 2 + 1 := by
+      exact rfl
+    rw [h₆]
+    clear h₆
+    rw [zpow_add₀ I_ne_zero]
+    have h₇ : (2 : ℤ) = 1 + 1 := by
+      exact rfl
+    rw [h₇]
+    clear h₇
+    rw [zpow_add₀ I_ne_zero]
+    simp only [zpow_one, I_mul_I, neg_mul, one_mul]
   rw [h₁]
   clear h₁
   have h₂ : cexp (↑π * I * 2⁻¹) = I := by

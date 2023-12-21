@@ -129,6 +129,28 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   simp_rw [h₀]
   clear h₀
   simp_rw [←tsum_mul_right]
+  have h₁ : ∀ x ∈ range ↑n, Summable (λ (x_1 : ℕ) => (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 / ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
+    intros k kr
+    exact Summable.smul_const (ExpTaylorSeriesSummable (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))) _
+  have h₂ := (tsum_sum h₁).symm
+  clear h₁
+  simp_rw [h₂]
+  clear h₂
+  simp_rw [mul_pow, ←Complex.exp_nat_mul]
+  have h₃ : ∀ (b x : ℕ), z ^ b * cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) / ↑(Nat.factorial b) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I) =
+            (z ^ b / ↑(Nat.factorial b)) * (cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
+    intros b x
+    ring_nf
+  simp_rw [h₃, ←Finset.mul_sum, ←Complex.exp_add, ←tsum_div_const, RuesDiff]
+  clear h₃
+  congr
+  ext1 k
+  have h₄ : ∀ (x : ℕ), ↑k * (2 * ↑π * (↑x / ↑↑n) * I) + ↑m * 2 * ↑π * (↑x / ↑↑n) * I =
+            (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) := by
+    intros x
+    ring_nf
+  simp_rw [h₄]
+  clear h₄
   sorry
 
 lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by

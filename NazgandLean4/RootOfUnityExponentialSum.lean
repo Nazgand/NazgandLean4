@@ -48,9 +48,9 @@ lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
 -- (RuesDiff n m) is the mth derivative of (Rues n)
 noncomputable
 def RuesDiff (n : ℕ+) (m : ℤ) (z : ℂ) : ℂ :=
-  tsum (λ (k : ℕ) => if ((k : ℤ) + m) % n = 0 then z ^ k / k.factorial else 0)
+  tsum (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0)
 
-lemma RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) : Summable (λ (k : ℕ) => if ((k : ℤ) + m) % n = 0 then z ^ k / k.factorial else 0) := by
+lemma RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) : Summable (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0) := by
   sorry
 
 lemma RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
@@ -76,7 +76,7 @@ lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou 
   simp_rw [RuesDiff, ←tsum_mul_left]
   congr
   ext1 k
-  simp only [EuclideanDomain.mod_eq_zero, zpow_neg, mul_ite, mul_zero]
+  simp only [zpow_neg, mul_ite, mul_zero]
   have h₀ := Classical.em (↑↑n ∣ ↑k + m)
   rcases h₀ with h₀a | h₀b
   · simp_rw [if_pos h₀a]
@@ -98,16 +98,23 @@ lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou 
     ring
   · simp_rw [if_neg h₀b]
 
+lemma Dvd.dvd.addMultiple (n m k : ℤ): (n ∣ m) ↔ (n ∣ m + k * n) := by
+  have h₁ : n ∣ (k * n) := by
+    exact Int.dvd_mul_left k n
+  constructor
+  · intros h₀
+    exact Dvd.dvd.add h₀ h₁
+  · intros h₂
+    exact (Int.dvd_add_left h₁).mp h₂
+
 lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + k * n) := by
   ext1 z
   simp_rw [RuesDiff]
   congr
   ext1 K
-  have h₀ : (↑K + m) % ↑↑n = (↑K + (m + k * ↑↑n)) % ↑↑n := by
-    have h₁ : ↑K + (m + k * ↑↑n) = (↑K + m) + k * ↑↑n := by
-      ring
-    rw [h₁, Int.add_mul_emod_self]
-  rw [h₀]
+  congr 1
+  rw [Dvd.dvd.addMultiple (↑↑n) (↑K + m) k]
+  ring_nf
 
 lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ in range k, RuesDiff (n * k) (n * k₀ + m) z := by
   sorry
@@ -120,6 +127,23 @@ lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = 
 
 lemma RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
   sorry
+
+lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x in range ↑n, cexp (2 * ↑π * ((k * ↑x / ↑↑n) * I)) = (if ↑↑n ∣ k then ↑↑n else 0) := by
+  have h₀ : ∀ (x : ℕ), (2 * ↑π * (↑k * ↑x / ↑↑n * I)) = ↑x * (2 * ↑π * (↑k / ↑↑n * I)) := by
+    intros x
+    ring_nf
+  simp_rw [h₀, Complex.exp_nat_mul]
+  clear h₀
+  have hem := Classical.em (↑↑n ∣ k)
+  rcases hem with hemt | hemf
+  · have h₁ : ∑ x in range ↑n, cexp (2 * ↑π * (↑k / ↑↑n * I)) ^ x = ∑ x in range ↑n, 1 := by
+      congr
+      ext1 x
+      obtain ⟨k₂, kDiv⟩ := hemt
+      rw [kDiv]
+      sorry
+    sorry
+  · sorry
 
 lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ in range n, cexp (z * cexp (2 * π * (k₀ / n) * I) + m * 2 * π * (k₀ / n) * I)) / n := by
   simp_rw [Complex.exp_add]
@@ -145,13 +169,25 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   clear h₃
   congr
   ext1 k
-  have h₄ : ∀ (x : ℕ), ↑k * (2 * ↑π * (↑x / ↑↑n) * I) + ↑m * 2 * ↑π * (↑x / ↑↑n) * I =
-            (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) := by
+  have h₄ : ∀ (x : ℕ), ↑k * (2 * ↑π * (↑x / ↑↑n) * I) + ↑m * 2 * ↑π * (↑x / ↑↑n) * I = (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) := by
     intros x
     ring_nf
   simp_rw [h₄]
   clear h₄
-  sorry
+  have h₅ := RouGeometricSumEqIte n (↑k + m)
+  have h₆ : ∀ (x : ℕ), (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) = (2 * ↑π * (↑(↑k + m) * ↑x / ↑↑n * I)) := by
+    intros x
+    simp only [Int.cast_add, Int.cast_ofNat]
+    ring_nf
+  simp_rw [h₆, h₅]
+  simp only [mul_ite, mul_zero]
+  have hem := Classical.em (↑↑n ∣ ↑k + m)
+  rcases hem with hemt | hemf
+  · simp_rw [if_pos hemt]
+    ring_nf
+    simp only [ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, mul_inv_cancel_right₀]
+  · simp_rw [if_neg hemf]
+    simp only [zero_div]
 
 lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
   sorry

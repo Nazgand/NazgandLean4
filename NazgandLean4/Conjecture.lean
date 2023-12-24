@@ -22,6 +22,6 @@ def GSpan : Prop := SetOfSolutions n a = {h : ℂ → ℂ | ∃ (b : (Fin n) →
 -- the column vector of the basis
 def v (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
 
-theorem ArgumentSumConjecture {f : ℂ → ℂ} (h₀ : anNonZero n a) (h₁ : IsDifferentialEquationSolution n a f) (h₂ : GSpan n a g) (z₀ z₁ : ℂ) :
-    ∃ (A : Matrix (Fin n) (Fin n) ℂ), (f (z₀ + z₁) = ((transpose (v n g z₀)) * A * (v n g z₁)) 0 0 ∧ A = transpose A) :=
+theorem ArgumentSumConjecture {f : ℂ → ℂ} (h₀ : anNonZero n a) (h₁ : IsDifferentialEquationSolution n a f) (h₂ : GSpan n a g) :
+    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), (f (z₀ + z₁) = ((transpose (v n g z₀)) * A * (v n g z₁)) 0 0 ∧ A = transpose A) :=
   sorry

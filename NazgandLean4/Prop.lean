@@ -23,5 +23,8 @@ lemma impliesReorder (p q r : Prop) : (p → (q → r)) ↔ (q → (p → r)) :=
 lemma impliesAndImplies (p q r : Prop) : (p → (q → r)) ↔ ((q ∧ p) → r) := by
   tauto
 
+lemma impliesOrImplies (p q r : Prop) : ((q → r) ∧ (p → r)) ↔ ((q ∨ p) → r) := by
+  tauto
+
 lemma combineCases (q r : Prop) : ((q → r) ∧ ((¬q) → r)) ↔ r := by
   tauto

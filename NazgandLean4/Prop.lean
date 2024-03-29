@@ -28,3 +28,6 @@ lemma impliesOrImplies (p q r : Prop) : ((q → r) ∧ (p → r)) ↔ ((q ∨ p)
 
 lemma combineCases (q r : Prop) : ((q → r) ∧ ((¬q) → r)) ↔ r := by
   tauto
+
+lemma squashImplies (q r : Prop) : (q → (q → r)) ↔ (q → r) := by
+  tauto

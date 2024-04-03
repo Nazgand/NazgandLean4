@@ -43,3 +43,6 @@ lemma combineCasesGeneralized (k : ℕ+) (p : ℕ → Prop) (r : Prop) : (∃ k�
 
 lemma squashImplies (q r : Prop) : (q → (q → r)) ↔ (q → r) := by
   tauto
+
+lemma insightFromGeneralization (p₀ p₁ p₂ : Prop) : (p₀ ↔ (p₁ → p₂)) → (p₁ → (p₀ ↔ p₂)) := by
+  tauto

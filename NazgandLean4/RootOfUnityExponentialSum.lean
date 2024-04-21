@@ -69,8 +69,21 @@ lemma RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (Ru
       ring
     rw [h₁]
 
-lemma RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
+lemma TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f : ℕ → α) {n : ℕ+} :
+  ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
+  have h₀ : (n : ℕ) ≠ 0 := PNat.ne_zero n
+  have h₁ : ∑' (k : ℕ), f ((n : ℕ) * k) = ∑' (a : Set.range (λ (m : ℕ) => (n : ℕ) * m)), f ↑a := by
+    sorry
   sorry
+
+lemma NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) : ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
+  exact TsumMulIte _
+
+lemma RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
+  ext1 z
+  rw [Rues, RuesDiff]
+  simp only [add_zero]
+  rw [NeedZeroCoeff (λ (k : ℕ) => z ^ k / (Nat.factorial k)) n]
 
 lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) : RuesDiff n m (z * rou) = rou ^ (-m) * RuesDiff n m z := by
   simp_rw [RuesDiff, ←tsum_mul_left]

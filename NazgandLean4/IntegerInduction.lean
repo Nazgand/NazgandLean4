@@ -16,6 +16,13 @@ lemma IntegerInduction (p : ℤ → Prop) :
     obtain ⟨k, hk⟩ := he
     exact fun n => (fun hsucc a b => (Succ.rec_linear hsucc a b).mpr) hi n k hk
 
+lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
+  (∀ (m : ℤ), p m ↔ p (m + k)) ↔ (∀ (m k₀ : ℤ), p m ↔ p (m + k₀ * k)) := by
+  constructor
+  · intros h
+    sorry
+  · intros h
+    sorry
 
 lemma WavelengthGCD (p : ℤ → Prop) (k₀ k₁ : ℕ+) : (∀ (m : ℤ), p m ↔ p (m + (Nat.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by

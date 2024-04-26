@@ -20,9 +20,14 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
   (∀ (m : ℤ), p m ↔ p (m + k)) ↔ (∀ (m k₀ : ℤ), p m ↔ p (m + k₀ * k)) := by
   constructor
   · intros h
-    sorry
-  · intros h
-    sorry
+    rw [IntegerInduction]
+    constructor
+    · sorry
+    · sorry
+  · intros h m
+    have h₀ := h m 1
+    simp only [one_mul] at h₀
+    exact h₀
 
 lemma WavelengthGCD (p : ℤ → Prop) (k₀ k₁ : ℕ+) : (∀ (m : ℤ), p m ↔ p (m + (Nat.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by

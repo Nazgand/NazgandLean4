@@ -20,10 +20,18 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
   (∀ (m : ℤ), p m ↔ p (m + k)) ↔ (∀ (m k₀ : ℤ), p m ↔ p (m + k₀ * k)) := by
   constructor
   · intros h
-    rw [IntegerInduction]
+    rw [forall_swap, IntegerInduction]
     constructor
-    · sorry
-    · sorry
+    · use 0
+      simp only [zero_mul, add_zero, forall_const]
+    · intros m
+      constructor
+      · intros h₀ k₀
+        rw [h₀ k₀, h]
+        ring_nf
+      · intros h₀ k₀
+        rw [h₀ k₀, h (k₀ + m * k)]
+        ring_nf
   · intros h m
     have h₀ := h m 1
     simp only [one_mul] at h₀

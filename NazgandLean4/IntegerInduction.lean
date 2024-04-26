@@ -14,7 +14,7 @@ lemma IntegerInduction (p : ℤ → Prop) :
   · intros h₀
     obtain ⟨he, hi⟩ := h₀
     obtain ⟨k, hk⟩ := he
-    exact fun n => (fun hsucc a b => (Succ.rec_linear hsucc a b).mpr) hi n k hk
+    exact fun n => (Succ.rec_linear hi n k).mpr hk
 
 lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
   (∀ (m : ℤ), p m ↔ p (m + k)) ↔ (∀ (m k₀ : ℤ), p m ↔ p (m + k₀ * k)) := by

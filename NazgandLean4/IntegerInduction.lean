@@ -37,13 +37,29 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
     simp only [one_mul] at h₀
     exact h₀
 
-lemma WavelengthGCD (p : ℤ → Prop) (k₀ k₁ : ℕ+) : (∀ (m : ℤ), p m ↔ p (m + (Nat.gcd k₀ k₁))) ↔
+lemma GcdLinearCombination (k₀ k₁ : ℤ) : (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
+  sorry
+
+lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) : (∀ (m : ℤ), p m ↔ p (m + (Int.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by
   constructor
   · intros h₀
+    rw [WavelengthRestate] at h₀
+    rw [WavelengthRestate]
     constructor
-    · sorry
-    · sorry
+    · have h₁ := Int.gcd_dvd_left k₀ k₁
+      obtain ⟨w, hw⟩ := h₁
+      intros m k
+      rw [h₀ m (w * k)]
+      nth_rw 2 [hw]
+      ring_nf
+    · have h₁ := Int.gcd_dvd_right k₀ k₁
+      obtain ⟨w, hw⟩ := h₁
+      rw [WavelengthRestate]
+      intros m k
+      rw [h₀ m (w * k)]
+      nth_rw 2 [hw]
+      ring_nf
   · intros h₀
     obtain ⟨h₁, h₂⟩ := h₀
     sorry

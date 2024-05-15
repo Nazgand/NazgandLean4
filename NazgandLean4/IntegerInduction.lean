@@ -1,6 +1,6 @@
 import Mathlib
 set_option maxHeartbeats 0
-open Classical Finset Nat
+open Classical Finset
 
 lemma IntegerInduction (p : ℤ → Prop) :
   (∀ (n : ℤ), p n) ↔ ((∃ (k : ℤ), p k) ∧ (∀ (m : ℤ), p m ↔ p (m + 1))) := by
@@ -37,8 +37,25 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
     simp only [one_mul] at h₀
     exact h₀
 
+lemma associated_gcd_gcd (a b : ℤ) : Associated (IsBezout.gcd a b) (GCDMonoid.gcd a b) := by
+  apply gcd_greatest_associated
+  · apply IsBezout.gcd_dvd_left
+  · apply IsBezout.gcd_dvd_right
+  · intro e ha hb
+    apply IsBezout.dvd_gcd ha hb
+
 lemma GcdLinearCombination (k₀ k₁ : ℤ) : (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
-  sorry
+  obtain ⟨m, n, h⟩ := IsBezout.gcd_eq_sum k₀ k₁
+  have := associated_gcd_gcd k₀ k₁
+  rw [Int.associated_iff] at this
+  cases this with
+  | inl h' =>
+    use m, n
+    rw [h, Int.coe_gcd, h']
+  | inr h' =>
+    use -m, -n
+    rw [Int.coe_gcd]
+    linarith
 
 lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) : (∀ (m : ℤ), p m ↔ p (m + (Int.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by

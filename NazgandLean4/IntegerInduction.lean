@@ -62,4 +62,8 @@ lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) : (∀ (m : ℤ), p m �
       ring_nf
   · intros h₀
     obtain ⟨h₁, h₂⟩ := h₀
-    sorry
+    rw [WavelengthRestate] at *
+    intros m j
+    obtain ⟨w₀, w₁, h₃⟩ := GcdLinearCombination k₀ k₁
+    rw [h₃, h₁ m (j * w₀), h₂ (m + j * w₀ * k₀) (j * w₁)]
+    ring_nf

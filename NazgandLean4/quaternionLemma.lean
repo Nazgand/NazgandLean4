@@ -51,7 +51,8 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     rcases hx with ⟨hx₀, hSphere⟩
     rcases hx₀ with ⟨hr, hrx, hry, hrz⟩
     simp_rw [hr]
-    simp only [ne_eq, zero_pow', zero_sub, zero_mul, and_self, and_true]
+    simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_sub, zero_mul,
+      and_self, and_true]
     simp_rw [hrx,hry,hrz]
     let hSphere2 := congrArg (λ (xk : ℝ) => -xk) hSphere
     simp only [neg_add_rev] at hSphere2
@@ -86,7 +87,7 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
     simp only [mul_one] at hNormSquare1
     rw [←Quaternion.normSq_eq_norm_mul_self, hr0, Quaternion.normSq_def'] at hNormSquare1
     rw [←hNormSquare1]
-    simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow', zero_add]
+    simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_add]
     ring_nf
 
 --declare a Set Of Quaternions q That Square To q Minus 1
@@ -102,8 +103,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     sub_zero, mul_imI, sub_imJ, QuaternionAlgebra.one_imJ, mul_imJ, sub_imK,
     QuaternionAlgebra.one_imK, mul_imK, one_div]
   ring_nf
-  simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
-    Int.int_cast_ofNat]
+  simp only [one_div]
   constructor
   · intros h₀
     use x
@@ -140,7 +140,6 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     let hSphere := congrArg (λ (x₀ : ℝ) => 1 / 4 - x₀) h₁
     ring_nf at hSphere
     rw [←hSphere]
-    simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat]
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
     rcases hx with ⟨hr, hx, hy, hz⟩
@@ -210,7 +209,8 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
         have h3g0 : (0 : ℝ) ≤ 3 := by linarith
         simp only [inv_pow, Real.sq_sqrt h3g0]
         have hSphere₂ := congrArg (λ (x₀ : ℝ) => x₀ * 4 / 3) hSphere
-        simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, div_mul_cancel, div_self] at hSphere₂
+        simp only [isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+          IsUnit.div_mul_cancel, div_self] at hSphere₂
         rw [←hSphere₂]
         ring
     · constructor

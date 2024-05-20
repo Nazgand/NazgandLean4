@@ -43,7 +43,7 @@ lemma RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 
 lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
   by_contra h₁
   rw [h₁] at h
-  simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow', zero_ne_one] at h
+  simp? [ne_eq, PNat.ne_zero, not_false_eq_true, zero_ne_one] at h
 
 -- (RuesDiff n m) is the mth derivative of (Rues n)
 noncomputable
@@ -235,7 +235,6 @@ lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
     rw [Complex.exp_add, Kih, ExpPiMulIHalf]
     have h₁ : Nat.succ K = K + 1 := by
       exact rfl
-    rw [h₁]
     have h₂ := zpow_add₀ I_ne_zero K 1
     simp only [zpow_coe_nat, zpow_one] at h₂
     rw [←h₂]
@@ -270,8 +269,6 @@ lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
   have h₁ : cexp (2 * ↑π * (↑↑(2 : ℕ+))⁻¹ * I) = -1 := by
     have h₂ : 2 * (π : ℂ) * (↑↑(2 : ℕ+))⁻¹ = π := by
       field_simp
-      ring
-      congr
     rw [h₂]
     simp only [exp_pi_mul_I]
   simp_rw [h₁]
@@ -289,8 +286,7 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
     CharP.cast_eq_zero, zero_div, mul_zero, zero_mul, Complex.exp_zero, mul_one, Multiset.sum_cons,
     Multiset.sum_singleton]
   ring_nf
-  simp only [Int.ofNat_eq_coe, Nat.cast_ofNat, Int.int_cast_ofNat, Nat.cast_one, Int.cast_one,
-    one_div, exp_pi_mul_I, mul_neg, mul_one]
+  simp only [one_div, exp_pi_mul_I, mul_neg, mul_one]
   have h₁ : cexp (↑π * I * (3 / 2)) = -I := by
     have h₁b := ExpToNatPowersOfI 3
     simp only [Nat.cast_ofNat] at h₁b
@@ -324,7 +320,7 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   rw [h₂]
   clear h₂
   have h₃ : (1 + I)⁻¹ = (1 - I) / 2 := by
-    rw [Inv.inv, instInvComplex, normSq]
+    rw [Inv.inv, Complex.instInv, normSq]
     simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, ofReal_inv, ofReal_add, ofReal_mul,
       map_add, map_one, conj_I, add_re, one_re, I_re, add_zero, ofReal_one, mul_one, add_im, one_im,
       I_im, zero_add]
@@ -332,7 +328,7 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   rw [h₃]
   clear h₃
   have h₄ : (1 - I)⁻¹ = (1 + I) / 2 := by
-    rw [Inv.inv, instInvComplex, normSq]
+    rw [Inv.inv, Complex.instInv, normSq]
     simp only [MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, ofReal_inv, ofReal_add, ofReal_mul,
       map_sub, map_one, conj_I, sub_neg_eq_add, sub_re, one_re, I_re, sub_zero, ofReal_one, mul_one,
       sub_im, one_im, I_im, zero_sub, ofReal_neg, mul_neg, neg_neg]

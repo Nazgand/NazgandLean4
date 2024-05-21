@@ -38,11 +38,7 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
     exact h₀
 
 lemma associated_gcd_gcd (a b : ℤ) : Associated (IsBezout.gcd a b) (GCDMonoid.gcd a b) := by
-  apply gcd_greatest_associated
-  · apply IsBezout.gcd_dvd_left
-  · apply IsBezout.gcd_dvd_right
-  · intro e ha hb
-    apply IsBezout.dvd_gcd ha hb
+  exact IsBezout.associated_gcd_gcd ℤ
 
 lemma GcdLinearCombination (k₀ k₁ : ℤ) : (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
   obtain ⟨m, n, h⟩ := IsBezout.gcd_eq_sum k₀ k₁

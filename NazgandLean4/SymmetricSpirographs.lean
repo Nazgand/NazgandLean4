@@ -1,4 +1,5 @@
 import Mathlib
+import NazgandLean4.IntegerInduction
 set_option maxHeartbeats 0
 open Complex Classical Real
 
@@ -25,7 +26,21 @@ lemma SpiroOffset (k : ℕ+) (m : ℤ) (h : Int.gcd m k = 1) (h₀ : f₀ ∈ Se
 
 lemma SpiroPseudoPeriodic (k : ℕ+) (m : ℤ) (h : Int.gcd m k = 1) (h₀ : f₀ ∈ SetSpiro k m h)
   : ∀ (n : ℤ) (t : ℂ), f₀ (t + 2 * n * π / k) = exp (I * 2 * n * m * π / k) * f₀ t := by
-  sorry
+  rw [IntegerInduction]
+  simp [SetSpiro] at *
+  constructor
+  · use 0
+    simp only [Int.cast_zero, mul_zero, zero_mul, zero_div, add_zero, Complex.exp_zero, one_mul,
+      implies_true]
+  · intros m₁
+    constructor
+    · intros h₁ t
+      rw [(show t + 2 * (↑m₁ + 1) * ↑π / ↑↑k = t + 2 * ↑m₁ * ↑π / ↑↑k + 2 * ↑π / ↑↑k by ring), h₀, h₁]
+      rw [(show (I * 2 * ↑m * ↑π / ↑↑k).exp * ((I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t) =
+        (I * 2 * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t by ring), ←Complex.exp_add]
+      ring_nf
+    · intros h₁ t
+      sorry
 
 lemma SpiroPeriodic (k : ℕ+) (m : ℤ) (h : Int.gcd m k = 1) (h₀ : f₀ ∈ SetSpiro k m h) : ∀ (t : ℂ), f₀ (t + 2 * π) = f₀ t := by
   intros t

@@ -44,7 +44,7 @@ lemma RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 
 lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
   by_contra h₁
   rw [h₁] at h
-  simp? [ne_eq, PNat.ne_zero, not_false_eq_true, zero_ne_one] at h
+  simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow, zero_ne_one] at h
 
 -- (RuesDiff n m) is the mth derivative of (Rues n)
 noncomputable

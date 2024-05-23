@@ -99,7 +99,7 @@ lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou 
       obtain ⟨k₂, kmDiv⟩ := h₀a
       have h₂ : rou ^ (↑k + m) = 1 := by
         rw [kmDiv, zpow_mul]
-        simp only [zpow_coe_nat, h, one_zpow]
+        simp only [zpow_natCast, h, one_zpow]
       have h₃ := congrArg (λ (z₀ : ℂ) => z₀ * (rou ^ m)⁻¹) h₂
       simp only [one_mul, ne_eq, inv_eq_zero] at h₃
       have h₄ := RouNot0 n rou h
@@ -237,7 +237,7 @@ lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
     have h₁ : Nat.succ K = K + 1 := by
       exact rfl
     have h₂ := zpow_add₀ I_ne_zero K 1
-    simp only [zpow_coe_nat, zpow_one] at h₂
+    simp only [zpow_natCast, zpow_one] at h₂
     rw [←h₂]
     exact rfl
 

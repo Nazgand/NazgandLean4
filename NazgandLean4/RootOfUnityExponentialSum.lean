@@ -19,12 +19,13 @@ lemma RuesSummable (n : ℕ+) (z : ℂ) : Summable (λ (k : ℕ) => z ^ (n * k) 
 
 lemma RuesRealToReal (n : ℕ+) (x : ℝ) : (Rues n x).im = 0 := by
   rw [Rues]
-  let h₀ := ContinuousLinearMap.map_tsum Complex.imClm (RuesSummable n x)
-  simp only [imClm_apply, div_nat_cast_im] at h₀
+  let h₀ := ContinuousLinearMap.map_tsum Complex.imCLM (RuesSummable n x)
+  simp only [imCLM_apply] at h₀
   rw [h₀]
   suffices h₁ : ∑' (z : ℕ), (x ^ (n * z) : ℂ).im / ↑(Nat.factorial (n * z)) = ∑' (z : ℕ), 0
   · rw [tsum_zero] at h₁
     rw [←h₁]
+    simp only [div_natCast_im]
   congr
   ext1 k
   norm_cast at *
@@ -190,7 +191,7 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   have h₅ := RouGeometricSumEqIte n (↑k + m)
   have h₆ : ∀ (x : ℕ), (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) = (2 * ↑π * (↑(↑k + m) * ↑x / ↑↑n * I)) := by
     intros x
-    simp only [Int.cast_add, Int.cast_ofNat]
+    simp only [Int.cast_add, Int.cast_natCast]
     ring_nf
   simp_rw [h₆, h₅]
   simp only [mul_ite, mul_zero]

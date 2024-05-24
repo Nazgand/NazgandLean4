@@ -40,7 +40,11 @@ lemma SpiroPseudoPeriodic (k : ℕ+) (m : ℤ) (h : Int.gcd m k = 1) (h₀ : f�
         (I * 2 * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t by ring), ←Complex.exp_add]
       ring_nf
     · intros h₁ t
-      sorry
+      rw [(show t + 2 * ↑m₁ * ↑π / ↑↑k = (t - 2 * ↑π / ↑↑k) + 2 * (↑m₁ + 1) * ↑π / ↑↑k by ring), h₁]
+      rw [(show f₀ t = f₀ ((t - 2 * ↑π / ↑↑k) + 2 * ↑π / ↑↑k) by ring_nf), h₀]
+      rw [(show (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * ((I * 2 * ↑m * ↑π / ↑↑k).exp * f₀ (t - 2 * ↑π / ↑↑k)) =
+        (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m * ↑π / ↑↑k).exp * f₀ (t - 2 * ↑π / ↑↑k) by ring_nf), ←Complex.exp_add]
+      ring_nf
 
 lemma SpiroPeriodic (k : ℕ+) (m : ℤ) (h : Int.gcd m k = 1) (h₀ : f₀ ∈ SetSpiro k m h) : ∀ (t : ℂ), f₀ (t + 2 * π) = f₀ t := by
   intros t

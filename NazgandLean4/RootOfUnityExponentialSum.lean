@@ -203,7 +203,7 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   clear h₀
   simp_rw [←tsum_mul_right]
   have h₁ : ∀ x ∈ range ↑n, Summable (λ (x_1 : ℕ) => (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 / ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
-    intros k kr
+    intros k _
     exact Summable.smul_const (ExpTaylorSeriesSummable (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))) _
   have h₂ := (tsum_sum h₁).symm
   clear h₁
@@ -249,7 +249,11 @@ lemma RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff n
   simp only [add_zero]
 
 lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
-  sorry
+  rw [RuesDiffMPeriodic n (m % n) (m / n)]
+  nth_rw 1 [←Int.ediv_add_emod' m n]
+  suffices h₀ : m / ↑↑n * ↑↑n + m % ↑↑n = m % ↑↑n + m / ↑↑n * ↑↑n
+  exact congrArg (RuesDiff n) h₀
+  ring_nf
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   sorry
@@ -269,8 +273,6 @@ lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
     rw [h₀]
     clear h₀
     rw [Complex.exp_add, Kih, ExpPiMulIHalf]
-    have h₁ : Nat.succ K = K + 1 := by
-      exact rfl
     have h₂ := zpow_add₀ I_ne_zero K 1
     simp only [zpow_natCast, zpow_one] at h₂
     rw [←h₂]
@@ -379,7 +381,7 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   simp only [Int.ofNat_eq_coe, Nat.cast_one, Int.cast_one, Nat.cast_ofNat, one_div,
     Int.cast_negOfNat, mul_neg, mul_one, neg_mul]
   simp_rw [←Complex.exp_nat_mul, ←Complex.exp_add]
-  ring
+  ring_nf
 
 lemma ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ in range k, RuesDiff k k₀ z := by
   rw [←RuesN1EqualsExp, ←RuesDiffM0EqualsRues]

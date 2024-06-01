@@ -73,9 +73,39 @@ lemma RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (Ru
 lemma TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f : ℕ → α) {n : ℕ+} :
   ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
   have h₀ : (n : ℕ) ≠ 0 := PNat.ne_zero n
-  have h₁ : ∑' (k : ℕ), f ((n : ℕ) * k) = ∑' (a : Set.range (λ (m : ℕ) => (n : ℕ) * m)), f ↑a := by
-    sorry
-  sorry
+  let nMul : ℕ → ℕ := (λ (m : ℕ) => (n : ℕ) * m)
+  have hnMulInj := mul_right_injective₀ h₀
+  have h₁ : ∑' (k : ℕ), f (↑n * k) = ∑' (k : ℕ), f (nMul k) := by exact rfl
+  have h₂ : ∑' (k : ℕ), f (nMul k) = ∑' (a : Set.range nMul), f ↑a := by
+    exact Eq.symm (tsum_range f hnMulInj)
+  rw [h₁, h₂, _root_.tsum_subtype (Set.range nMul) f]
+  have h₃ : ∀ (k : ℕ), (Set.range nMul).indicator f k = if (↑n : ℤ) ∣ ↑k then f k else 0 := by
+    intros k
+    simp only [Set.indicator, Set.mem_range, eq_comm, Dvd.dvd, nMul]
+    congr 1
+    rw [←iff_eq_eq]
+    constructor
+    · intros h₀
+      rcases h₀ with ⟨w, hw⟩
+      have h₁ : ∃ (w₂ : ℕ), w = w₂ := by
+        refine Int.eq_ofNat_of_zero_le ?_
+        by_contra h₆
+        simp only [not_le] at h₆
+        have h₃ : (n : ℤ) > 0 := by
+          refine Int.ofNat_pos.mpr ?_
+          exact PNat.pos n
+        have h₄ : ((n : ℤ) * w) < 0 := by
+          exact Int.mul_neg_of_pos_of_neg h₃ h₆
+        linarith
+      rcases h₁ with ⟨w₂, hw₂⟩
+      use w₂
+      rw [hw₂] at hw
+      exact Int.ofNat_inj.mp hw
+    · intros h₄
+      rcases h₄ with ⟨w,hw⟩
+      use w
+      simp only [Nat.cast_mul, hw]
+  exact tsum_congr (h₃)
 
 lemma NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) : ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
   exact TsumMulIte _

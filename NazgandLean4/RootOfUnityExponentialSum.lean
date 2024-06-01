@@ -161,9 +161,14 @@ lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + 
   ring_nf
 
 lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ in range k, RuesDiff (n * k) (n * k₀ + m) z := by
-  sorry
-
-lemma ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ in range k, RuesDiff k k₀ z := by
+  simp_rw [RuesDiff]
+  have h₀ : ∀ x ∈ range k, Summable (λ (k_1 : ℕ) => if ↑↑(n * k) ∣ ↑k_1 + (↑↑n * ↑x + m) then z ^ k_1 / ↑k_1.factorial else 0) := by
+    intros x h₁
+    exact RuesDiffSummable (n * k) _ z
+  rw [← tsum_sum h₀]
+  clear h₀
+  congr
+  ext1 x
   sorry
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
@@ -375,3 +380,9 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
     Int.cast_negOfNat, mul_neg, mul_one, neg_mul]
   simp_rw [←Complex.exp_nat_mul, ←Complex.exp_add]
   ring
+
+lemma ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ in range k, RuesDiff k k₀ z := by
+  rw [←RuesN1EqualsExp, ←RuesDiffM0EqualsRues]
+  have h₀ := RuesDiffSumOfRuesDiff 1 k 0 z
+  simp only [one_mul, PNat.val_ofNat, Nat.cast_one, add_zero] at h₀
+  assumption

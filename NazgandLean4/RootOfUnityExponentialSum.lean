@@ -175,7 +175,9 @@ lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = 
   sorry
 
 lemma RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
-  sorry
+  rw [RuesDiffIteratedDeriv, RuesDiffMPeriodic n m 1]
+  simp only [one_mul]
+  ring_nf
 
 lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x in range ↑n, cexp (2 * ↑π * ((k * ↑x / ↑↑n) * I)) = (if ↑↑n ∣ k then ↑↑n else 0) := by
   have h₀ : ∀ (x : ℕ), (2 * ↑π * (↑k * ↑x / ↑↑n * I)) = ↑x * (2 * ↑π * (↑k / ↑↑n * I)) := by

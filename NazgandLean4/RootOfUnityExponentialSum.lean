@@ -163,7 +163,7 @@ lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + 
 lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ in range k, RuesDiff (n * k) (n * k₀ + m) z := by
   simp_rw [RuesDiff]
   have h₀ : ∀ x ∈ range k, Summable (λ (k_1 : ℕ) => if ↑↑(n * k) ∣ ↑k_1 + (↑↑n * ↑x + m) then z ^ k_1 / ↑k_1.factorial else 0) := by
-    intros x h₁
+    intros x _
     exact RuesDiffSummable (n * k) _ z
   rw [← tsum_sum h₀]
   clear h₀
@@ -247,7 +247,7 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
         simp only [add_right_neg] at h₃
         exact h₃.symm
   · intros h₀
-    obtain ⟨w, h₁, h₂⟩ := h₀
+    obtain ⟨w, _, h₂⟩ := h₀
     have h₃ := dvd_of_mul_right_dvd h₂
     have h₄ : (n : ℤ) ∣ ↑↑n * ↑w := by exact Int.dvd_mul_right (↑n) w
     rw [(show ↑x + (↑↑n * ↑w + m) = ↑↑n * ↑w + ↑(x + m) by ring_nf)] at h₃

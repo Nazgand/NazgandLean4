@@ -174,7 +174,36 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
     intros i hir j hjr hi hj
     simp [f₀] at hi hj
     simp only [mem_range] at hir hjr
-    sorry
+    clear f₀ z
+    rw [←Int.modEq_zero_iff_dvd] at hi hj
+    have h₀ := Int.ModEq.sub hi hj
+    simp only [add_sub_add_left_eq_sub, add_sub_add_right_eq_sub, sub_self] at h₀
+    clear hi hj
+    rw [Int.modEq_zero_iff_dvd, (show (↑↑n * ↑i - ↑↑n * ↑j : ℤ) = ↑↑n * (↑i - ↑j) by ring)] at h₀
+    have h₁ : (n : ℤ) ≠ 0 := by
+      exact Ne.symm (NeZero.ne' (n : ℤ))
+    have h₂ : (k : ℤ) ∣ ↑i - ↑j := by exact (mul_dvd_mul_iff_left h₁).mp h₀
+    obtain ⟨y, h₃⟩ := h₂
+    have h₄ : k * y < k := by
+      linarith
+    have h₅ : -k < k * y := by
+      linarith
+    have h₆ : (k : ℤ) > 0 := by
+      linarith
+    have h₇ : y < 1 := by
+      exact (mul_lt_iff_lt_one_right h₆).mp h₄
+    nth_rw 1 [(show -(k : ℤ) = ↑↑k * -1 by ring)] at h₅
+    have h₈ : -1 < y := by
+      exact (mul_lt_mul_left h₆).mp h₅
+    have h₉ : y = 0 := by
+      linarith
+    rw [h₉] at h₃
+    simp only [mul_zero] at h₃
+    clear n hir hjr m h₀ h₁ h₄ h₅ h₆ h₇ h₈ h₉ y x k
+    refine Int.ofNat_inj.mp ?intro.a
+    have h₀ := congrArg (λ (k : ℤ) => k + j) h₃
+    simp only [sub_add_cancel, zero_add] at h₀
+    exact h₀
   have h₂ := Finset.sum_ite_zero (range ↑k) f₀ h₁ (z ^ x / ↑x.factorial)
   clear h₁
   simp only [PNat.mul_coe, Nat.cast_mul, mem_range, f₀] at h₂ ⊢

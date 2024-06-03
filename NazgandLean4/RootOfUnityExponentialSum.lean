@@ -169,7 +169,60 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
   clear h₀
   congr
   ext1 x
-  sorry
+  let f₀ : ℕ → Prop := (λ (i : ℕ) => ↑↑(n * k) ∣ ↑x + (↑↑n * ↑i + m))
+  have h₁ : ∀ i ∈ range ↑k, ∀ j ∈ range ↑k, f₀ i → f₀ j → i = j := by
+    intros i hir j hjr hi hj
+    simp [f₀] at hi hj
+    simp only [mem_range] at hir hjr
+    sorry
+  have h₂ := Finset.sum_ite_zero (range ↑k) f₀ h₁ (z ^ x / ↑x.factorial)
+  clear h₁
+  simp only [PNat.mul_coe, Nat.cast_mul, mem_range, f₀] at h₂ ⊢
+  rw [h₂]
+  clear h₂ f₀
+  congr
+  rw [←iff_eq_eq]
+  constructor
+  · intros h₀
+    obtain ⟨w, h₁⟩ := h₀
+    have h₂ : ∀ (i : ℕ), ↑x + (↑↑n * ↑i + m) = ↑x + m + (↑↑n * ↑i) := by
+      intros i
+      ring_nf
+    simp_rw [h₂, h₁]
+    use ((-w) % k).toNat
+    constructor
+    · refine (Int.toNat_lt' ?h.left.hn).mpr ?h.left.a
+      · exact PNat.ne_zero k
+      · refine Int.emod_lt_of_pos (-w) ?h.left.a.H
+        refine Int.ofNat_pos.mpr ?h.left.a.H.a
+        exact PNat.pos k
+    · have h₃ : ↑(-w % ↑↑k).toNat = (-w % ↑↑k) := by
+        refine Int.toNat_of_nonneg ?_
+        refine Int.emod_nonneg (-w) ?_
+        exact Ne.symm (NeZero.ne' (k : ℤ))
+      rw [h₃]
+      clear h₁ h₂ h₃ m z x
+      suffices h₀ : ↑↑k ∣ w + (-w % ↑↑k)
+      · have h₁ := mul_dvd_mul_left (n : ℤ) h₀
+        ring_nf at *
+        exact h₁
+      · refine Int.dvd_of_emod_eq_zero ?h₀.H
+        have h₀ : (0 : ℤ) = 0 % k := by
+          exact rfl
+        rw [h₀]
+        refine Eq.symm (Int.ModEq.eq ?h₀.H.a)
+        have h₁ : -w % ↑↑k ≡ -w [ZMOD ↑↑k] := by
+          exact Int.mod_modEq (-w) ↑↑k
+        have h₂ : w ≡ w [ZMOD ↑↑k] := by exact rfl
+        have h₃ := Int.ModEq.add h₂ h₁
+        simp only [add_right_neg] at h₃
+        exact h₃.symm
+  · intros h₀
+    obtain ⟨w, h₁, h₂⟩ := h₀
+    have h₃ := dvd_of_mul_right_dvd h₂
+    have h₄ : (n : ℤ) ∣ ↑↑n * ↑w := by exact Int.dvd_mul_right (↑n) w
+    rw [(show ↑x + (↑↑n * ↑w + m) = ↑↑n * ↑w + ↑(x + m) by ring_nf)] at h₃
+    exact (Int.dvd_iff_dvd_of_dvd_add h₃).mp h₄
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   sorry

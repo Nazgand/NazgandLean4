@@ -268,15 +268,43 @@ lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x in range ↑n, cexp (2 * 
   simp_rw [h₀, Complex.exp_nat_mul]
   clear h₀
   have hem := Classical.em (↑↑n ∣ k)
+  have h₂ : (n : ℂ) ≠ 0 := by exact Ne.symm (NeZero.ne' (n : ℂ))
   rcases hem with hemt | hemf
   · have h₁ : ∑ x in range ↑n, cexp (2 * ↑π * (↑k / ↑↑n * I)) ^ x = ∑ x in range ↑n, 1 := by
       congr
       ext1 x
       obtain ⟨k₂, kDiv⟩ := hemt
       rw [kDiv]
+      field_simp
+      suffices h₃ : cexp (2 * ↑π * (↑k₂ * I)) = 1
+      · rw [h₃]
+        simp only [one_pow]
+      · refine Complex.exp_eq_one_iff.mpr ?h₃.a
+        use k₂
+        ring_nf
+    rw [h₁, if_pos hemt]
+    simp only [sum_const, card_range, nsmul_eq_mul, mul_one]
+  · rw [if_neg hemf]
+    have h₀ : cexp (2 * ↑π * (↑k / ↑↑n * I)) ≠ 1 := by
+      by_contra h
+      rw [Complex.exp_eq_one_iff] at h
+      obtain ⟨m, h⟩ := h
+      rw [(show 2 * ↑π * (↑k / ↑↑n * I) = (↑k / ↑↑n) * (2 * ↑π * I) by ring)] at h
+      have h₃ := mul_right_cancel₀ Complex.two_pi_I_ne_zero h
+      have h₄ : k = m * n := by
+        sorry
+      have h₅ : (n : ℤ) ∣ k := by
+        exact Dvd.intro_left m (id (Eq.symm h₄))
       sorry
-    sorry
-  · sorry
+    rw [geom_sum_eq h₀]
+    suffices h₁ : cexp (2 * ↑π * (↑k / ↑↑n * I)) ^ (n : ℕ) = 1
+    · rw [h₁]
+      simp only [sub_self, zero_div]
+    · rw [(Complex.exp_nat_mul _ n).symm]
+      refine Complex.exp_eq_one_iff.mpr ?h₁.a
+      use k
+      field_simp
+      ring_nf
 
 lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ in range n, cexp (z * cexp (2 * π * (k₀ / n) * I) + m * 2 * π * (k₀ / n) * I)) / n := by
   simp_rw [Complex.exp_add]

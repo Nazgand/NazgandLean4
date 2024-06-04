@@ -291,11 +291,13 @@ lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x in range ↑n, cexp (2 * 
       obtain ⟨m, h⟩ := h
       rw [(show 2 * ↑π * (↑k / ↑↑n * I) = (↑k / ↑↑n) * (2 * ↑π * I) by ring)] at h
       have h₃ := mul_right_cancel₀ Complex.two_pi_I_ne_zero h
+      field_simp at h₃
       have h₄ : k = m * n := by
         sorry
       have h₅ : (n : ℤ) ∣ k := by
         exact Dvd.intro_left m (id (Eq.symm h₄))
-      sorry
+      apply hemf
+      exact h₅
     rw [geom_sum_eq h₀]
     suffices h₁ : cexp (2 * ↑π * (↑k / ↑↑n * I)) ^ (n : ℕ) = 1
     · rw [h₁]

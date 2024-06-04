@@ -293,7 +293,7 @@ lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x in range ↑n, cexp (2 * 
       have h₃ := mul_right_cancel₀ Complex.two_pi_I_ne_zero h
       field_simp at h₃
       have h₄ : k = m * n := by
-        sorry
+        exact mod_cast h₃
       have h₅ : (n : ℤ) ∣ k := by
         exact Dvd.intro_left m (id (Eq.symm h₄))
       apply hemf

@@ -371,9 +371,6 @@ lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
   exact congrArg (RuesDiff n) h₀
   ring_nf
 
-lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
-  sorry
-
 lemma ExpPiMulIHalf : cexp (↑(π / 2) * I) = I := by
   rw [exp_mul_I]
   simp only [ofReal_div, ofReal_ofNat, Complex.cos_pi_div_two, Complex.sin_pi_div_two, one_mul,
@@ -504,3 +501,15 @@ lemma ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ in range k, RuesD
   have h₀ := RuesDiffSumOfRuesDiff 1 k 0 z
   simp only [one_mul, PNat.val_ofNat, Nat.cast_one, add_zero] at h₀
   assumption
+
+lemma RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^ (n : ℕ) = 1 := by
+  rw [(Complex.exp_nat_mul _ n).symm, Complex.exp_eq_one_iff]
+  use x
+  field_simp
+  ring_nf
+
+lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
+  rw [RuesDiffEqualsExpSum]
+  simp_rw [Complex.exp_add, RightDistribClass.right_distrib, Complex.exp_add, ExpSumOfRuesDiff n (z₀ * _), ExpSumOfRuesDiff n (z₁ * _)]
+  simp_rw [RuesDiffRotationallySymmetric n _ _ _ (RouForm n _)]
+  sorry

@@ -508,8 +508,14 @@ lemma RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^ (
   field_simp
   ring_nf
 
+lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
+    ∑ a in s, ∑ b in t, ∑ c in u, f a b c = ∑ b in t, ∑ c in u, ∑ a in s, f a b c := by
+  rw [sum_comm]
+  simp_rw [@sum_comm _ _ γ]
+
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]
   simp_rw [Complex.exp_add, RightDistribClass.right_distrib, Complex.exp_add, ExpSumOfRuesDiff n (z₀ * _), ExpSumOfRuesDiff n (z₁ * _)]
-  simp_rw [RuesDiffRotationallySymmetric n _ _ _ (RouForm n _)]
+  simp_rw [RuesDiffRotationallySymmetric n _ _ _ (RouForm n _), Finset.sum_mul, Finset.mul_sum, Finset.sum_mul, ←Complex.exp_int_mul]
+  rw [Sum3Cycle]
   sorry

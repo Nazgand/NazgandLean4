@@ -1,3 +1,5 @@
+-- PDF document this is based on: https://github.com/Nazgand/NazgandMathBook/blob/master/RootOfUnityExponentialSumFunction.pdf
+-- LEAN 3 code for this: https://github.com/Nazgand/NazgandMathBook/blob/master/NazgandLean3/src/RootOfUnityExponentialSum.lean
 import Mathlib
 set_option maxHeartbeats 0
 open Complex Classical NormedSpace BigOperators Finset Real

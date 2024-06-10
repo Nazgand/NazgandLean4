@@ -530,7 +530,13 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
   sorry
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
-  sorry
+  rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]
+  congr
+  ext k
+  congr 1
+  rw [RuesDiffMPeriodic n (0 - ↑k) 1]
+  congr 1
+  ring_nf
 
 lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
   sorry

@@ -518,4 +518,22 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
   simp_rw [Complex.exp_add, RightDistribClass.right_distrib, Complex.exp_add, ExpSumOfRuesDiff n (z₀ * _), ExpSumOfRuesDiff n (z₁ * _)]
   simp_rw [RuesDiffRotationallySymmetric n _ _ _ (RouForm n _), Finset.sum_mul, Finset.mul_sum, Finset.sum_mul, ←Complex.exp_int_mul]
   rw [Sum3Cycle]
+  have h₀ : ∀ (a b c : ℕ), cexp (↑(-(b : ℤ)) * (2 * ↑π * (↑a / ↑↑n) * I)) * RuesDiff n (↑b) z₀ * (cexp (↑(-(c : ℤ)) * (2 * ↑π * (↑a / ↑↑n) * I)) * RuesDiff n (↑c) z₁) * cexp (↑m * 2 * ↑π * (↑a / ↑↑n) * I) =
+      RuesDiff n (↑b) z₀ * RuesDiff n (↑c) z₁ * (cexp (↑(-(b : ℤ)) * (2 * ↑π * (↑a / ↑↑n) * I)) * (cexp (↑(-(c : ℤ)) * (2 * ↑π * (↑a / ↑↑n) * I))) * cexp (↑m * 2 * ↑π * (↑a / ↑↑n) * I)) := by
+    intros a b c
+    ring_nf
+  simp_rw [h₀, ←Complex.exp_add, ←Finset.mul_sum]
+  clear h₀
+  simp only [Int.cast_neg, Int.cast_natCast, neg_mul]
+  have h₁ : ∀ (x x_1 x_2 : ℕ), -(↑x * (2 * ↑π * (↑x_2 / ↑↑n) * I)) + -(↑x_1 * (2 * ↑π * (↑x_2 / ↑↑n) * I)) + ↑m * 2 * ↑π * (↑x_2 / ↑↑n) * I =
+      (2 * ↑π * (((↑m - ↑x - ↑x_1) * ↑x_2 / ↑↑n) * I)) := by
+    intros x x_1 x_2
+    ring_nf
+  simp_rw [h₁]
+  clear h₁
+  have h₂ : ∀ (x x_1 : ℕ), (m : ℂ) - (x : ℂ) - (x_1 : ℂ) = @Int.cast ℂ Ring.toIntCast (m - (x : ℤ) - (x_1 : ℤ)) := by
+    intros x x_1
+    norm_cast
+  simp_rw [h₂, RouGeometricSumEqIte]
+  clear h₂
   sorry

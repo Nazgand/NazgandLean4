@@ -255,9 +255,6 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
     rw [(show ↑x + (↑↑n * ↑w + m) = ↑↑n * ↑w + ↑(x + m) by ring_nf)] at h₃
     exact (Int.dvd_iff_dvd_of_dvd_add h₃).mp h₄
 
-lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
-  sorry
-
 lemma RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
   rw [RuesDiffIteratedDeriv, RuesDiffMPeriodic n m 1]
   simp only [one_mul]
@@ -353,12 +350,6 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
     simp only [ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, mul_inv_cancel_right₀]
   · simp_rw [if_neg hemf]
     simp only [zero_div]
-
-lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
-  sorry
-
-lemma EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) : (f = iteratedDeriv n f) ↔ (f = ∑ k in range n, (λ(z : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))) := by
-  sorry
 
 lemma RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff n m := by
   rw [←RuesDiffM0EqualsRues, RuesDiffIteratedDeriv]
@@ -536,4 +527,13 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
     norm_cast
   simp_rw [h₂, RouGeometricSumEqIte]
   clear h₂
+  sorry
+
+lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
+  sorry
+
+lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
+  sorry
+
+lemma EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) : (f = iteratedDeriv n f) ↔ (f = ∑ k in range n, (λ(z : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))) := by
   sorry

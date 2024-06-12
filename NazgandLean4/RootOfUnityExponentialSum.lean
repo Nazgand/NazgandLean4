@@ -527,6 +527,7 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
     norm_cast
   simp_rw [h₂, RouGeometricSumEqIte]
   clear h₂
+  simp only [mul_ite, mul_zero, sum_range]
   sorry
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by

@@ -521,7 +521,28 @@ lemma DesiredV4 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
   refine sum_congr rfl ?_
   intros k hk
-  sorry
+  rcases Nat.exists_eq_succ_of_ne_zero hn with ⟨n₀, rfl⟩
+  simp only [Nat.succ_eq_add_one, Nat.cast_add, Nat.cast_one, sum_range]
+  change (∑ i : ZMod (n₀ + 1), if ↑n₀ + 1 ∣ m - ↑k - ↑i.val then f (↑k) z₀ * f (i.val) z₁ else 0) = f (↑k) z₀ * f (↑m - ↑k) z₁
+  have h₀ : ∀ (i : ZMod (n₀ + 1)), (n₀ : ℤ) + 1 ∣ m - ↑k - ↑i.val ↔ i = (m : ZMod (n₀ + 1)) - (k : ZMod (n₀ + 1)) := by
+    intros i
+    constructor
+    · intros ha
+      obtain ⟨w, hw⟩ := ha
+      norm_cast
+      have hw₂ := congrArg (λ (j : ℤ) => j + ↑i.val) hw
+      simp only [ZMod.natCast_val, sub_add_cancel] at hw₂
+      rw [hw₂]
+      simp only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one, ZMod.natCast_self',
+        zero_mul, ZMod.intCast_cast, ZMod.cast_id', id_eq, zero_add]
+    · intros ha
+      rw [ha]
+      norm_cast
+      refine (ZMod.intCast_eq_intCast_iff_dvd_sub (↑(↑(m - ↑k) : ZMod (n₀ + 1)).val) (m - ↑k) (n₀ + 1)).mp ?_
+      simp only [ZMod.natCast_val, ZMod.intCast_cast, ZMod.cast_intCast']
+  simp_rw [h₀]
+  simp only [Nat.succ_eq_add_one, ZMod.natCast_val, ZMod.cast_id', id_eq, sum_ite_eq', mem_univ,
+    ↓reduceIte]
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]

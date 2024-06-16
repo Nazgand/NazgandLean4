@@ -2,6 +2,7 @@
 -- LEAN 3 code for this: https://github.com/Nazgand/NazgandMathBook/blob/master/NazgandLean3/src/RootOfUnityExponentialSum.lean
 import Mathlib
 set_option maxHeartbeats 0
+set_option linter.unreachableTactic false
 open Complex Classical NormedSpace BigOperators Finset Real
 
 lemma ExpTsumForm (z : ℂ) : cexp z = tsum (λ (k : ℕ) => z ^ k / k.factorial) := by
@@ -362,6 +363,16 @@ lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
   exact congrArg (RuesDiff n) h₀
   ring_nf
 
+-- RuesDiffZMod is the `ZMod n` version of RuesDiff
+noncomputable
+def RuesDiffZMod (n : ℕ+) (m : ZMod n) (z : ℂ) : ℂ := RuesDiff n m.val z
+
+lemma RuesDiffZModEqRuesDiff (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiffZMod n ↑m := by
+  ext1 z
+  rw [RuesDiffZMod, RuesDiffMod]
+  congr
+  exact Eq.symm (ZMod.val_intCast m)
+
 lemma ExpPiMulIHalf : cexp (↑(π / 2) * I) = I := by
   rw [exp_mul_I]
   simp only [ofReal_div, ofReal_ofNat, Complex.cos_pi_div_two, Complex.sin_pi_div_two, one_mul,
@@ -504,20 +515,13 @@ lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Fins
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
-lemma DesiredV3 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) {f : ℤ → α → β} (f_periodic : ∀ (m₂ : ℤ) , f m₂ = f (m₂ % n)) :
+lemma DesiredV4 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
     (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
   refine sum_congr rfl ?_
   intros k hk
-  calc
-    _ = ∑ j ∈ range n, if j = (m - ↑k) % n then f (↑k) z₀ * f (↑j) z₁ else 0 := by
-      congr! 2 with j hj
-      sorry
-    _ = f (↑k) z₀ * f ((m - ↑k) % n) z₁ := by
-      sorry
-    _ = _ := by
-      exact Eq.symm (Mathlib.Tactic.LinearCombination.mul_pf rfl (congrFun (f_periodic (m - ↑k)) z₁))
+  sorry
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]
@@ -543,14 +547,21 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
   simp_rw [h₂, RouGeometricSumEqIte]
   clear h₂
   simp only [mul_ite, mul_zero, sum_div]
+  simp_rw [RuesDiffZModEqRuesDiff]
   calc
     _ = (∑ x ∈ range ↑n, ∑ x_1 ∈ range ↑n, if ↑↑n ∣ m - ↑x - ↑x_1 then RuesDiff n (↑x) z₀ * RuesDiff n (↑x_1) z₁ else 0) := by
       congr! 2 with x _ x_1 _; split_ifs
-      · simp only [isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true,
-        IsUnit.mul_div_cancel_right]
+      · simp only [Int.cast_natCast, isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero,
+        not_false_eq_true, IsUnit.mul_div_cancel_right, RuesDiffZModEqRuesDiff]
       · simp only [zero_div]
     _ = _ := by
-      exact DesiredV3 m z₀ z₁ (RuesDiffMod n)
+      have h := DesiredV4 m z₀ z₁ (RuesDiffZMod n)
+      norm_cast at h
+      norm_cast
+      simp_rw [←h]
+      congr! 3
+      simp_rw [RuesDiffZModEqRuesDiff]
+      norm_cast
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]

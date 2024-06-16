@@ -528,7 +528,19 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
   simp_rw [h₂, RouGeometricSumEqIte]
   clear h₂
   simp only [mul_ite, mul_zero, sum_range]
-  sorry
+  simp_rw [sum_div]
+  calc
+    _ = ∑ x : Fin ↑n, ∑ i : Fin ↑n, (if ↑↑n ∣ m - ↑↑x - ↑↑i then RuesDiff n (↑↑x) z₀ * RuesDiff n (↑↑i) z₁ else 0) := by
+      congr! 2 with i hi j hj; split_ifs
+      · simp only [isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, IsUnit.mul_div_cancel_right]
+      · simp only [zero_div]
+    _ = ∑ x : Fin ↑n, ∑ i : Fin ↑n, (if i = ↑m - x then RuesDiff n (↑↑x) z₀ * RuesDiff n (↑↑i) z₁ else 0) := by
+      congr! 3 with i hi j hj
+      sorry
+    _ = _ := by
+      simp only [sum_ite_eq', mem_univ, ↓reduceIte]
+      congr! 2 with k hk
+      sorry
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]

@@ -504,6 +504,10 @@ lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Fins
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
+lemma DesiredV2 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) {f : ℤ → α → β} (f_periodic : ∀ (m₂ k : ℤ) , f m₂ = f (m₂ + k * n)) :
+    (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
+  sorry
+
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]
   simp_rw [Complex.exp_add, RightDistribClass.right_distrib, Complex.exp_add, ExpSumOfRuesDiff n (z₀ * _), ExpSumOfRuesDiff n (z₁ * _)]
@@ -527,30 +531,15 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
     norm_cast
   simp_rw [h₂, RouGeometricSumEqIte]
   clear h₂
-  simp only [mul_ite, mul_zero, sum_range]
-  simp_rw [sum_div]
+  simp only [mul_ite, mul_zero, sum_div]
   calc
-    _ = ∑ x : Fin ↑n, ∑ i : Fin ↑n, (if ↑↑n ∣ m - ↑↑x - ↑↑i then RuesDiff n (↑↑x) z₀ * RuesDiff n (↑↑i) z₁ else 0) := by
-      congr! 2 with i hi j hj; split_ifs
-      · simp only [isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, IsUnit.mul_div_cancel_right]
+    _ = (∑ x ∈ range ↑n, ∑ x_1 ∈ range ↑n, if ↑↑n ∣ m - ↑x - ↑x_1 then RuesDiff n (↑x) z₀ * RuesDiff n (↑x_1) z₁ else 0) := by
+      congr! 2 with x _ x_1 _; split_ifs
+      · simp only [isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true,
+        IsUnit.mul_div_cancel_right]
       · simp only [zero_div]
-    _ = ∑ x : Fin ↑n, ∑ i : Fin ↑n, (if i = ↑m - x then RuesDiff n (↑↑x) z₀ * RuesDiff n (↑↑i) z₁ else 0) := by
-      congr! 3 with i hi j hj
-      constructor
-      · intros h₃
-        obtain ⟨w, hw⟩ := h₃
-        have hw₂ := congrArg (λ (k : ℤ) => (k : Fin n) + j) hw
-        simp only [Int.cast_sub, Int.cast_natCast, Fin.cast_val_eq_self, sub_add_cancel,
-          Int.cast_mul, Fin.natCast_self, zero_mul, zero_add] at hw₂
-        exact hw₂.symm
-      · intros h₃
-        rw [h₃]
-        refine Int.dvd_sub_of_emod_eq ?_
-        sorry
     _ = _ := by
-      simp only [sum_ite_eq', mem_univ, ↓reduceIte]
-      congr! 2 with k hk
-      sorry
+      exact DesiredV2 m z₀ z₁ (RuesDiffMPeriodic n)
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]

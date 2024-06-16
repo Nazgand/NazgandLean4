@@ -504,9 +504,20 @@ lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Fins
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
-lemma DesiredV2 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) {f : ℤ → α → β} (f_periodic : ∀ (m₂ k : ℤ) , f m₂ = f (m₂ + k * n)) :
+lemma DesiredV3 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) {f : ℤ → α → β} (f_periodic : ∀ (m₂ : ℤ) , f m₂ = f (m₂ % n)) :
     (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
-  sorry
+  obtain rfl | hn := eq_or_ne n 0
+  · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
+  refine sum_congr rfl ?_
+  intros k hk
+  calc
+    _ = ∑ j ∈ range n, if j = (m - ↑k) % n then f (↑k) z₀ * f (↑j) z₁ else 0 := by
+      congr! 2 with j hj
+      sorry
+    _ = f (↑k) z₀ * f ((m - ↑k) % n) z₁ := by
+      sorry
+    _ = _ := by
+      exact Eq.symm (Mathlib.Tactic.LinearCombination.mul_pf rfl (congrFun (f_periodic (m - ↑k)) z₁))
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]
@@ -539,7 +550,7 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
         IsUnit.mul_div_cancel_right]
       · simp only [zero_div]
     _ = _ := by
-      exact DesiredV2 m z₀ z₁ (RuesDiffMPeriodic n)
+      exact DesiredV3 m z₀ z₁ (RuesDiffMod n)
 
 lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]

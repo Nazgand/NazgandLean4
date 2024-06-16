@@ -536,7 +536,17 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
       · simp only [zero_div]
     _ = ∑ x : Fin ↑n, ∑ i : Fin ↑n, (if i = ↑m - x then RuesDiff n (↑↑x) z₀ * RuesDiff n (↑↑i) z₁ else 0) := by
       congr! 3 with i hi j hj
-      sorry
+      constructor
+      · intros h₃
+        obtain ⟨w, hw⟩ := h₃
+        have hw₂ := congrArg (λ (k : ℤ) => (k : Fin n) + j) hw
+        simp only [Int.cast_sub, Int.cast_natCast, Fin.cast_val_eq_self, sub_add_cancel,
+          Int.cast_mul, Fin.natCast_self, zero_mul, zero_add] at hw₂
+        exact hw₂.symm
+      · intros h₃
+        rw [h₃]
+        refine Int.dvd_sub_of_emod_eq ?_
+        sorry
     _ = _ := by
       simp only [sum_ite_eq', mem_univ, ↓reduceIte]
       congr! 2 with k hk

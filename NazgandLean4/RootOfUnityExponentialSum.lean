@@ -515,7 +515,7 @@ lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Fins
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
-lemma DesiredV4 {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
+lemma SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
     (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
@@ -576,7 +576,7 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
         not_false_eq_true, IsUnit.mul_div_cancel_right, RuesDiffZModEqRuesDiff]
       · simp only [zero_div]
     _ = _ := by
-      have h := DesiredV4 m z₀ z₁ (RuesDiffZMod n)
+      have h := SumOfSumEqSum m z₀ z₁ (RuesDiffZMod n)
       norm_cast at h
       norm_cast
       simp_rw [←h]

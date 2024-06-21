@@ -17,18 +17,30 @@ def IsDifferentialEquationSolution {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → �
 
 def SetOfSolutions {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) : Set (ℂ → ℂ) := {h : ℂ → ℂ | IsDifferentialEquationSolution DiffEqCoeff h}
 
--- the n different g functions span the set of solutions (and thus are a basis of the set of solutions)
-def GSpan {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (g : (Fin n) → ℂ → ℂ) : Prop := SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin n) → ℂ), h = λ (z : ℂ) => ∑ k in range ↑n, b k * g k z}
+-- the n different g functions are a basis of the set of solutions
+def GBasis {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (g : (Fin n) → ℂ → ℂ) : Prop := SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin n) → ℂ), h = λ (z : ℂ) => ∑ k in range ↑n, b k * g k z}
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
 
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.
-lemma SpanMatrixImageOfSpan {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) (g₀ g₁ : (Fin n) → ℂ → ℂ) (h₁ : GSpan DiffEqCoeff g₀) (h₂ : GSpan DiffEqCoeff g₁) :
-    ∃ (C : Matrix (Fin n) (Fin n) ℂ), (∀ z : ℂ, v g₀ z = C * v g₁ z) := sorry
+lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) (g₀ g₁ : (Fin n) → ℂ → ℂ) (h₁ : GBasis DiffEqCoeff g₀) (h₂ : GBasis DiffEqCoeff g₁) :
+    ∃ (C : Matrix (Fin n) (Fin n) ℂ), (∀ z : ℂ, v g₀ z = C * v g₁ z) := by
+  have h₃ : ∀ k : Fin ↑n, g₀ k ∈ SetOfSolutions DiffEqCoeff := by
+    intros k
+    rw [h₁]
+    simp only [Set.mem_setOf_eq]
+    use (λ k₀ : Fin ↑n => if k = k₀ then (1 : ℂ) else (0 : ℂ))
+    simp only [ite_mul, one_mul, zero_mul]
+    ext1 z
+    simp only [sum_range, Fin.cast_val_eq_self, sum_ite_eq, mem_univ, ↓reduceIte]
+  rw [h₂] at h₃
+  simp only [Set.mem_setOf_eq] at h₃
+  -- h₃ gives the coefficients of the matrix, 1 row at a time. But how can I obtain the coefficients behind the ∀?
+  sorry
 
 -- the actual conjecture
-theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GSpan DiffEqCoeff g) :
+theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
     ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), (f (z₀ + z₁) = ((transpose (v g z₀)) * A * (v g z₁)) 0 0 ∧ A = transpose A) :=
   sorry

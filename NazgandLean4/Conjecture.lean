@@ -37,7 +37,10 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
     simp only [sum_range, Fin.cast_val_eq_self, sum_ite_eq, mem_univ, ↓reduceIte]
   rw [h₂] at h₃
   simp only [Set.mem_setOf_eq] at h₃
-  -- h₃ gives the coefficients of the matrix, 1 row at a time. But how can I obtain the coefficients behind the ∀?
+  choose b hb using h₃
+  use of λ (y : Fin n) (x : Fin n) => b y x
+  intros z
+  unfold v
   sorry
 
 -- the actual conjecture

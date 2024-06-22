@@ -41,7 +41,9 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
   use of λ (y : Fin n) (x : Fin n) => b y x
   intros z
   unfold v
-  sorry
+  clear h₁ h₂ DiffEqCoeff h₀
+  ext i j
+  simp only [hb, ← Fin.sum_univ_eq_sum_range, Fin.cast_val_eq_self, of_apply, mul_apply]
 
 -- the actual conjecture
 theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :

@@ -45,7 +45,56 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
   ext i j
   simp only [hb, ← Fin.sum_univ_eq_sum_range, Fin.cast_val_eq_self, of_apply, mul_apply]
 
--- the actual conjecture
-theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
-    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), (f (z₀ + z₁) = ((transpose (v g z₀)) * A * (v g z₁)) 0 0 ∧ A = transpose A) :=
+-- the simplified asymmetric conjecture
+theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
+    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) :=
   sorry
+
+-- the full symmetric conjecture
+theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
+    ∃ (A : Matrix (Fin n) (Fin n) ℂ), A = transpose A ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+  choose A₀ hA₀ using AsymmArgumentSumConjecture h₀ h₁ g h₂
+  use (1 / 2 : ℂ) • (A₀ + (transpose A₀))
+  constructor
+  · ext i j
+    simp only [one_div, smul_apply, add_apply, transpose_apply, smul_eq_mul, smul_add]
+    ring
+  · have hA₀2 : ∀ (z₀ z₁ : ℂ), (of fun x x => f (z₀ + z₁)) = (v g z₀)ᵀ * A₀ᵀ * v g z₁ := by
+      intros z₁ z₀
+      have h₃ := congrArg (λ B => Bᵀ) (hA₀ z₀ z₁)
+      simp only [transpose_mul, transpose_transpose] at h₃
+      have h₄ : (of fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁))ᵀ = (of fun x x => f (z₀ + z₁)) := by
+        ext i j
+        simp only [transpose_apply, of_apply]
+      rw [h₄] at h₃
+      rw [(show z₁ + z₀ = z₀ + z₁ by ring), h₃]
+      exact Eq.symm (Matrix.mul_assoc (v g z₁)ᵀ A₀ᵀ (v g z₀))
+    have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun x x => f (z₀ + z₁)) = (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+      intros z₀ z₁
+      have h₃ := Mathlib.Tactic.LinearCombination.add_pf (hA₀ z₀ z₁) (hA₀2 z₀ z₁)
+      have h₄ : (of fun x x => f (z₀ + z₁)) + (of fun x x => f (z₀ + z₁)) = 2 • (of fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁)) := by
+        ext i j
+        simp only [add_apply, of_apply, smul_apply, nsmul_eq_mul, Nat.cast_ofNat]
+        ring
+      rw [h₄] at h₃
+      rw [h₃]
+      have h₅ : (v g z₀)ᵀ * (A₀ + A₀ᵀ) = (v g z₀)ᵀ * A₀ + (v g z₀)ᵀ * A₀ᵀ := by
+        exact Matrix.mul_add (v g z₀)ᵀ A₀ A₀ᵀ
+      rw [h₅]
+      exact Eq.symm (Matrix.add_mul ((v g z₀)ᵀ * A₀) ((v g z₀)ᵀ * A₀ᵀ) (v g z₁))
+    have hA₀4 : ∀ (z₀ z₁ : ℂ), (of fun x x => f (z₀ + z₁)) = (1 / 2 : ℂ) • (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+      intros z₀ z₁
+      have h₃ := congrArg (λ (B : Matrix (Fin 1) (Fin 1) ℂ) => (1 / 2 : ℂ) • B) (hA₀3 z₀ z₁)
+      simp only [one_div, smul_of, nsmul_eq_mul, Nat.cast_ofNat] at h₃
+      have h₄ : (of ((2 : ℂ)⁻¹ • (2 * fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁)))) = (of fun x x => f (z₀ + z₁)) := by
+        ext i j
+        simp only [of_apply, Pi.smul_apply, Pi.mul_apply, Pi.ofNat_apply, Nat.cast_ofNat,
+          smul_eq_mul, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+          IsUnit.inv_mul_cancel_left]
+      rw [h₄] at h₃
+      rw [h₃]
+      simp only [one_div, smul_mul]
+    intros z₀ z₁
+    rw [hA₀4]
+    congr 1
+    rw [Matrix.mul_smul, Matrix.smul_mul]

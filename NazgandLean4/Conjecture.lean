@@ -59,20 +59,20 @@ theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
   · ext i j
     simp only [one_div, smul_apply, add_apply, transpose_apply, smul_eq_mul, smul_add]
     ring
-  · have hA₀2 : ∀ (z₀ z₁ : ℂ), (of fun x x => f (z₀ + z₁)) = (v g z₀)ᵀ * A₀ᵀ * v g z₁ := by
+  · have hA₀2 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) = (v g z₀)ᵀ * A₀ᵀ * v g z₁ := by
       intros z₁ z₀
       have h₃ := congrArg (λ B => Bᵀ) (hA₀ z₀ z₁)
       simp only [transpose_mul, transpose_transpose] at h₃
-      have h₄ : (of fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁))ᵀ = (of fun x x => f (z₀ + z₁)) := by
-        ext i j
+      have h₄ : (of fun (_ _ : Fin 1) => f (z₀ + z₁))ᵀ = (of fun _ _ => f (z₀ + z₁)) := by
+        ext _ _
         simp only [transpose_apply, of_apply]
       rw [h₄] at h₃
       rw [(show z₁ + z₀ = z₀ + z₁ by ring), h₃]
       exact Eq.symm (Matrix.mul_assoc (v g z₁)ᵀ A₀ᵀ (v g z₀))
-    have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun x x => f (z₀ + z₁)) = (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+    have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun _ _ => f (z₀ + z₁)) = (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
       intros z₀ z₁
       have h₃ := Mathlib.Tactic.LinearCombination.add_pf (hA₀ z₀ z₁) (hA₀2 z₀ z₁)
-      have h₄ : (of fun x x => f (z₀ + z₁)) + (of fun x x => f (z₀ + z₁)) = 2 • (of fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁)) := by
+      have h₄ : (of fun _ _ => f (z₀ + z₁)) + (of fun _ _ => f (z₀ + z₁)) = 2 • (of fun (_ _ : Fin 1) => f (z₀ + z₁)) := by
         ext i j
         simp only [add_apply, of_apply, smul_apply, nsmul_eq_mul, Nat.cast_ofNat]
         ring
@@ -82,12 +82,12 @@ theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
         exact Matrix.mul_add (v g z₀)ᵀ A₀ A₀ᵀ
       rw [h₅]
       exact Eq.symm (Matrix.add_mul ((v g z₀)ᵀ * A₀) ((v g z₀)ᵀ * A₀ᵀ) (v g z₁))
-    have hA₀4 : ∀ (z₀ z₁ : ℂ), (of fun x x => f (z₀ + z₁)) = (1 / 2 : ℂ) • (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+    have hA₀4 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) = (1 / 2 : ℂ) • (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
       intros z₀ z₁
       have h₃ := congrArg (λ (B : Matrix (Fin 1) (Fin 1) ℂ) => (1 / 2 : ℂ) • B) (hA₀3 z₀ z₁)
       simp only [one_div, smul_of, nsmul_eq_mul, Nat.cast_ofNat] at h₃
-      have h₄ : (of ((2 : ℂ)⁻¹ • (2 * fun (x : Fin 1) (x : Fin 1) => f (z₀ + z₁)))) = (of fun x x => f (z₀ + z₁)) := by
-        ext i j
+      have h₄ : (of ((2 : ℂ)⁻¹ • (2 * fun (_ _ : Fin 1) => f (z₀ + z₁)))) = (of fun _ _ => f (z₀ + z₁)) := by
+        ext _ _
         simp only [of_apply, Pi.smul_apply, Pi.mul_apply, Pi.ofNat_apply, Nat.cast_ofNat,
           smul_eq_mul, isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
           IsUnit.inv_mul_cancel_left]

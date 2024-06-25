@@ -45,10 +45,23 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
   ext i j
   simp only [hb, ← Fin.sum_univ_eq_sum_range, Fin.cast_val_eq_self, of_apply, mul_apply]
 
+-- the simplified single basis asymmetric conjecture
+theorem Asymm1BasisArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) :
+    ∃ (g : (Fin n) → ℂ → ℂ) (A : Matrix (Fin n) (Fin n) ℂ), (GBasis DiffEqCoeff g) ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) :=
+  sorry
+
 -- the simplified asymmetric conjecture
 theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
-    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) :=
-  sorry
+    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+  choose g₀ A₀ h₃ h₄ using Asymm1BasisArgumentSumConjecture h₀ h₁
+  choose C hC using BasisMatrixImageOfBasis h₀ g₀ g h₃ h₂
+  use Cᵀ * A₀ * C
+  intros z₀ z₁
+  rw [h₄, ←Matrix.mul_assoc, ←Matrix.mul_assoc]
+  have h₅ := congrArg (λ B : Matrix (Fin ↑n) (Fin 1) ℂ => Bᵀ) (hC z₀)
+  simp only [transpose_mul] at h₅
+  rw [←h₅, Matrix.mul_assoc, Matrix.mul_assoc, hC z₁]
+  simp only [Matrix.mul_assoc]
 
 -- the full symmetric conjecture
 theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :

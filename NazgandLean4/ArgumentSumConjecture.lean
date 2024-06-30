@@ -1,7 +1,7 @@
 -- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
 import Mathlib
 set_option maxHeartbeats 0
-open Complex Classical BigOperators Finset Matrix
+open Complex Classical BigOperators Finset Matrix Polynomial
 
 -- throughout this file we have reused variable names
 -- (n : ℕ+) -- n is the degree of the differential equation
@@ -44,6 +44,14 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
   clear h₁ h₂ DiffEqCoeff h₀
   ext i j
   simp only [hb, ← Fin.sum_univ_eq_sum_range, Fin.cast_val_eq_self, of_apply, mul_apply]
+
+-- Define the characteristic polynomial for the differential equation
+noncomputable def CharacteristicPolynomial (n : ℕ+) (DiffEqCoeff : Fin (n + 1) → ℂ) : Polynomial ℂ :=
+  ∑ k in range (n + 1), (C (DiffEqCoeff k)) * X^k
+
+-- Define the set of roots of the characteristic polynomial
+noncomputable def RootsOfCharacteristicPoly (n : ℕ+) (DiffEqCoeff : Fin (n + 1) → ℂ) : Multiset ℂ :=
+  (CharacteristicPolynomial n DiffEqCoeff).roots
 
 -- the simplified single basis asymmetric conjecture
 theorem Asymm1BasisArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) :

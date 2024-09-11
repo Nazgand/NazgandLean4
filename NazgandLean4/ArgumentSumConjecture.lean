@@ -9,11 +9,8 @@ open Complex Classical BigOperators Finset Matrix Polynomial
 
 def LeadCoeffNonZero {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) : Prop := DiffEqCoeff n ≠ 0 -- needed to keep the degree equal to n
 
-def IsDifferentiableEverywhere (f : ℂ → ℂ) : Prop := --checks whether a given function Is Differentiable Everywhere
-  ∀ (z : ℂ), ∃ (f' : ℂ), HasDerivAt f f' z
-
 def IsDifferentialEquationSolution {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (f : ℂ → ℂ) : Prop := --checks whether a given function is a solution
-  IsDifferentiableEverywhere f ∧ ∀ (z : ℂ), 0 = ∑ k in range ↑(n + 1), (DiffEqCoeff k) * (iteratedDeriv k f z)
+  ContDiff ℂ ⊤ f ∧ ∀ (z : ℂ), 0 = ∑ k in range ↑(n + 1), (DiffEqCoeff k) * (iteratedDeriv k f z)
 
 def SetOfSolutions {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) : Set (ℂ → ℂ) := {h : ℂ → ℂ | IsDifferentialEquationSolution DiffEqCoeff h}
 

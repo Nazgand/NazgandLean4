@@ -23,7 +23,18 @@ def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1
 -- A solution with input shifted by a constant z₁ is still a solution
 lemma ShiftedSolution {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈ SetOfSolutions DiffEqCoeff) :
   (λ (z₀ : ℂ) => f (z₀ + z₁)) ∈ SetOfSolutions DiffEqCoeff := by
-  sorry
+  unfold SetOfSolutions
+  unfold SetOfSolutions at h₀
+  simp only [Set.mem_setOf_eq]
+  simp only [Set.mem_setOf_eq] at h₀
+  unfold IsDifferentialEquationSolution
+  unfold IsDifferentialEquationSolution at h₀
+  rcases h₀ with ⟨h₁, h₂⟩
+  constructor
+  · refine Differentiable.contDiff ?left.hf
+    unfold Differentiable
+    sorry
+  · sorry
 
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.

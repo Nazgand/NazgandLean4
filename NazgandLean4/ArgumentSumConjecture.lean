@@ -1,6 +1,7 @@
 -- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
 import Mathlib
 set_option maxHeartbeats 0
+set_option pp.proofs true
 open Complex Classical BigOperators Finset Matrix Polynomial
 
 -- throughout this file we have reused variable names
@@ -77,6 +78,13 @@ noncomputable def ExtractedFunctions {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) →
   simp only [Set.mem_setOf_eq] at h₃
   choose b hb using h₃
   exact b k
+
+-- Not sure how to prove but is obvious from the definition
+lemma ExtractedFunctionsUse {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
+  ∀ (z₀ z₁ : ℂ), f (z₀ + z₁) = ∑ k ∈ range ↑n, (ExtractedFunctions h₀ h₁ g h₂ k z₁) * g (↑k) z₀ := by
+  intros z₀ z₁
+  sorry
 
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.

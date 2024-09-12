@@ -15,7 +15,8 @@ def IsDifferentialEquationSolution {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → �
 def SetOfSolutions {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) : Set (ℂ → ℂ) := {h : ℂ → ℂ | IsDifferentialEquationSolution DiffEqCoeff h}
 
 -- the n different g functions are a basis of the set of solutions
-def GBasis {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (g : (Fin n) → ℂ → ℂ) : Prop := SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin n) → ℂ), h = λ (z : ℂ) => ∑ k in range ↑n, b k * g k z}
+def GBasis {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (g : (Fin n) → ℂ → ℂ) : Prop :=
+  SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin n) → ℂ), h = λ (z : ℂ) => ∑ k in range ↑n, b k * g k z}
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
@@ -68,10 +69,19 @@ lemma ShiftedSolution {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} {f : ℂ 
     intros z₀
     exact h₂ (z₀ + z₁)
 
+noncomputable def ExtractedFunctions {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (k : Fin n) (z₁ : ℂ) : ℂ := by
+  have h₃ := ShiftedSolution z₁ h₁
+  unfold GBasis at h₂
+  rw [h₂] at h₃
+  simp only [Set.mem_setOf_eq] at h₃
+  choose b hb using h₃
+  exact b k
+
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.
-lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) (g₀ g₁ : (Fin n) → ℂ → ℂ) (h₁ : GBasis DiffEqCoeff g₀) (h₂ : GBasis DiffEqCoeff g₁) :
-    ∃ (C : Matrix (Fin n) (Fin n) ℂ), (∀ z : ℂ, v g₀ z = C * v g₁ z) := by
+lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) (g₀ g₁ : (Fin n) → ℂ → ℂ)
+  (h₁ : GBasis DiffEqCoeff g₀) (h₂ : GBasis DiffEqCoeff g₁) : ∃ (C : Matrix (Fin n) (Fin n) ℂ), (∀ z : ℂ, v g₀ z = C * v g₁ z) := by
   have h₃ : ∀ k : Fin ↑n, g₀ k ∈ SetOfSolutions DiffEqCoeff := by
     intros k
     rw [h₁]
@@ -99,13 +109,15 @@ noncomputable def RootsOfCharacteristicPoly (n : ℕ+) (DiffEqCoeff : Fin (n + 1
   (CharacteristicPolynomial n DiffEqCoeff).roots
 
 -- the simplified single basis asymmetric conjecture
-theorem Asymm1BasisArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) :
-    ∃ (g : (Fin n) → ℂ → ℂ) (A : Matrix (Fin n) (Fin n) ℂ), (GBasis DiffEqCoeff g) ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) :=
+theorem Asymm1BasisArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) : ∃ (g : (Fin n) → ℂ → ℂ) (A : Matrix (Fin n) (Fin n) ℂ),
+  (GBasis DiffEqCoeff g) ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) :=
   sorry
 
 -- the simplified asymmetric conjecture
-theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
-    ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
+  ∃ (A : Matrix (Fin n) (Fin n) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
   choose g₀ A₀ h₃ h₄ using Asymm1BasisArgumentSumConjecture h₀ h₁
   choose C hC using BasisMatrixImageOfBasis h₀ g₀ g h₃ h₂
   use Cᵀ * A₀ * C
@@ -117,8 +129,9 @@ theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → �
   simp only [Matrix.mul_assoc]
 
 -- the full symmetric conjecture
-theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ} (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
-    ∃ (A : Matrix (Fin n) (Fin n) ℂ), A = transpose A ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : IsDifferentialEquationSolution DiffEqCoeff f) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
+  ∃ (A : Matrix (Fin n) (Fin n) ℂ), A = transpose A ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
   choose A₀ hA₀ using AsymmArgumentSumConjecture h₀ h₁ g h₂
   use (1 / 2 : ℂ) • (A₀ + (transpose A₀))
   constructor

@@ -32,9 +32,7 @@ lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ :
     have hh₂ : DifferentiableAt ℂ h₂ (h z) := by
       refine Differentiable.differentiableAt ?h
       refine ContDiff.differentiable_iteratedDeriv' ?h.hf
-      have hktop : (↑K + 1 : ℕ∞) ≤ ⊤ := by
-        sorry
-      exact ContDiff.of_le h₀ hktop
+      exact ContDiff.of_le h₀ (OrderTop.le_top (↑K + 1 : ℕ∞))
     have hh : DifferentiableAt ℂ h z := by
       refine DifferentiableAt.add_const ?hf z₁
       exact differentiableAt_id'

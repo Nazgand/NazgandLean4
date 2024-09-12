@@ -1,7 +1,6 @@
 -- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
 import Mathlib
 set_option maxHeartbeats 0
-set_option diagnostics true
 open Complex Classical BigOperators Finset Matrix Polynomial
 
 -- throughout this file we have reused variable names
@@ -57,9 +56,17 @@ lemma ShiftedSolution {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} {f : ℂ 
   rcases h₀ with ⟨h₁, h₂⟩
   constructor
   · refine Differentiable.contDiff ?left.hf
-    unfold Differentiable
-    sorry
-  · sorry
+    refine Differentiable.comp' ?left.hf.hg ?left.hf.hf
+    · have h1LeTop : (1 : ℕ∞) ≤ ⊤ := by exact OrderTop.le_top 1
+      exact ContDiff.differentiable h₁ h1LeTop
+    · refine (differentiable_add_const_iff z₁).mpr ?left.hf.hf.a
+      exact differentiable_id'
+  · have hShID : ∀ (k : ℕ), (iteratedDeriv k fun z₀ => f (z₀ + z₁)) = fun z₀ => iteratedDeriv k f (z₀ + z₁) := by
+      intros k
+      rw [ShiftedIteratedDerivative k z₁ h₁]
+    simp_rw [hShID]
+    intros z₀
+    exact h₂ (z₀ + z₁)
 
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.

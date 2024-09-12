@@ -1,6 +1,7 @@
 -- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
 import Mathlib
 set_option maxHeartbeats 0
+set_option diagnostics true
 open Complex Classical BigOperators Finset Matrix Polynomial
 
 -- throughout this file we have reused variable names
@@ -19,6 +20,32 @@ def GBasis {n : ℕ+} (DiffEqCoeff : (Fin (n + 1)) → ℂ) (g : (Fin n) → ℂ
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
+
+-- simplify the shifted iterated derivative
+lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) : iteratedDeriv k (fun z₀ => f (z₀ + z₁)) = (fun z₀ => iteratedDeriv k f (z₀ + z₁)) := by
+  induction' k with K Kih
+  · simp only [iteratedDeriv_zero]
+  · rw [iteratedDeriv_succ, Kih]
+    ext z
+    let h₂ := iteratedDeriv K f
+    let h := fun z₀ => (z₀ + z₁)
+    have hh₂ : DifferentiableAt ℂ h₂ (h z) := by
+      refine Differentiable.differentiableAt ?h
+      refine ContDiff.differentiable_iteratedDeriv' ?h.hf
+      have hktop : (↑K + 1 : ℕ∞) ≤ ⊤ := by
+        sorry
+      exact ContDiff.of_le h₀ hktop
+    have hh : DifferentiableAt ℂ h z := by
+      refine DifferentiableAt.add_const ?hf z₁
+      exact differentiableAt_id'
+    have hcomp := deriv.comp z hh₂ hh
+    have hrwh₂ : h₂ = iteratedDeriv K f := by exact rfl
+    have hrwh : h = fun z₀ => z₀ + z₁ := by exact rfl
+    rw [hrwh₂, hrwh] at hcomp
+    simp only [differentiableAt_id', differentiableAt_const, deriv_add, deriv_id'', deriv_const',
+      add_zero, mul_one, ←iteratedDeriv_succ] at hcomp
+    rw [←hcomp]
+    rfl
 
 -- A solution with input shifted by a constant z₁ is still a solution
 lemma ShiftedSolution {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈ SetOfSolutions DiffEqCoeff) :

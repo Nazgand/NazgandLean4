@@ -70,21 +70,32 @@ lemma ShiftedSolution {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} {f : ℂ 
     intros z₀
     exact h₂ (z₀ + z₁)
 
-noncomputable def ExtractedFunctions {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
-  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (k : Fin n) (z₁ : ℂ) : ℂ := by
+noncomputable def ExtractedFunctionExists {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (z₁ : ℂ) :
+  ∃ b : (Fin ↑n → ℂ), (fun z₀ => f (z₀ + z₁)) = fun z => ∑ k ∈ range ↑n, b ↑k * g (↑k) z := by
   have h₃ := ShiftedSolution z₁ h₁
   unfold GBasis at h₂
   rw [h₂] at h₃
   simp only [Set.mem_setOf_eq] at h₃
-  choose b hb using h₃
-  exact b k
+  exact h₃
 
--- Not sure how to prove but is obvious from the definition
-lemma ExtractedFunctionsUse {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
-  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) :
-  ∀ (z₀ z₁ : ℂ), f (z₀ + z₁) = ∑ k ∈ range ↑n, (ExtractedFunctions h₀ h₁ g h₂ k z₁) * g (↑k) z₀ := by
-  intros z₀ z₁
-  sorry
+noncomputable def ExtractedFunctions {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (k : Fin n) (z₁ : ℂ) : ℂ := by
+  exact Classical.choose (ExtractedFunctionExists h₀ h₁ g h₂ z₁) ↑k
+
+-- The convenient to define one
+lemma ExtractedFunctionsUse0 {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (z₁ : ℂ) :
+  (fun z₀ => f (z₀ + z₁)) = fun z₀ => ∑ k ∈ range ↑n, (ExtractedFunctions h₀ h₁ g h₂ ↑k z₁) * g (↑k) z₀ := by
+  unfold ExtractedFunctions
+  exact Classical.choose_spec (ExtractedFunctionExists h₀ h₁ g h₂ z₁)
+
+-- The one we actually need
+lemma ExtractedFunctionsUse1 {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+  (h₁ : f ∈ SetOfSolutions DiffEqCoeff) (g : (Fin n) → ℂ → ℂ) (h₂ : GBasis DiffEqCoeff g) (z₀ : ℂ) :
+  (fun z₁ => f (z₀ + z₁)) = fun z₁ => ∑ k ∈ range ↑n, (ExtractedFunctions h₀ h₁ g h₂ ↑k z₁) * g (↑k) z₀ := by
+  ext z₁
+  exact congrFun (ExtractedFunctionsUse0 h₀ h₁ g h₂ z₁) z₀
 
 -- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
 -- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.

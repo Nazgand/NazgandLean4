@@ -425,9 +425,13 @@ lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
       field_simp
     rw [h₂]
     simp only [exp_pi_mul_I]
+  simp only [Multiset.mem_singleton, zero_ne_one, not_false_eq_true, Multiset.ndinsert_of_not_mem,
+    PNat.val_ofNat, Nat.cast_ofNat, Multiset.map_cons, CharP.cast_eq_zero, zero_div, mul_zero,
+    zero_mul, Complex.exp_zero, mul_one, Multiset.map_singleton, Nat.cast_one, one_div,
+    Multiset.sum_cons, Multiset.sum_singleton]
+  simp only [PNat.val_ofNat, Nat.cast_ofNat] at h₁
   simp_rw [h₁]
   simp only [mul_neg, mul_one]
-  congr
 
 lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
   rw [RuesNEqualsExpSum, Complex.cosh, Complex.cosh]

@@ -10,7 +10,7 @@ def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqtstn1₀, Soqtstn1₁]
-  simp only [ext_iff, neg_re, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
+  simp only [Quaternion.ext_iff, neg_re, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
     neg_zero, mul_imI, neg_imJ, QuaternionAlgebra.one_imJ, mul_imJ, neg_imK,
     QuaternionAlgebra.one_imK, mul_imK]
   constructor
@@ -62,7 +62,7 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
 lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqtstn1₁, Soqtstn1₂]
-  simp only [ext_iff]
+  simp only [Quaternion.ext_iff]
   constructor
   · intros h
     rcases h with ⟨rx, ry, rz, hx, hSphere⟩
@@ -99,7 +99,7 @@ def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qi
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₀, Soqqtstqm1₁]
-  simp only [ext_iff, sub_re, QuaternionAlgebra.one_re, mul_re, sub_imI, QuaternionAlgebra.one_imI,
+  simp only [Quaternion.ext_iff, sub_re, QuaternionAlgebra.one_re, mul_re, sub_imI, QuaternionAlgebra.one_imI,
     sub_zero, mul_imI, sub_imJ, QuaternionAlgebra.one_imJ, mul_imJ, sub_imK,
     QuaternionAlgebra.one_imK, mul_imK, one_div]
   ring_nf
@@ -156,7 +156,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₁, Soqqtstqm1₂]
-  simp only [one_div, ext_iff]
+  simp only [one_div, Quaternion.ext_iff]
   constructor
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
@@ -192,7 +192,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₁, Soqqtstqm1₃, Soqtstn1₁]
-  simp only [one_div, ext_iff, add_re, add_imI, add_imJ, add_imK]
+  simp only [one_div, Quaternion.ext_iff, add_re, add_imI, add_imJ, add_imK]
   constructor
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩

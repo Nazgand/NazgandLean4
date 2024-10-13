@@ -18,12 +18,9 @@ def DiffEq.IsVectorBasis (de : DiffEq) (g : (Fin de.Degree) → ℂ → ℂ) : P
   (de.SetOfSolutions = {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ k in range de.Degree, b k * g k z} ∧
   ∀ m ∈ range de.Degree, ¬ (g m ∈ {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ k in (range de.Degree \ {m}), b k * g k z}))
 
--- the column vector of the functions in g
-def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
-
 -- simplify the shifted iterated derivative
 lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
-  iteratedDeriv k (fun z₀ => f (z₀ + z₁)) = (fun z₀ => iteratedDeriv k f (z₀ + z₁)) := by
+    iteratedDeriv k (fun z₀ => f (z₀ + z₁)) = (fun z₀ => iteratedDeriv k f (z₀ + z₁)) := by
   induction' k with K Kih
   · simp only [iteratedDeriv_zero]
   · rw [iteratedDeriv_succ, Kih]
@@ -94,3 +91,32 @@ lemma ExtractedFunctionsUse1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.Se
   (fun z₁ => f (z₀ + z₁)) = fun z₁ => ∑ k ∈ range de.Degree, (ExtractedFunctions h₁ g h₂ ↑k z₁) * g (↑k) z₀ := by
   ext z₁
   exact congrFun (ExtractedFunctionsUse0 h₁ g h₂ z₁) z₀
+
+noncomputable def KeyDifferentialOperator (de : DiffEq) (f : ℂ → ℂ) : ℂ → ℂ :=
+  λ (z: ℂ) => ∑ k in range ↑(de.Degree + 1), (de.Coeff k) * (iteratedDeriv k f z)
+
+lemma AppliedDifferentialOperator {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (z₀ z₁ : ℂ), 0 = KeyDifferentialOperator de (fun z₁ => ∑ k ∈ range de.Degree, (ExtractedFunctions h₁ g h₂ ↑k z₁) * g (↑k) z₀) z₁ := by
+  intros z₀ z₁
+  have h₀ := congrArg (KeyDifferentialOperator de) (ExtractedFunctionsUse1 h₁ g h₂ z₀)
+  unfold KeyDifferentialOperator at h₀
+  simp only [PNat.add_coe, PNat.val_ofNat] at h₀
+  have h₃ : (fun z₁ => f (z₀ + z₁)) = (fun z₁ => f (z₁ + z₀)) := by
+    ext z₂
+    ring_nf
+  rw [h₃] at h₀
+  clear h₃
+  have h₄ := congrFun h₀ z₁
+  clear h₀
+  unfold KeyDifferentialOperator
+  simp only [PNat.add_coe, PNat.val_ofNat]
+  rw [←h₄]
+  clear h₄
+  have h₅ := ShiftedSolution z₀ h₁
+  unfold DiffEq.SetOfSolutions at h₅
+  unfold DiffEq.IsSolution at h₅
+  simp only [PNat.add_coe, PNat.val_ofNat, Set.mem_setOf_eq] at h₅
+  exact h₅.right z₁
+
+-- the column vector of the functions in g
+def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

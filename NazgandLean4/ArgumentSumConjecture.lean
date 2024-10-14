@@ -16,7 +16,7 @@ def DiffEq.SetOfSolutions (de : DiffEq) : Set (ℂ → ℂ) := {h : ℂ → ℂ 
 
 def DiffEq.IsVectorBasis (de : DiffEq) (g : (Fin de.Degree) → ℂ → ℂ) : Prop :=
   (de.SetOfSolutions = {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ k in range de.Degree, b k * g k z} ∧
-  ∀ m ∈ range de.Degree, ¬ (g m ∈ {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ k in (range de.Degree \ {m}), b k * g k z}))
+  ∀ m ∈ range de.Degree, ∀ (b : (Fin de.Degree) → ℂ), g m ≠ (λ (z : ℂ) => ∑ k in (range de.Degree \ {m}), b k * g k z))
 
 -- simplify the shifted iterated derivative
 lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
@@ -95,7 +95,7 @@ lemma ExtractedFunctionsUse1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.Se
 noncomputable def KeyDifferentialOperator (de : DiffEq) (f : ℂ → ℂ) : ℂ → ℂ :=
   λ (z: ℂ) => ∑ k in range ↑(de.Degree + 1), (de.Coeff k) * (iteratedDeriv k f z)
 
-lemma AppliedDifferentialOperator {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+lemma AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₀ z₁ : ℂ), 0 = KeyDifferentialOperator de (fun z₁ => ∑ k ∈ range de.Degree, (ExtractedFunctions h₁ g h₂ ↑k z₁) * g (↑k) z₀) z₁ := by
   intros z₀ z₁
   have h₀ := congrArg (KeyDifferentialOperator de) (ExtractedFunctionsUse1 h₁ g h₂ z₀)
@@ -117,6 +117,29 @@ lemma AppliedDifferentialOperator {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ 
   unfold DiffEq.IsSolution at h₅
   simp only [PNat.add_coe, PNat.val_ofNat, Set.mem_setOf_eq] at h₅
   exact h₅.right z₁
+
+theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] {ι : Type u_1}
+  {u : Finset ι} {A : ι → 𝕜 → F} (h : ∀ i ∈ u, ContDiff 𝕜 ⊤ (A i)) :
+  ∀ (k : ℕ), iteratedDeriv k (fun y => Finset.sum u fun i => A i y) = (fun y => Finset.sum u fun i => iteratedDeriv k (A i) y) := by
+  intros k
+  induction' k with K Kih
+  · simp only [iteratedDeriv_zero, Finset.sum_apply]
+  · have h₀ := congrArg deriv Kih
+    rw [iteratedDeriv_succ, h₀]
+    clear h₀
+    ext x
+    have h₁ : (1 : ℕ∞) ≤ ⊤ := by exact OrderTop.le_top 1
+    have h₂ : ∀ i ∈ u, DifferentiableAt 𝕜 (iteratedDeriv K (A i)) x := by
+      intros i ih
+      have h₃ := ContDiff.iterate_deriv K (h i ih)
+      rw [←iteratedDeriv_eq_iterate] at h₃
+      exact ContDiffAt.differentiableAt (ContDiff.contDiffAt h₃) h₁
+    rw [deriv_sum h₂]
+    simp_rw [iteratedDeriv_succ]
+
+lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (z₀ z₁ : ℂ), 0 = ∑ k ∈ range de.Degree, (KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ ↑k)) z₁ * g (↑k) z₀ := by
+  sorry
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

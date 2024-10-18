@@ -119,9 +119,8 @@ lemma AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈
   exact h₅.right z₁
 
 theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] {ι : Type u_1}
-  {u : Finset ι} {A : ι → 𝕜 → F} (h : ∀ i ∈ u, ContDiff 𝕜 ⊤ (A i)) :
-  ∀ (k : ℕ), iteratedDeriv k (fun y => Finset.sum u fun i => A i y) = (fun y => Finset.sum u fun i => iteratedDeriv k (A i) y) := by
-  intros k
+  {u : Finset ι} {A : ι → 𝕜 → F} (h : ∀ i ∈ u, ContDiff 𝕜 ⊤ (A i)) (k : ℕ) :
+  iteratedDeriv k (fun y => Finset.sum u fun i => A i y) = (fun y => Finset.sum u fun i => iteratedDeriv k (A i) y) := by
   induction' k with K Kih
   · simp only [iteratedDeriv_zero, Finset.sum_apply]
   · have h₀ := congrArg deriv Kih
@@ -137,9 +136,17 @@ theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Typ
     rw [deriv_sum h₂]
     simp_rw [iteratedDeriv_succ]
 
-lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
-  ∀ (z₀ z₁ : ℂ), 0 = ∑ k ∈ range de.Degree, (KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ ↑k)) z₁ * g (↑k) z₀ := by
+lemma ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)
+  : ∀ k ∈ range de.Degree, Differentiable ℂ (ExtractedFunctions h₁ g h₂ ↑k) := by
   sorry
+
+lemma ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)
+  (z₀ : ℂ) : ∀ k ∈ range de.Degree, ContDiff ℂ ⊤ (λ (z₁ : ℂ) => ((ExtractedFunctions h₁ g h₂ ↑k z₁) * g (↑k) z₀)) := by
+  intros k kh
+  have h₀ := Differentiable.mul_const (ExtractedFunctionsDifferentiable0 h₁ g h₂ k kh) (g (↑k) z₀)
+  exact Differentiable.contDiff h₀
+
+
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

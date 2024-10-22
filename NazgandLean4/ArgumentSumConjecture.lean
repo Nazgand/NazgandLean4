@@ -67,7 +67,7 @@ lemma ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈
     intros z₀
     exact h₂ (z₀ + z₁)
 
-noncomputable def ExtractedFunctionExists {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+lemma ExtractedFunctionExists {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₁ : ℂ) :
   ∃ b : (Fin de.Degree → ℂ), (fun z₀ => f (z₀ + z₁)) = fun z => ∑ k ∈ range de.Degree, b ↑k * g (↑k) z := by
   have h₃ := ShiftedSolution z₁ h₁
@@ -83,7 +83,6 @@ noncomputable def ExtractedFunctions {de : DiffEq} {f : ℂ → ℂ} (h₁ : f �
 -- The convenient to define one
 lemma ExtractedFunctionsUse0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₁ : ℂ) :
   (fun z₀ => f (z₀ + z₁)) = fun z₀ => ∑ k ∈ range ↑de.Degree, (ExtractedFunctions h₁ g h₂ ↑k z₁) * g (↑k) z₀ := by
-  unfold ExtractedFunctions
   exact Classical.choose_spec (ExtractedFunctionExists h₁ g h₂ z₁)
 
 -- The one we actually need
@@ -118,7 +117,7 @@ lemma AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈
   simp only [PNat.add_coe, PNat.val_ofNat, Set.mem_setOf_eq] at h₅
   exact h₅.right z₁
 
-theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] {ι : Type u_1}
+lemma iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v} [NormedAddCommGroup F] [NormedSpace 𝕜 F] {ι : Type u_1}
   {u : Finset ι} {A : ι → 𝕜 → F} (h : ∀ i ∈ u, ContDiff 𝕜 ⊤ (A i)) (k : ℕ) :
   iteratedDeriv k (fun y => Finset.sum u fun i => A i y) = (fun y => Finset.sum u fun i => iteratedDeriv k (A i) y) := by
   induction' k with K Kih
@@ -146,7 +145,46 @@ lemma ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : 
   have h₀ := Differentiable.mul_const (ExtractedFunctionsDifferentiable0 h₁ g h₂ k kh) (g (↑k) z₀)
   exact Differentiable.contDiff h₀
 
+lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (z₀ z₁ : ℂ), 0 = ∑ k ∈ range de.Degree, (KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ ↑k) z₁ * g (↑k) z₀) := by
+  sorry
 
+lemma ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (z₁ : ℂ) (k : ℕ), (k ∈ range de.Degree) → 0 = KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ ↑k) z₁ := by
+  sorry
+
+lemma ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (k : ℕ), (k ∈ range de.Degree) → (ExtractedFunctions h₁ g h₂ ↑k) ∈ de.SetOfSolutions := by
+  intros k hk
+  rw [DiffEq.SetOfSolutions]
+  simp only [Set.mem_setOf_eq]
+  rw [DiffEq.IsSolution]
+  constructor
+  · have h0 := ExtractedFunctionsDifferentiable0 h₁ g h₂ k hk
+    exact Differentiable.contDiff h0
+  · intros z
+    have h1 := ExtractedFunctionsAreSolutions0 h₁ g h₂ z k hk
+    rw [KeyDifferentialOperator] at h1
+    exact h1
+
+lemma MatrixEntriesExist {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∀ (k : ℕ), (k ∈ range de.Degree) → ∃ (b : (Fin de.Degree) → ℂ), (ExtractedFunctions h₁ g h₂ ↑k) = λ (z : ℂ) => ∑ k in range de.Degree, b k * g k z := by
+  intros k hk
+  have h0 := ExtractedFunctionsAreSolutions1 h₁ g h₂ k hk
+  have h1 := h₂
+  rw [DiffEq.IsVectorBasis] at h1
+  rw [h1.left] at h0
+  simp only [Set.mem_setOf_eq] at h0
+  exact h0
+
+noncomputable def MatrixEntries {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ)
+  (h₂ : de.IsVectorBasis g) (k : ℕ) (hk : k ∈ range de.Degree) : (Fin de.Degree) → ℂ := by
+  exact Classical.choose (MatrixEntriesExist h₁ g h₂ k hk)
+
+lemma MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ)
+  (h₂ : de.IsVectorBasis g) (k : ℕ) (hk : k ∈ range de.Degree) : ExtractedFunctions h₁ g h₂ ↑k = fun z₀ =>
+    ∑ k_1 ∈ range ↑de.Degree, (MatrixEntries h₁ g h₂ k hk) ↑k_1 * g (↑k_1) z₀ := by
+  exact Classical.choose_spec (MatrixEntriesExist h₁ g h₂ k hk)
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

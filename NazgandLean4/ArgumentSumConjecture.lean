@@ -204,3 +204,27 @@ lemma ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfS
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
+
+lemma ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ), ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+  use of λ (y : Fin de.Degree) (x : Fin de.Degree) => MatrixEntries h₁ g h₂ x y
+  intros z₀ z₁
+  ext x y
+  simp only [of_apply]
+  have h0 : x = 0 := by exact Fin.fin_one_eq_zero x
+  have h1 : y = 0 := by exact Fin.fin_one_eq_zero y
+  rw [h1, h0, Matrix.mul_apply]
+  simp_rw [Matrix.mul_apply]
+  simp only [Fin.isValue, transpose_apply, of_apply]
+  rw [v, v]
+  simp only [Fin.isValue, of_apply]
+  have h2 := ArgumentSumSumForm h₁ g h₂ z₁ z₀
+  have h3 : (z₁ + z₀) = (z₀ + z₁) := by exact AddCommMagma.add_comm z₁ z₀
+  rw [h3] at h2
+  rw [h2]
+  congr
+  ext k
+  rw [Finset.sum_mul]
+  congr
+  ext m
+  ring_nf

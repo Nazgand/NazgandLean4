@@ -184,17 +184,23 @@ lemma MatrixEntriesExist {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfS
   exact h0
 
 noncomputable def MatrixEntries {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ)
-  (h₂ : de.IsVectorBasis g) (k : ℕ) : (Fin de.Degree) → ℂ := by
+  (h₂ : de.IsVectorBasis g) (k : (Fin de.Degree)) : (Fin de.Degree) → ℂ := by
   exact Classical.choose (MatrixEntriesExist h₁ g h₂ k)
 
 lemma MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ)
-  (h₂ : de.IsVectorBasis g) (k : ℕ) : ExtractedFunctions h₁ g h₂ k = fun z₁ =>
+  (h₂ : de.IsVectorBasis g) (k : (Fin de.Degree)) : ExtractedFunctions h₁ g h₂ k = fun z₁ =>
     ∑ (k_1 : (Fin de.Degree)), (MatrixEntries h₁ g h₂ k) k_1 * g k_1 z₁ := by
   exact Classical.choose_spec (MatrixEntriesExist h₁ g h₂ k)
 
 lemma ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₀ z₁ : ℂ) :
-  f (z₀ + z₁) = ∑ (k : (Fin de.Degree)), ∑ (k_1 : (Fin de.Degree)), (MatrixEntries h₁ g h₂ k) k_1 * g k_1 z₁ * g k z₀ := by
-  sorry
+  f (z₀ + z₁) = ∑ (k : (Fin de.Degree)), ∑ (k_1 : (Fin de.Degree)), MatrixEntries h₁ g h₂ k k_1 * g k_1 z₁ * g k z₀ := by
+  have h0 := congrFun (ExtractedFunctionsUse1 h₁ g h₂ z₀) z₁
+  rw [h0]
+  congr
+  ext k
+  rw [MatrixEntriesUse h₁ g h₂ k]
+  simp only
+  exact sum_mul univ (fun i => MatrixEntries h₁ g h₂ k i * g i z₁) (g k z₀)
 
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

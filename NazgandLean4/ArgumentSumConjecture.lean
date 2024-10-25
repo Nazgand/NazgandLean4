@@ -16,7 +16,8 @@ def DiffEq.SetOfSolutions (de : DiffEq) : Set (ℂ → ℂ) := {h : ℂ → ℂ 
 
 def DiffEq.IsVectorBasis (de : DiffEq) (g : (Fin de.Degree) → ℂ → ℂ) : Prop :=
   (de.SetOfSolutions = {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b k * g k z} ∧
-  ∀ (m : (Fin de.Degree)), ∀ (b : (Fin de.Degree) → ℂ), g m ≠ (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), (if k=m then 0 else b k) * g k z))
+  (∀ (m : (Fin de.Degree)), ∀ (b : (Fin de.Degree) → ℂ), ∀ (c : ℂ),
+    (λ (z : ℂ) => c * g m z) = (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b k * g k z) → b = λ (k : (Fin de.Degree)) => if k = m then c else 0))
 
 -- simplify the shifted iterated derivative
 lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
@@ -149,7 +150,14 @@ lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈
 
 lemma ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₁ : ℂ) (k : (Fin de.Degree)), 0 = KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ := by
-  sorry
+  intros z₁ k
+  have h0 := h₂.right k (λ (k : (Fin de.Degree)) => KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁) 0
+  simp only [zero_mul, ite_self] at h0
+  have h1 : ((fun z => 0) = fun z => ∑ k : Fin ↑de.Degree, KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ * g k z) := by
+    ext z₀
+    exact AppliedDifferentialOperator1 h₁ g h₂ z₀ z₁
+  have h2 := congrFun (h0 h1) k
+  rw [h2]
 
 lemma ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (k : (Fin de.Degree)), (ExtractedFunctions h₁ g h₂ k) ∈ de.SetOfSolutions := by
@@ -187,5 +195,6 @@ lemma MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSol
 lemma ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₀ z₁ : ℂ) :
   f (z₀ + z₁) = ∑ (k : (Fin de.Degree)), ∑ (k_1 : (Fin de.Degree)), (MatrixEntries h₁ g h₂ k) k_1 * g k_1 z₁ * g k z₀ := by
   sorry
+
 -- the column vector of the functions in g
 def v {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) : Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z

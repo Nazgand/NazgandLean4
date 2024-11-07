@@ -16,8 +16,8 @@ def DiffEq.SetOfSolutions (de : DiffEq) : Set (ℂ → ℂ) := {h : ℂ → ℂ 
 
 def DiffEq.IsVectorBasis (de : DiffEq) (g : (Fin de.Degree) → ℂ → ℂ) : Prop :=
   (de.SetOfSolutions = {h : ℂ → ℂ | ∃ (b : (Fin de.Degree) → ℂ), h = λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b k * g k z} ∧
-  (∀ (m : (Fin de.Degree)), ∀ (b : (Fin de.Degree) → ℂ), ∀ (c : ℂ),
-    (λ (z : ℂ) => c * g m z) = (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b k * g k z) → b = λ (k : (Fin de.Degree)) => if k = m then c else 0))
+  (∀ (b₀ b₁ : (Fin de.Degree) → ℂ),
+    (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b₀ k * g k z) = (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b₁ k * g k z) → b₀ = b₁))
 
 -- simplify the shifted iterated derivative
 lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
@@ -151,13 +151,12 @@ lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈
 lemma ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₁ : ℂ) (k : (Fin de.Degree)), 0 = KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ := by
   intros z₁ k
-  have h0 := h₂.right k (λ (k : (Fin de.Degree)) => KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁) 0
-  simp only [zero_mul, ite_self] at h0
+  have h0 := h₂.right (λ (k : (Fin de.Degree)) => 0) (λ (k : (Fin de.Degree)) => KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁)
+  simp only [zero_mul, sum_const_zero] at h0
   have h1 : ((fun z => 0) = fun z => ∑ k : Fin ↑de.Degree, KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ * g k z) := by
     ext z₀
     exact AppliedDifferentialOperator1 h₁ g h₂ z₀ z₁
-  have h2 := congrFun (h0 h1) k
-  rw [h2]
+  exact congrFun (h0 h1) k
 
 lemma ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (k : (Fin de.Degree)), (ExtractedFunctions h₁ g h₂ k) ∈ de.SetOfSolutions := by
@@ -228,3 +227,8 @@ lemma ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.Set
   congr
   ext m
   ring_nf
+
+lemma ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
+  ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ), (A = transpose A ∧
+    ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁)))) := by
+  sorry

@@ -35,7 +35,7 @@ lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ :
     have hh : DifferentiableAt ℂ h z := by
       refine DifferentiableAt.add_const ?hf z₁
       exact differentiableAt_id'
-    have hcomp := deriv.comp z hh₂ hh
+    have hcomp := deriv_comp z hh₂ hh
     have hrwh₂ : h₂ = iteratedDeriv K f := by exact rfl
     have hrwh : h = fun z₀ => z₀ + z₁ := by exact rfl
     rw [hrwh₂, hrwh] at hcomp

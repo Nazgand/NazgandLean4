@@ -130,7 +130,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
       simp only [one_div, hrn0, or_false] at hz₂
       simp [hx₂, hy₂, hz₂] at h₁
       let h₂ := congrArg (λ (x₀ : ℝ) => x₀ - r + 1) h₁
-      simp only [add_sub_cancel, add_left_neg] at h₂
+      simp only [add_sub_cancel, neg_add_cancel] at h₂
       have hSquareNn := mul_self_nonneg (r - 1 / 2)
       linarith
     have hr₁ : r = 1/2 := by_contra hr₀

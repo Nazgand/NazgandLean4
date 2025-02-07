@@ -55,7 +55,12 @@ def RuesDiff (n : ℕ+) (m : ℤ) (z : ℂ) : ℂ :=
   tsum (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0)
 
 lemma RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) : Summable (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0) := by
-  sorry
+  apply Summable.of_norm_bounded _ <| Real.summable_pow_div_factorial (norm z)
+  · intro N
+    split
+    · simp
+    · rw [norm_zero, Complex.norm_eq_abs]
+      positivity
 
 lemma RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
   sorry
@@ -248,7 +253,7 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
           exact Int.mod_modEq (-w) ↑↑k
         have h₂ : w ≡ w [ZMOD ↑↑k] := by exact rfl
         have h₃ := Int.ModEq.add h₂ h₁
-        simp only [add_right_neg] at h₃
+        simp only [add_neg_cancel] at h₃
         exact h₃.symm
   · intros h₀
     obtain ⟨w, _, h₂⟩ := h₀

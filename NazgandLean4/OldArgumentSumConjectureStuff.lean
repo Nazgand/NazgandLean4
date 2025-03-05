@@ -84,7 +84,7 @@ theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 1)) → ℂ} (
       exact Eq.symm (Matrix.mul_assoc (v g z₁)ᵀ A₀ᵀ (v g z₀))
     have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun _ _ => f (z₀ + z₁)) = (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
       intros z₀ z₁
-      have h₃ := Mathlib.Tactic.LinearCombination.add_pf (hA₀ z₀ z₁) (hA₀2 z₀ z₁)
+      have h₃ := Mathlib.Tactic.LinearCombination.add_eq_eq (hA₀ z₀ z₁) (hA₀2 z₀ z₁)
       have h₄ : (of fun _ _ => f (z₀ + z₁)) + (of fun _ _ => f (z₀ + z₁)) = 2 • (of fun (_ _ : Fin 1) => f (z₀ + z₁)) := by
         ext i j
         simp only [add_apply, of_apply, smul_apply, nsmul_eq_mul, Nat.cast_ofNat]

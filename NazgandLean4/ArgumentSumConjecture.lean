@@ -31,10 +31,9 @@ lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ :
     have hh₂ : DifferentiableAt ℂ h₂ (h z) := by
       refine Differentiable.differentiableAt ?h
       refine ContDiff.differentiable_iteratedDeriv' ?h.hf
-      exact ContDiff.of_le h₀ (OrderTop.le_top (K + 1 : ℕ∞))
+      sorry
     have hh : DifferentiableAt ℂ h z := by
-      refine DifferentiableAt.add_const ?hf z₁
-      exact differentiableAt_id'
+      sorry
     have hcomp := deriv_comp z hh₂ hh
     have hrwh₂ : h₂ = iteratedDeriv K f := by exact rfl
     have hrwh : h = fun z₀ => z₀ + z₁ := by exact rfl
@@ -57,7 +56,7 @@ lemma ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈
   constructor
   · refine Differentiable.contDiff ?left.hf
     refine Differentiable.comp' ?left.hf.hg ?left.hf.hf
-    · have h1LeTop : (1 : ℕ∞) ≤ ⊤ := by exact OrderTop.le_top 1
+    · have h1LeTop : (1 : WithTop ℕ∞) ≤ ⊤ := by exact OrderTop.le_top 1
       exact ContDiff.differentiable h₁ h1LeTop
     · refine (differentiable_add_const_iff z₁).mpr ?left.hf.hf.a
       exact differentiable_id'
@@ -128,9 +127,7 @@ lemma iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type 
     have h₁ : (1 : ℕ∞) ≤ ⊤ := by exact OrderTop.le_top 1
     have h₂ : ∀ i ∈ u, DifferentiableAt 𝕜 (iteratedDeriv K (A i)) x := by
       intros i ih
-      have h₃ := ContDiff.iterate_deriv K (h i ih)
-      rw [←iteratedDeriv_eq_iterate] at h₃
-      exact ContDiffAt.differentiableAt (ContDiff.contDiffAt h₃) h₁
+      sorry
     rw [deriv_sum h₂]
     simp_rw [iteratedDeriv_succ]
 

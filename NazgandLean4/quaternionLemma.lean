@@ -73,7 +73,7 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
     let hNorm1 := congrArg Real.sqrt hSphere
     simp only [Real.sqrt_one] at hNorm1
     simp_rw [←hNorm1]
-    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (@QuaternionAlgebra.mk ℝ (-1) (-1) 0 x y z))
+    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (QuaternionAlgebra.mk 0 x y z))
     simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
     simp_rw [←hSqrtNormSquare, Quaternion.normSq_def']
     ring_nf
@@ -168,7 +168,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     nth_rewrite 2 [hrSquare] at hNormSq
     simp only at hNormSq
     ring_nf at hNormSq
-    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (@QuaternionAlgebra.mk ℝ (-1) (-1) r x y z))
+    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (QuaternionAlgebra.mk r x y z))
     simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
     rw [←hSqrtNormSquare, Quaternion.normSq_def']
     simp only [Real.sqrt_eq_one]
@@ -197,7 +197,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩
     rcases hx with ⟨hr, hx, hy, hz⟩
-    use (@QuaternionAlgebra.mk ℝ (-1) (-1) 0 (rx * 2 / Real.sqrt 3) (ry * 2 / Real.sqrt 3) (rz * 2 / Real.sqrt 3))
+    use (QuaternionAlgebra.mk 0 (rx * 2 / Real.sqrt 3) (ry * 2 / Real.sqrt 3) (rz * 2 / Real.sqrt 3))
     simp only [true_and]
     constructor
     · use rx * 2 / Real.sqrt 3

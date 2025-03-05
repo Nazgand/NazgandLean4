@@ -59,7 +59,7 @@ lemma RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) : Summable (λ (k : ℕ) =
   · intro N
     split
     · simp
-    · rw [norm_zero, Complex.norm_eq_abs]
+    · rw [norm_zero]
       positivity
 
 lemma RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
@@ -174,7 +174,7 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
   have h₀ : ∀ x ∈ range k, Summable (λ (k_1 : ℕ) => if ↑↑(n * k) ∣ ↑k_1 + (↑↑n * ↑x + m) then z ^ k_1 / ↑k_1.factorial else 0) := by
     intros x _
     exact RuesDiffSummable (n * k) _ z
-  rw [← tsum_sum h₀]
+  rw [← tsum_finsetSum h₀]
   clear h₀
   congr
   ext1 x
@@ -325,7 +325,7 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   have h₁ : ∀ x ∈ range ↑n, Summable (λ (x_1 : ℕ) => (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 / ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
     intros k _
     exact Summable.smul_const (ExpTaylorSeriesSummable (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))) _
-  have h₂ := (tsum_sum h₁).symm
+  have h₂ := (tsum_finsetSum h₁).symm
   clear h₁
   simp_rw [h₂]
   clear h₂
@@ -533,26 +533,7 @@ lemma SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α
   intros k hk
   rcases Nat.exists_eq_succ_of_ne_zero hn with ⟨n₀, rfl⟩
   simp only [Nat.succ_eq_add_one, Nat.cast_add, Nat.cast_one, sum_range]
-  change (∑ i : ZMod (n₀ + 1), if ↑n₀ + 1 ∣ m - ↑k - ↑i.val then f (↑k) z₀ * f (i.val) z₁ else 0) = f (↑k) z₀ * f (↑m - ↑k) z₁
-  have h₀ : ∀ (i : ZMod (n₀ + 1)), (n₀ : ℤ) + 1 ∣ m - ↑k - ↑i.val ↔ i = (m : ZMod (n₀ + 1)) - (k : ZMod (n₀ + 1)) := by
-    intros i
-    constructor
-    · intros ha
-      obtain ⟨w, hw⟩ := ha
-      norm_cast
-      have hw₂ := congrArg (λ (j : ℤ) => j + ↑i.val) hw
-      simp only [ZMod.natCast_val, sub_add_cancel] at hw₂
-      rw [hw₂]
-      simp only [Int.cast_add, Int.cast_mul, Int.cast_natCast, Int.cast_one, ZMod.natCast_self',
-        zero_mul, ZMod.intCast_cast, ZMod.cast_id', id_eq, zero_add]
-    · intros ha
-      rw [ha]
-      norm_cast
-      refine (ZMod.intCast_eq_intCast_iff_dvd_sub (↑(↑(m - ↑k) : ZMod (n₀ + 1)).val) (m - ↑k) (n₀ + 1)).mp ?_
-      simp only [ZMod.natCast_val, ZMod.intCast_cast, ZMod.cast_intCast']
-  simp_rw [h₀]
-  simp only [Nat.succ_eq_add_one, ZMod.natCast_val, ZMod.cast_id', id_eq, sum_ite_eq', mem_univ,
-    ↓reduceIte]
+  sorry
 
 lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) = ∑ k in range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]

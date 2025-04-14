@@ -230,7 +230,7 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
     use ((-w) % k).toNat
     constructor
     · refine (Int.toNat_lt' ?h.left.hn).mpr ?h.left.a
-      · exact PNat.ne_zero k
+      · exact PNat.pos k
       · refine Int.emod_lt_of_pos (-w) ?h.left.a.H
         refine Int.ofNat_pos.mpr ?h.left.a.H.a
         exact PNat.pos k

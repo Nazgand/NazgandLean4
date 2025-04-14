@@ -28,10 +28,9 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     simp only [zero_eq_mul, mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h0z
     have hr₀ : (¬ r = 0) → False := by
       intros hrn0
-      let hrn0₂ := Iff.mpr iff_false_iff hrn0
-      simp only [hrn0₂, false_or] at h0x
-      simp only [hrn0₂, false_or] at h0y
-      simp only [hrn0₂, false_or] at h0z
+      simp only [hrn0, false_or] at h0x
+      simp only [hrn0, false_or] at h0y
+      simp only [hrn0, false_or] at h0z
       simp_rw [h0x, h0y, h0z] at hSphere3
       simp only [mul_zero, sub_zero] at hSphere3
       have hrnn := mul_self_nonneg r

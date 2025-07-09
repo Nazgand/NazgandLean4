@@ -37,3 +37,23 @@ lemma NonPowerPowerTowerUniqueHeight (k h₀ h₁ : ℕ)
 lemma PosNatHasNonPowerPowerTower (k : ℕ) (h0 : k ∈ PosNat) :
   ∃ h : ℕ, k ∈ NonPowerPowerTower h :=
   sorry
+
+def PowerTower (list : List ℕ) : ℕ :=
+  match list with
+  | [] => 1
+  | h :: t => h ^ PowerTower t
+
+def ListOfNonPowers (list : List ℕ) : Prop :=
+  match list with
+  | [] => true
+  | h :: t => (h ∈ NonPowerNat) ∧ ListOfNonPowers t
+
+lemma UniqueNonPowerPowerTower (list₀ list₁ : List ℕ)
+  (h0 : ListOfNonPowers list₀) (h1 : ListOfNonPowers list₁)
+  (h2 : PowerTower list₀ = PowerTower list₁) :
+  list₀ = list₁ :=
+  sorry
+
+lemma PosNatExistsNonPowerPowerTower (k : ℕ) (h0 : k ∈ PosNat) :
+  ∃ (list : List ℕ), ListOfNonPowers list ∧ PowerTower list = k :=
+  sorry

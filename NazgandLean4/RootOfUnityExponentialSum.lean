@@ -174,7 +174,7 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
   have h₀ : ∀ x ∈ range k, Summable (λ (k_1 : ℕ) => if ↑↑(n * k) ∣ ↑k_1 + (↑↑n * ↑x + m) then z ^ k_1 / ↑k_1.factorial else 0) := by
     intros x _
     exact RuesDiffSummable (n * k) _ z
-  rw [← tsum_finsetSum h₀]
+  rw [← Summable.tsum_finsetSum h₀]
   clear h₀
   congr
   ext1 x
@@ -325,7 +325,7 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   have h₁ : ∀ x ∈ range ↑n, Summable (λ (x_1 : ℕ) => (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 / ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
     intros k _
     exact Summable.smul_const (ExpTaylorSeriesSummable (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))) _
-  have h₂ := (tsum_finsetSum h₁).symm
+  have h₂ := (Summable.tsum_finsetSum h₁).symm
   clear h₁
   simp_rw [h₂]
   clear h₂

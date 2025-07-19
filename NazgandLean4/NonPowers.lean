@@ -6,7 +6,7 @@ def OverUnityNat : Set ℕ := {k : ℕ | k > 1}
 def NonPowerNat : Set ℕ := {k : ℕ | ¬(∃ a b : ℕ, k = a ^ b ∧ b > 1)}
 
 -- the greatest common divisor of the prime exponents in the factorization of k
-def PrimeExponentsGcd (k : ℕ) : ℕ := (Nat.factorization k).support.gcd (Nat.factorization k)
+def PrimeExponentsGcd (k : ℕ) : ℕ := k.factorization.support.gcd k.factorization
 
 theorem NonPowerNatPrimeExponentsGcdEq1 : NonPowerNat = {k : ℕ | 1 = PrimeExponentsGcd k} := by
   sorry

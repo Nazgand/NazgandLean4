@@ -9,6 +9,7 @@ def NonPowerNat : Set ℕ := {k : ℕ | ¬(∃ a b : ℕ, k = a ^ b ∧ b > 1)}
 def PrimeExponentsGcd (k : ℕ) : ℕ := k.factorization.support.gcd k.factorization
 
 theorem PrimeExponentsGcdOfPower (a b : ℕ) : PrimeExponentsGcd (a ^ b) = b * PrimeExponentsGcd a := by
+  -- Use Nat.factorization_pow
   sorry
 
 theorem NonPowerNatPrimeExponentsGcdEq1 : NonPowerNat = {k : ℕ | 1 = PrimeExponentsGcd k} := by

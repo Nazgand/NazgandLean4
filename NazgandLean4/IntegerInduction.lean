@@ -60,13 +60,13 @@ lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) : (∀ (m : ℤ), p m �
     rw [WavelengthRestate] at h₀
     rw [WavelengthRestate]
     constructor
-    · have h₁ : ↑(k₀.gcd k₁) ∣ k₀ := Int.gcd_dvd_left
+    · have h₁ : ↑(k₀.gcd k₁) ∣ k₀ := Int.gcd_dvd_left k₀ k₁
       obtain ⟨w, hw⟩ := h₁
       intros m k
       rw [h₀ m (w * k)]
       nth_rw 2 [hw]
       ring_nf
-    · have h₁ : ↑(k₀.gcd k₁) ∣ k₁ := Int.gcd_dvd_right
+    · have h₁ : ↑(k₀.gcd k₁) ∣ k₁ := Int.gcd_dvd_right k₀ k₁
       obtain ⟨w, hw⟩ := h₁
       rw [WavelengthRestate]
       intros m k

@@ -129,7 +129,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
       simp only [one_div, hrn0, or_false] at hz₂
       simp [hx₂, hy₂, hz₂] at h₁
       let h₂ := congrArg (λ (x₀ : ℝ) => x₀ - r + 1) h₁
-      simp only [add_sub_cancel, neg_add_cancel] at h₂
+      simp only [add_sub_cancel_right, neg_add_cancel] at h₂
       have hSquareNn := mul_self_nonneg (r - 1 / 2)
       linarith
     have hr₁ : r = 1/2 := by_contra hr₀
@@ -144,8 +144,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     rcases hx with ⟨hr, hx, hy, hz⟩
     simp_rw [hr]
     ring_nf
-    simp only [Int.cast_negOfNat, Nat.cast_one, Int.ofNat_eq_coe, Int.cast_one, Nat.cast_ofNat,
-      one_div, neg_mul, one_mul, and_self, and_true]
+    simp only [one_div, and_self, and_true]
     rw [←hx, ←hy, ←hz] at hSphere
     let hXSquare := congrArg (λ (x₀ : ℝ) => x₀ - y ^ 2 - z ^ 2) hSphere
     ring_nf at hXSquare

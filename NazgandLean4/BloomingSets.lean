@@ -35,6 +35,7 @@ def SubBloom («🪻0» «🪻1» : «🌸») : Prop := (Maximum «🪻0» «�
 axiom LevelOfWithinSubBloomLevel : ∀ («🪻0» «🪻1» : «🌸»),
   Within «🪻0» «🪻1» → SubBloom (Level «🪻0») (Level «🪻1»)
 
+--should all be provable with EqualIfSameBloomsWithinAllMetaLevels
 axiom SubBloomOfMaximum : ∀ («🪻0» «🪻1» «🪻2» : «🌸»), SubBloom «🪻0» «🪻1» → SubBloom «🪻0» (Maximum «🪻1» «🪻2»)
 
 axiom BloomOfSmallerLevels : «🌸» → «🌸»
@@ -47,9 +48,23 @@ axiom SubBloomWithinPowerBloom : ∀ («🪻0» «🪻1» : «🌸»),
   SubBloom «🪻0» «🪻1» ↔ Within «🪻0» (PowerBloom «🪻1»)
 axiom PowerBloomLevel : ∀ («🪻» : «🌸»), Level (PowerBloom «🪻») = Level «🪻»
 
-axiom BloomOfSingleBloom : «🌸» → «🌸»
-axiom UniqueWithinBloomOfSingleBloom : ∀ («🪻0» «🪻1» : «🌸»), Within «🪻0» (BloomOfSingleBloom «🪻1») ↔ «🪻0» = «🪻1»
-axiom LevelOfBloomOfSingleBloom : ∀ («🪻» : «🌸»), Level (BloomOfSingleBloom «🪻») = Level «🪻»
+theorem SubBloomOfSelf («🪻» : «🌸») : SubBloom «🪻» «🪻» := by
+  rw [SubBloom, MaximumOfSelf]
+
+noncomputable
+def BloomOfSingleBloom («🪻» : «🌸») : «🌸» :=
+  PropSubBloom (λ («🪻2» : «🌸») ↦ «🪻2» = «🪻») (PowerBloom «🪻»)
+
+theorem UniqueWithinBloomOfSingleBloom («🪻0» «🪻1» : «🌸») :
+  Within «🪻0» (BloomOfSingleBloom «🪻1») ↔ «🪻0» = «🪻1» := by
+  rw [BloomOfSingleBloom, WithinPropSubBloom, ← SubBloomWithinPowerBloom]
+  simp only [and_iff_left_iff_imp]
+  intro h0
+  rw [h0]
+  exact SubBloomOfSelf «🪻1»
+
+theorem LevelOfBloomOfSingleBloom («🪻» : «🌸») : Level (BloomOfSingleBloom «🪻») = Level «🪻» := by
+  rw [BloomOfSingleBloom, LevelOfPropSubBloom, PowerBloomLevel]
 
 theorem BloomOfSingleBloomNotEmptyBloom («🪻» : «🌸») : ¬EmptyBloom (BloomOfSingleBloom «🪻») := by
   rw [EmptyBloom]
@@ -205,9 +220,6 @@ theorem SubBloomImpLevelSubBloom («🪻0» «🪻1» : «🌸») (h : SubBloom 
   have h0 := congr_arg Level h
   rw [LevelOfMaximum] at h0
   exact h0
-
-theorem SubBloomOfSelf («🪻» : «🌸») : SubBloom «🪻» «🪻» := by
-  rw [SubBloom, MaximumOfSelf]
 
 theorem TransitiveSubBloom («🪻0» «🪻1» «🪻2» : «🌸») (h0 : SubBloom «🪻0» «🪻1») (h1 : SubBloom «🪻1» «🪻2») :
   SubBloom «🪻0» «🪻2» := by
@@ -641,7 +653,8 @@ theorem BloomMinusSubBloomSelf («🪻0» «🪻1» : «🌸») : SubBloom (Bloo
       exact h
   · rw [LevelOfMaximum, BloomMinusLevel, MaximumOfSelf]
 
-theorem extracted_1 (k1 k3 : ℕ) : Within (PeanoBloom k1) (BloomMinus (RangePeanoBloom (k3 + 1)) (RangePeanoBloom k3)) ↔
+theorem UniquePeanoBloomWithinRangePeanoBloomSuccBloomMinusRangePeanoBloom (k1 k3 : ℕ) :
+  Within (PeanoBloom k1) (BloomMinus (RangePeanoBloom (k3 + 1)) (RangePeanoBloom k3)) ↔
   k1 = k3 := by
   constructor
   · rw [WithinBloomMinus]
@@ -651,27 +664,24 @@ theorem extracted_1 (k1 k3 : ℕ) : Within (PeanoBloom k1) (BloomMinus (RangePea
     rw [h]
     sorry
 
-theorem RangePeanoBloomRangeNat (k0 k1 : ℕ) : k1 ∈ Finset.range k0 ↔ Within (PeanoBloom k1) (RangePeanoBloom k0) := by
+theorem RangePeanoBloomRangeNat (k0 k1 : ℕ) : k1 < k0 ↔ Within (PeanoBloom k1) (RangePeanoBloom k0) := by
   induction k0 with
-  | zero => simp only [Finset.range_zero, Finset.not_mem_empty, false_iff, RangePeanoBloom, NotWithinBaseCase]
+  | zero => simp only [not_lt_zero', RangePeanoBloom, NotWithinBaseCase]
   | succ k3 ih =>
     constructor
     · intro h0
       rw [RangePeanoBloom, WithinMaximumIffWithinPart, ←ih]
-      have h1 : k1 < (k3 + 1) := by exact List.mem_range.mp h0
+      have h1 : k1 < (k3 + 1) := by exact h0
       have h2 : k1 < k3 ∨ k1 = k3 := by exact Nat.lt_succ_iff_lt_or_eq.mp h1
       cases h2 with
-      | inl h2 => simp only [Finset.mem_range, h2, true_or]
+      | inl h2 => simp only [h2, true_or]
       | inr h3 =>
-        simp only [h3, Finset.mem_range, lt_self_iff_false, false_or, PeanoBloomWithinSucc]
-    · simp only [Finset.mem_range] at ih
-      simp only [Finset.mem_range]
-      intro h0
+        simp only [h3, lt_self_iff_false, PeanoBloomWithinSucc, or_true]
+    · intro h0
       cases Classical.em (k1 < k3) with
       | inl h1 => exact Nat.lt_add_right 1 h1
       | inr h1 =>
         simp only [h1, false_iff] at ih
-
         sorry
 
 -- theorem RangePeanoBloomSubBloomIteratedPowerBloom (k : ℕ) : ∀ («🪻0» «🪻1» : «🌸»),
@@ -868,7 +878,7 @@ theorem ReplaceLeavesIsPeanoBloomAdd (k0 k1 : ℕ) : ReplaceLeaves (PeanoBloom k
       rw [(show k3 + 1 + k1 = k3 + k1 + 1 by ring), WithinPeanoBloom]
       have h1 : ∀ (k8 : ℕ), ¬EmptyBloom (PeanoBloom (k8 + 1)) := by
         intro k8
-        simp only [PeanoBloom, Nat.add_eq]
+        simp only [PeanoBloom]
         exact BloomOfSingleBloomNotEmptyBloom _
       constructor
       · intro h2
@@ -895,7 +905,7 @@ theorem ReplaceLeavesIsPeanoBloomAdd (k0 k1 : ℕ) : ReplaceLeaves (PeanoBloom k
             intro h0
             simp only [h1, not_false_eq_true, WithinReplaceLeaves]
             use PeanoBloom k3
-            simp only [PeanoBloomWithinSucc, Nat.add_left_inj, and_true]
+            simp only [PeanoBloomWithinSucc, and_true]
             cases Classical.em (k1 = k5 + 1) with
             | inl h2 =>
               rw [h2] at h

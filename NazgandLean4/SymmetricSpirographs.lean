@@ -67,7 +67,7 @@ lemma SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) :
   simp only [one_mul]
 
 lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) : ∀ (t : ℂ), f₀ (t + 2 * π / (Int.gcd m k)) = f₀ t := by
-  have h₂ : ↑(Int.gcd m k) ∣ (k : ℤ) := Int.gcd_dvd_right
+  have h₂ : ↑(Int.gcd m k) ∣ (k : ℤ) := Int.gcd_dvd_right m ↑↑k
   obtain ⟨w, hw⟩ := h₂
   have h₁ := SpiroPseudoPeriodic k m h₀ w
   intros t
@@ -93,7 +93,7 @@ lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) 
     field_simp
     ring_nf
   rw [h₆]
-  have h₇ : ↑(Int.gcd m k) ∣ m := Int.gcd_dvd_left
+  have h₇ : ↑(Int.gcd m k) ∣ m := Int.gcd_dvd_left m ↑↑k
   obtain ⟨w₂, hw₂⟩ := h₇
   nth_rw 1 [hw₂]
   have h₈ : I * 2 * ↑(↑(m.gcd ↑↑k) * w₂) * ↑π / ↑(m.gcd ↑↑k) = I * 2 * ↑π * ↑w₂ := by

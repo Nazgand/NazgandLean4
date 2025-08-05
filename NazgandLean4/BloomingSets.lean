@@ -4,7 +4,7 @@ set_option maxHeartbeats 0
 axiom «🌸» : Type
 axiom «🌺» : «🌸»
 axiom Level : «🌸» → «🌸»
-axiom BaseCaseLevel : Level «🌺» = «🌺»
+axiom LevelOfBaseCase : Level «🌺» = «🌺»
 axiom Within : «🌸» → «🌸» → Prop -- the first bloom is in the second bloom
 def EmptyBloom («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬Within «🪻» «🪻0»
 axiom EmptyBloomBaseCase : EmptyBloom «🌺»
@@ -19,11 +19,11 @@ axiom LevelOfPropSubBloom : ∀ (p : («🌸» → Prop)) («🪻» : «🌸»),
   Level (PropSubBloom p «🪻») = Level «🪻»
 
 axiom Maximum : «🌸» → «🌸» → «🌸»
-axiom WithinMaximumIffWithinPart : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
+axiom WithinMaximum : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
   Within «🪻2» (Maximum «🪻0» «🪻1») ↔ (Within «🪻2» «🪻0» ∨ Within «🪻2» «🪻1»)
 axiom LevelOfMaximum : ∀ («🪻0» «🪻1» : «🌸»), Level (Maximum «🪻0» «🪻1») = Maximum (Level «🪻0») (Level «🪻1»)
 
---should all be provable with EqualIfSameBloomsWithinAllMetaLevels
+--should all be provable with EqualIffSameBloomsWithinAllMetaLevels
 axiom SymmetricMaximum : ∀ («🪻0» «🪻1» : «🌸»), Maximum «🪻0» «🪻1» = Maximum «🪻1» «🪻0»
 axiom MaximumOfSelf : ∀ («🪻» : «🌸»), Maximum «🪻» «🪻» = «🪻»
 axiom BaseCaseMaximum : ∀ («🪻» : «🌸»), Maximum «🌺» «🪻» = «🪻»
@@ -32,21 +32,21 @@ axiom UniqueMaximumEqBaseCase («🪻0» «🪻1» : «🌸») :
 
 def SubBloom («🪻0» «🪻1» : «🌸») : Prop := (Maximum «🪻0» «🪻1») = «🪻1»
 
-axiom LevelOfWithinSubBloomLevel : ∀ («🪻0» «🪻1» : «🌸»),
+axiom WithinImpLevelSubBloomLevel : ∀ («🪻0» «🪻1» : «🌸»),
   Within «🪻0» «🪻1» → SubBloom (Level «🪻0») (Level «🪻1»)
 
---should all be provable with EqualIfSameBloomsWithinAllMetaLevels
+--should all be provable with EqualIffSameBloomsWithinAllMetaLevels
 axiom SubBloomOfMaximum : ∀ («🪻0» «🪻1» «🪻2» : «🌸»), SubBloom «🪻0» «🪻1» → SubBloom «🪻0» (Maximum «🪻1» «🪻2»)
 
 axiom BloomOfSmallerLevels : «🌸» → «🌸»
-axiom BloomOfSmallerLevelsWithin : ∀ («🪻0» «🪻1» : «🌸»),
+axiom WithinBloomOfSmallerLevels : ∀ («🪻0» «🪻1» : «🌸»),
   Within «🪻0» (BloomOfSmallerLevels «🪻1») ↔ (SubBloom (Level «🪻0») «🪻1» ∧ (Level «🪻0») ≠ «🪻1»)
-axiom BloomOfSmallerLevelsLevel : ∀ («🪻» : «🌸»), Level (BloomOfSmallerLevels «🪻») = «🪻»
+axiom LevelOfBloomOfSmallerLevels : ∀ («🪻» : «🌸»), Level (BloomOfSmallerLevels «🪻») = «🪻»
 
 axiom PowerBloom : «🌸» → «🌸»
-axiom SubBloomWithinPowerBloom : ∀ («🪻0» «🪻1» : «🌸»),
-  SubBloom «🪻0» «🪻1» ↔ Within «🪻0» (PowerBloom «🪻1»)
-axiom PowerBloomLevel : ∀ («🪻» : «🌸»), Level (PowerBloom «🪻») = Level «🪻»
+axiom WithinPowerBloom : ∀ («🪻0» «🪻1» : «🌸»),
+  Within «🪻0» (PowerBloom «🪻1») ↔ SubBloom «🪻0» «🪻1»
+axiom LevelOfPowerBloom : ∀ («🪻» : «🌸»), Level (PowerBloom «🪻») = Level «🪻»
 
 theorem SubBloomOfSelf («🪻» : «🌸») : SubBloom «🪻» «🪻» := by
   rw [SubBloom, MaximumOfSelf]
@@ -57,63 +57,61 @@ def BloomOfSingleBloom («🪻» : «🌸») : «🌸» :=
 
 theorem WithinBloomOfSingleBloom («🪻0» «🪻1» : «🌸») :
   Within «🪻0» (BloomOfSingleBloom «🪻1») ↔ «🪻0» = «🪻1» := by
-  rw [BloomOfSingleBloom, WithinPropSubBloom, ← SubBloomWithinPowerBloom]
+  rw [BloomOfSingleBloom, WithinPropSubBloom, WithinPowerBloom]
   simp only [and_iff_left_iff_imp]
   intro h0
   rw [h0]
   exact SubBloomOfSelf «🪻1»
 
 theorem LevelOfBloomOfSingleBloom («🪻» : «🌸») : Level (BloomOfSingleBloom «🪻») = Level «🪻» := by
-  rw [BloomOfSingleBloom, LevelOfPropSubBloom, PowerBloomLevel]
+  rw [BloomOfSingleBloom, LevelOfPropSubBloom, LevelOfPowerBloom]
 
-theorem BloomOfSingleBloomNotEmptyBloom («🪻» : «🌸») : ¬EmptyBloom (BloomOfSingleBloom «🪻») := by
+theorem NotEmptyBloomBloomOfSingleBloom («🪻» : «🌸») : ¬EmptyBloom (BloomOfSingleBloom «🪻») := by
   rw [EmptyBloom]
   simp only [not_forall, not_not]
   use «🪻»
   exact (WithinBloomOfSingleBloom «🪻» «🪻»).mpr rfl
 
-theorem EmptyBloomMaximumIffEmptyBloomEmptyBloom («🪻0» «🪻1» : «🌸») : ((EmptyBloom «🪻0») ∧ (EmptyBloom «🪻1»)) ↔
-  EmptyBloom (Maximum «🪻0» «🪻1») := by
+theorem EmptyBloomMaximumIffEmptyBloomEmptyBloom («🪻0» «🪻1» : «🌸») :
+  EmptyBloom (Maximum «🪻0» «🪻1») ↔ ((EmptyBloom «🪻0») ∧ (EmptyBloom «🪻1»)) := by
   constructor
   · intro h0
-    obtain ⟨h1, h2⟩ := h0
-    rw [EmptyBloom] at *
-    intro «🪻»
-    simp only [WithinMaximumIffWithinPart, h1, h2, or_self, not_false_eq_true]
-  · intro h0
-    simp only [EmptyBloom, WithinMaximumIffWithinPart, not_or] at *
+    simp only [EmptyBloom, WithinMaximum, not_or] at *
     constructor
     · intro «🪻»
       simp only [(h0 «🪻»).left, not_false_eq_true]
     · intro «🪻»
       simp only [(h0 «🪻»).right, not_false_eq_true]
+  · intro h0
+    obtain ⟨h1, h2⟩ := h0
+    rw [EmptyBloom] at *
+    intro «🪻»
+    simp only [WithinMaximum, h1, h2, or_self, not_false_eq_true]
 
 theorem NotEmptyBloomImpliesNotEmptyBloomMaximum («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻0») : ¬EmptyBloom (Maximum «🪻0» «🪻1»)
   := by
-  have h0 := EmptyBloomMaximumIffEmptyBloomEmptyBloom «🪻0» «🪻1»
-  simp only [h, false_and, false_iff] at h0
-  exact h0
+  simp only [EmptyBloomMaximumIffEmptyBloomEmptyBloom, h, false_and, not_false_eq_true]
 
 axiom MaximumOfWithin : «🌸» → «🌸»
 axiom WithinMaximumOfWithin («🪻0» «🪻1» : «🌸») : Within «🪻0» (MaximumOfWithin «🪻1») ↔
   ∃ («🪻2» : «🌸»), (Within «🪻2» «🪻1» ∧ Within «🪻0» «🪻2»)
-axiom LevelMaximumOfWithin («🪻» : «🌸») : Level (MaximumOfWithin «🪻») = Level «🪻»
+axiom LevelOfMaximumOfWithin («🪻» : «🌸») : Level (MaximumOfWithin «🪻») = Level «🪻»
 
 theorem MaximumOfWithinBloomOfSingleBloom («🪻» : «🌸») :
   MaximumOfWithin (BloomOfSingleBloom «🪻») = «🪻» := by
-  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelMaximumOfWithin, LevelOfBloomOfSingleBloom]
+  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelOfMaximumOfWithin, LevelOfBloomOfSingleBloom]
   simp only [WithinMaximumOfWithin, WithinBloomOfSingleBloom, exists_eq_left, implies_true,
     and_self]
 
 theorem MaximumOfWithinMaximum («🪻0» «🪻1» : «🌸») :
   MaximumOfWithin (Maximum «🪻0» «🪻1») =
   Maximum (MaximumOfWithin «🪻0») (MaximumOfWithin «🪻1») := by
-  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelMaximumOfWithin, LevelOfMaximum,
-    LevelOfMaximum, LevelMaximumOfWithin, LevelMaximumOfWithin]
+  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelOfMaximumOfWithin, LevelOfMaximum,
+    LevelOfMaximum, LevelOfMaximumOfWithin, LevelOfMaximumOfWithin]
   simp only [and_true]
   intro «🪻»
-  rw [WithinMaximumOfWithin, WithinMaximumIffWithinPart, WithinMaximumOfWithin, WithinMaximumOfWithin]
-  simp only [WithinMaximumIffWithinPart]
+  rw [WithinMaximumOfWithin, WithinMaximum, WithinMaximumOfWithin, WithinMaximumOfWithin]
+  simp only [WithinMaximum]
   constructor
   · intro h0
     choose «🪻2» h1 using h0
@@ -162,14 +160,14 @@ theorem TransitiveSubBloom («🪻0» «🪻1» «🪻2» : «🌸») (h0 : SubB
 
 theorem MaximumOfWithinBloomOfSmallerLevels («🪻» : «🌸») :
   MaximumOfWithin (BloomOfSmallerLevels «🪻») = BloomOfSmallerLevels «🪻» := by
-  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelMaximumOfWithin]
+  rw [← BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin, LevelOfMaximumOfWithin]
   simp only [WithinMaximumOfWithin, and_true]
   intro «🪻0»
-  simp_rw [BloomOfSmallerLevelsWithin]
+  simp_rw [WithinBloomOfSmallerLevels]
   constructor
   · intro h0
     obtain ⟨«🪻1», h0, h1⟩ := h0
-    have h2 := LevelOfWithinSubBloomLevel _ _ h1
+    have h2 := WithinImpLevelSubBloomLevel _ _ h1
     have h3 := TransitiveSubBloomButNotEqual _ _ _ h2 (h0.left) (h0.right)
     have h4 := TransitiveSubBloom _ _ _ h2 (h0.left)
     simp only [h4, ne_eq, h3, not_false_eq_true, and_self]
@@ -179,20 +177,14 @@ theorem MaximumOfWithinBloomOfSmallerLevels («🪻» : «🌸») :
       WithinBloomOfSingleBloom]
 
 axiom IteratedPowerBloom : «🌸» → «🌸» → «🌸»
-axiom IteratedPowerBloomLevel («🪻0» «🪻1» : «🌸») :
+axiom LevelOfIteratedPowerBloom («🪻0» «🪻1» : «🌸») :
   Level (IteratedPowerBloom «🪻0» «🪻1») = Maximum (Level «🪻0») (Level «🪻1»)
 axiom IteratedPowerBloomEmptyBloom («🪻0» «🪻1» : «🌸») (h : EmptyBloom «🪻1») :
   SameBloomsWithin (IteratedPowerBloom «🪻0» «🪻1») «🪻0»
-axiom IteratedPowerBloomInduction («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
+axiom IteratedPowerBloomNotEmptyBloom («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
   IteratedPowerBloom «🪻0» «🪻1» = IteratedPowerBloom (PowerBloom «🪻0») (MaximumOfWithin «🪻1»)
 axiom IteratedPowerBloomTransfiniteInduction («🪻» : «🌸») :
   IteratedPowerBloom «🌺» (BloomOfSmallerLevels «🪻») = BloomOfSmallerLevels «🪻»
-
--- looks provable
-axiom IteratedPowerBloomBaseWithin («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
-  Within «🌺» (IteratedPowerBloom «🪻0» «🪻1»)
-axiom IteratedPowerBloomBaseWithin2 («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
-  Within (IteratedPowerBloom «🌺» (MaximumOfWithin «🪻1»)) (IteratedPowerBloom «🪻0» «🪻1»)
 
 -- should be provable
 axiom BaseCaseIteratedPowerBloomSubBloom («🪻0» «🪻1» «🪻2» : «🌸») (h : SubBloom «🪻1» «🪻2») :
@@ -207,13 +199,13 @@ axiom PeanoLessThan1Iff : ∀ («🪻0» «🪻1» : «🌸»), PeanoLessThan1 �
 
 axiom ReplaceLeaves : «🌸» → «🌸» → «🌸»
 axiom ReplaceLeavesEmptyBloom : ∀ («🪻0» «🪻1» : «🌸»), EmptyBloom «🪻0» → SameBloomsWithin (ReplaceLeaves «🪻0» «🪻1») «🪻1»
-axiom ReplaceLeavesLevel : ∀ («🪻0» «🪻1» : «🌸»), Level (ReplaceLeaves «🪻0» «🪻1») = Maximum (Level «🪻0») (Level «🪻1»)
+axiom LevelOfReplaceLeaves : ∀ («🪻0» «🪻1» : «🌸»), Level (ReplaceLeaves «🪻0» «🪻1») = Maximum (Level «🪻0») (Level «🪻1»)
 
 axiom WithinReplaceLeaves : ∀ («🪻0» «🪻1» «🪻2» : «🌸»), (¬EmptyBloom «🪻0») →
   (Within «🪻2» (ReplaceLeaves «🪻0» «🪻1») ↔ (∃ («🪻3» : «🌸»), («🪻2» = ReplaceLeaves «🪻3» «🪻1» ∧ Within «🪻3» «🪻0»)))
 
 -- probably provable
-axiom ReplaceLeavesBaseCase2 («🪻» : «🌸») : (ReplaceLeaves «🪻» «🌺») = «🪻»
+axiom ReplaceLeavesBaseCase0 («🪻» : «🌸») : (ReplaceLeaves «🪻» «🌺») = «🪻»
 
 def PeanoLessThan2 («🪻0» «🪻1» : «🌸») : Prop :=
   ∃ («🪻2» : «🌸»), («🪻2» ≠ «🌺» ∧ ReplaceLeaves «🪻0» «🪻2» = «🪻1»)
@@ -236,11 +228,11 @@ axiom BaseLevelIteratedPowerBloomLessThanEqualSomePeanoBloom («🪻0» : «🌸
   ∃ (k : ℕ), IteratedPowerBloomLessThanEqual «🪻0» (PeanoBloom k)
 
 axiom MetaLevel : «🌸» → «🌸» → «🌸»
-axiom MetaLevelBaseCase («🪻0» «🪻1» : «🌸») (h : EmptyBloom «🪻1») : MetaLevel «🪻0» «🪻1» = «🪻0»
-axiom MetaLevelNonEmpty («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
+axiom MetaLevelEmptyBloom («🪻0» «🪻1» : «🌸») (h : EmptyBloom «🪻1») : MetaLevel «🪻0» «🪻1» = «🪻0»
+axiom MetaLevelNotEmptyBloom («🪻0» «🪻1» : «🌸») (h : ¬EmptyBloom «🪻1») :
   MetaLevel «🪻0» «🪻1» = MetaLevel (Level «🪻0») (MaximumOfWithin «🪻1»)
 axiom MetaLevelEventualBaseCase («🪻» : «🌸») : ∃ («🪻0» : «🌸»), MetaLevel «🪻» «🪻0» = «🌺»
-axiom EqualIfSameBloomsWithinAllMetaLevels : ∀ («🪻0» «🪻1» : «🌸»),
+axiom EqualIffSameBloomsWithinAllMetaLevels : ∀ («🪻0» «🪻1» : «🌸»),
   (∀ («🪻2» : «🌸»), Within «🪻2» «🪻0» ↔ Within «🪻2» «🪻1») ↔ «🪻0» = «🪻1»
 axiom ExistsBloomOfSameMetaLevelDepth («🪻0» : «🌸») :
   ∃ («🪻1» : «🌸»), (∀ («🪻2» : «🌸»), (Within «🪻2» «🪻1» ↔ MetaLevel «🪻2» «🪻0» = «🌺»))
@@ -248,7 +240,7 @@ axiom ExistsBloomOfSameMetaLevelDepth («🪻0» : «🌸») :
 theorem SameBloomsWithinSelf («🪻» : «🌸») : SameBloomsWithin «🪻» «🪻» := by
   simp only [SameBloomsWithin, implies_true]
 
-theorem EmptyBloomSameBloomsWithin («🪻0» «🪻1» : «🌸») (h0 : SameBloomsWithin «🪻0» «🪻1») :
+theorem SameBloomsWithinImpEmptyBloomIffEmptyBloom («🪻0» «🪻1» : «🌸») (h0 : SameBloomsWithin «🪻0» «🪻1») :
   EmptyBloom «🪻0» ↔ EmptyBloom «🪻1» := by
   constructor
   · intro h1
@@ -265,7 +257,7 @@ theorem UniqueEmptyBloomBaseLevel («🪻» : «🌸») (h0 : Level «🪻» = �
   constructor
   · intros h1
     rw [EmptyBloom] at h1
-    rw [←BloomDefinedByLevelAndWhatIsWithin, BaseCaseLevel, SameBloomsWithin, h0]
+    rw [←BloomDefinedByLevelAndWhatIsWithin, LevelOfBaseCase, SameBloomsWithin, h0]
     simp only [and_true]
     intro «🪻0»
     let h2 := EmptyBloomBaseCase
@@ -277,7 +269,7 @@ theorem UniqueEmptyBloomBaseLevel («🪻» : «🌸») (h0 : Level «🪻» = �
 
 theorem WithinSelfImpliesWithinMaximum («🪻0» «🪻1» «🪻2» : «🌸») : Within «🪻2» «🪻0» → Within «🪻2» (Maximum «🪻0» «🪻1») := by
   intro h0
-  rw [WithinMaximumIffWithinPart]
+  rw [WithinMaximum]
   left
   exact h0
 
@@ -286,11 +278,11 @@ theorem WithinSubBloom («🪻0» «🪻1» «🪻2» : «🌸») (h0 : SubBloom
   rw [SubBloom, ← BloomDefinedByLevelAndWhatIsWithin] at h0
   obtain ⟨h3, h2⟩ := h0
   rw [SameBloomsWithin] at h3
-  rw [← h3, WithinMaximumIffWithinPart]
+  rw [← h3, WithinMaximum]
   left
   exact h1
 
-theorem SubBloomImpLevelSubBloom («🪻0» «🪻1» : «🌸») (h : SubBloom «🪻0» «🪻1») : SubBloom (Level «🪻0») (Level «🪻1») := by
+theorem SubBloomImpSubBloomOfLevels («🪻0» «🪻1» : «🌸») (h : SubBloom «🪻0» «🪻1») : SubBloom (Level «🪻0») (Level «🪻1») := by
   rw [SubBloom] at *
   have h0 := congr_arg Level h
   rw [LevelOfMaximum] at h0
@@ -310,8 +302,8 @@ theorem UniqueSubBloomBaseCase («🪻» : «🌸») : SubBloom «🪻» «🌺�
 
 theorem BaseCaseNotPowerBloom («🪻0» : «🌸») : «🌺» ≠ (PowerBloom «🪻0») := by
   intro h
-  let h0 := congr_arg (λ(«🪻» : «🌸»)↦(Within «🌺» «🪻»)) h
-  simp only [← SubBloomWithinPowerBloom, BaseCaseSubBloomAll] at h0
+  let h0 := congr_arg (λ («🪻» : «🌸») ↦ (Within «🌺» «🪻»)) h
+  simp only [WithinPowerBloom, BaseCaseSubBloomAll] at h0
   let h1 := EmptyBloomBaseCase
   rw [EmptyBloom] at h1
   let h2 := h1 «🌺»
@@ -322,11 +314,11 @@ theorem SubBloomOfBloomOfSingleBloomBaseLevel («🪻0» «🪻1» : «🌸») (
   SubBloom «🪻0» (BloomOfSingleBloom «🪻1») ↔ («🪻0» = «🌺» ∨ «🪻0» = BloomOfSingleBloom «🪻1») := by
   constructor
   · intro h
-    have h4 := SubBloomImpLevelSubBloom _ _ h
+    have h4 := SubBloomImpSubBloomOfLevels _ _ h
     rw [SubBloom, ← BloomDefinedByLevelAndWhatIsWithin] at h
     obtain ⟨h1, h2⟩ := h
     rw [SameBloomsWithin] at h1
-    simp_rw [WithinBloomOfSingleBloom, WithinMaximumIffWithinPart, WithinBloomOfSingleBloom] at h1
+    simp_rw [WithinBloomOfSingleBloom, WithinMaximum, WithinBloomOfSingleBloom] at h1
     simp only [or_iff_right_iff_imp] at h1
     rw [LevelOfBloomOfSingleBloom, h0, UniqueSubBloomBaseCase] at h4
     cases Classical.em (EmptyBloom «🪻0») with
@@ -359,24 +351,24 @@ theorem SubBloomOfBloomOfSingleBloomBaseLevel («🪻0» «🪻1» : «🌸») (
       rw [h2]
       exact SubBloomOfSelf (BloomOfSingleBloom «🪻1»)
 
-theorem NotWithinBaseCase («🪻1» : «🌸») : ¬Within «🪻1» «🌺» := by
+theorem NotWithinBaseCase («🪻» : «🌸») : ¬Within «🪻» «🌺» := by
   have h := EmptyBloomBaseCase
   rw [EmptyBloom] at h
-  exact h «🪻1»
+  exact h «🪻»
 
-theorem BaseCaseNotBloomOfSingleBloom («🪻1» : «🌸») : ¬«🌺» = BloomOfSingleBloom «🪻1» := by
+theorem BaseCaseNotBloomOfSingleBloom («🪻» : «🌸») : ¬«🌺» = BloomOfSingleBloom «🪻» := by
   rw [←BloomDefinedByLevelAndWhatIsWithin]
   simp only [not_and]
-  have h : ¬SameBloomsWithin «🌺» (BloomOfSingleBloom «🪻1») := by
+  have h : ¬SameBloomsWithin «🌺» (BloomOfSingleBloom «🪻») := by
     rw [SameBloomsWithin]
     simp only [not_forall]
-    use «🪻1»
+    use «🪻»
     simp [NotWithinBaseCase, WithinBloomOfSingleBloom]
   simp only [h, IsEmpty.forall_iff]
 
 theorem SubBloomOfBloomOfSingleBloomBaseLevel1 («🪻» «🪻1» : «🌸») (h0 : Level «🪻1» = «🌺») :
   (SubBloom «🪻» (BloomOfSingleBloom «🪻1») ∧ «🪻» ≠ BloomOfSingleBloom «🪻1») ↔ «🪻» = «🌺» := by
-  rw [SubBloomOfBloomOfSingleBloomBaseLevel _ _ h0]
+  simp only [SubBloomOfBloomOfSingleBloomBaseLevel _ _ h0, ne_eq]
   constructor
   · intro h
     have h1 := h.left
@@ -384,12 +376,12 @@ theorem SubBloomOfBloomOfSingleBloomBaseLevel1 («🪻» «🪻1» : «🌸») (
     simp only [h2, or_false] at h1
     exact h1
   · intro h
-    simp only [h, BaseCaseNotBloomOfSingleBloom, true_or, ne_eq, true_and]
+    simp only [h, BaseCaseNotBloomOfSingleBloom, true_or, true_and]
     exact fun a => a
 
 theorem SubBloomOfBloomOfSingleBloomBaseLevel2 («🪻» «🪻1» : «🌸») (h0 : Level «🪻1» = «🌺») :
   (SubBloom «🪻» (BloomOfSingleBloom «🪻1») ∧ «🪻» ≠ «🌺») ↔ «🪻» = BloomOfSingleBloom «🪻1» := by
-  rw [SubBloomOfBloomOfSingleBloomBaseLevel _ _ h0]
+  simp only [SubBloomOfBloomOfSingleBloomBaseLevel _ _ h0, ne_eq]
   constructor
   · intro h
     have h1 := h.left
@@ -397,7 +389,7 @@ theorem SubBloomOfBloomOfSingleBloomBaseLevel2 («🪻» «🪻1» : «🌸») (
     simp only [h2, false_or] at h1
     exact h1
   · intro h
-    simp only [h, or_true, ne_eq, true_and]
+    simp only [h, or_true, true_and]
     rw [←BloomDefinedByLevelAndWhatIsWithin]
     simp only [not_and]
     have h1 : ¬SameBloomsWithin (BloomOfSingleBloom «🪻1») «🌺» := by
@@ -434,12 +426,12 @@ theorem EqualBloomOfSingleBloom («🪻0» «🪻1» : «🌸») : BloomOfSingle
     rw [h2]
 
 theorem BaseCaseBloomOfSmallerLevels : BloomOfSmallerLevels «🌺» = «🌺» := by
-  rw [←BloomDefinedByLevelAndWhatIsWithin, BloomOfSmallerLevelsLevel, BaseCaseLevel]
+  rw [←BloomDefinedByLevelAndWhatIsWithin, LevelOfBloomOfSmallerLevels, LevelOfBaseCase]
   let h0 := EmptyBloomBaseCase
   rw [EmptyBloom] at h0
   simp only [and_true]
   intro «🪻»
-  simp only [BloomOfSmallerLevelsWithin, UniqueSubBloomBaseCase, ne_eq, and_not_self, h0]
+  simp only [WithinBloomOfSmallerLevels, UniqueSubBloomBaseCase, ne_eq, and_not_self, h0]
 
 theorem IteratedPowerBloomEmptyBloomIff («🪻0» «🪻1» : «🌸») :
   EmptyBloom (IteratedPowerBloom «🪻0» «🪻1») ↔ (EmptyBloom «🪻0» ∧ EmptyBloom «🪻1») := by
@@ -461,7 +453,7 @@ theorem IteratedPowerBloomCounterexample («🪻» : «🌸») (h0 : EmptyBloom 
   ¬IteratedPowerBloom «🌺» «🪻» = «🌺» := by
   intro h2
   let h3 := congr_arg Level h2
-  rw [IteratedPowerBloomLevel, BaseCaseLevel, BaseCaseMaximum] at h3
+  rw [LevelOfIteratedPowerBloom, LevelOfBaseCase, BaseCaseMaximum] at h3
   rw [UniqueEmptyBloomBaseLevel «🪻» h3] at h0
   exact h1 h0
 
@@ -472,7 +464,8 @@ theorem LevelOfSubBloomOfBaseLevel («🪻0» «🪻1» : «🌸») (h0 : Level 
   rw [LevelOfMaximum, h0, SymmetricMaximum, BaseCaseMaximum] at h2
   exact h2
 
-theorem SameBloomsWithinBloomOfSmallerLevelsOfSingleBloom («🪻0» «🪻1» : «🌸») (h0 : Level «🪻0» = «🌺») (h1 : Level «🪻1» = «🌺»)
+theorem SameBloomsWithinBloomOfSmallerLevelsOfSingleBloomBaseLevel («🪻0» «🪻1» : «🌸»)
+  (h0 : Level «🪻0» = «🌺») (h1 : Level «🪻1» = «🌺»)
   : SameBloomsWithin (BloomOfSmallerLevels (BloomOfSingleBloom «🪻0»)) (BloomOfSmallerLevels (BloomOfSingleBloom «🪻1»)) := by
   rw [SameBloomsWithin]
   intros «🪻»
@@ -480,14 +473,14 @@ theorem SameBloomsWithinBloomOfSmallerLevelsOfSingleBloom («🪻0» «🪻1» :
     Within «🪻» (BloomOfSmallerLevels (BloomOfSingleBloom «🪻2»)) →
     Within «🪻» (BloomOfSmallerLevels (BloomOfSingleBloom «🪻3»)) := by
     intros «🪻2» «🪻3» h5 h6 h7
-    rw [BloomOfSmallerLevelsWithin] at h7
+    rw [WithinBloomOfSmallerLevels] at h7
     let h8 := SubBloomOfBloomOfSingleBloomBaseLevel (Level «🪻») «🪻2» h5
     rw [h8] at h7
     simp only [ne_eq] at h7
     have h9 : ((Level «🪻» = «🌺» ∨ Level «🪻» = BloomOfSingleBloom «🪻2») ∧ ¬Level «🪻» = BloomOfSingleBloom «🪻2»)
       → Level «🪻» = «🌺» := by tauto
     have h10 := h9 h7
-    rw [BloomOfSmallerLevelsWithin, h10]
+    rw [WithinBloomOfSmallerLevels, h10]
     simp only [BaseCaseSubBloomAll, ne_eq, true_and]
     let h11 := (BloomOfSingleBloomNotBaseCase «🪻3»).symm
     simp only [h11, not_false_eq_true]
@@ -496,16 +489,16 @@ theorem SameBloomsWithinBloomOfSmallerLevelsOfSingleBloom («🪻0» «🪻1» :
   · exact h2 «🪻1» «🪻0» h1 h0
 
 theorem ChooseWithinBloomOfSingleBloom («🪻» «🌱» : «🌸») :
-  ChooseWithin (BloomOfSingleBloom «🪻») «🌱» (BloomOfSingleBloomNotEmptyBloom «🪻») = «🪻» := by
-  let h0 := WithinChooseWithin (BloomOfSingleBloom «🪻») «🌱» (BloomOfSingleBloomNotEmptyBloom «🪻»)
+  ChooseWithin (BloomOfSingleBloom «🪻») «🌱» (NotEmptyBloomBloomOfSingleBloom «🪻») = «🪻» := by
+  let h0 := WithinChooseWithin (BloomOfSingleBloom «🪻») «🌱» (NotEmptyBloomBloomOfSingleBloom «🪻»)
   exact
     (WithinBloomOfSingleBloom
-          (ChooseWithin (BloomOfSingleBloom «🪻») «🌱» (BloomOfSingleBloomNotEmptyBloom «🪻»)) «🪻»).mp
+          (ChooseWithin (BloomOfSingleBloom «🪻») «🌱» (NotEmptyBloomBloomOfSingleBloom «🪻»)) «🪻»).mp
       h0
 
-theorem PeanoBloomLevel (k : ℕ) : Level (PeanoBloom k) = «🌺» := by
+theorem LevelOfPeanoBloom (k : ℕ) : Level (PeanoBloom k) = «🌺» := by
   induction k with
-  | zero => rw [PeanoBloom, BaseCaseLevel]
+  | zero => rw [PeanoBloom, LevelOfBaseCase]
   | succ k0 ih =>
     rw [PeanoBloom, LevelOfBloomOfSingleBloom, ih]
 
@@ -553,20 +546,7 @@ theorem PeanoBloomLessNotEq (k0 k1 : ℕ) (h : k0 < k1) : PeanoBloom k0 ≠ Pean
   simp only [ne_eq, eq_comm, h3, Nat.add_comm] at h5
   exact h5
 
---Difficult to apply
-theorem PeanoBloomInjective : PeanoBloom.Injective := by
-  intro k₀ k₁ h
-  have h0 := Nat.lt_trichotomy k₀ k₁
-  cases h0 with
-  | inl h1 =>
-    simp only [PeanoBloomLessNotEq k₀ k₁ h1] at h
-  | inr h2 =>
-    cases h2 with
-    | inl h3 => exact h3
-    | inr h4 =>
-      simp only [(PeanoBloomLessNotEq k₁ k₀ h4).symm] at h
-
-theorem PeanoBloomInjective0 (k₀ k₁ : ℕ) : PeanoBloom k₀ = PeanoBloom k₁ ↔ k₀ = k₁ := by
+theorem PeanoBloomInjective (k₀ k₁ : ℕ) : PeanoBloom k₀ = PeanoBloom k₁ ↔ k₀ = k₁ := by
   constructor
   · intro h
     have h0 := Nat.lt_trichotomy k₀ k₁
@@ -591,7 +571,7 @@ theorem ReplaceLeavesEmptyBloomEmptyBloom («🪻0» «🪻1» : «🌸») (h0 :
   exact (iff_false_right (h1 «🪻»)).mp (h2 «🪻»)
 
 theorem ReplaceLeavesBaseCase («🪻» : «🌸») : (ReplaceLeaves «🌺» «🪻») = «🪻» := by
-  rw [←BloomDefinedByLevelAndWhatIsWithin, ReplaceLeavesLevel, BaseCaseLevel, BaseCaseMaximum]
+  rw [←BloomDefinedByLevelAndWhatIsWithin, LevelOfReplaceLeaves, LevelOfBaseCase, BaseCaseMaximum]
   have h0 := ReplaceLeavesEmptyBloom «🌺» «🪻» EmptyBloomBaseCase
   simp only [h0, and_self]
 
@@ -603,13 +583,6 @@ theorem NotSubBloomImpNotBaseCase («🪻0» «🪻1» : «🌸») (h : ¬SubBlo
   by_contra h0
   rw [h0] at h
   simp only [BaseCaseSubBloomAll «🪻1», not_true_eq_false] at h
-
-theorem SubBloomImpSubBloomOfLevels («🪻0» «🪻1» : «🌸») (h0 : SubBloom «🪻0» «🪻1») :
-  SubBloom (Level «🪻0») (Level «🪻1») := by
-  rw [SubBloom] at *
-  have h1 := congr_arg Level h0
-  rw [LevelOfMaximum] at h1
-  exact h1
 
 -- Bloom containing all blooms the of the RusselBloom restricted to maximmum level «🪻L»
 -- not obviously inconsistent
@@ -670,7 +643,7 @@ theorem PeanoBloomWithinSucc (k0 k1 : ℕ) : Within (PeanoBloom k0) (PeanoBloom 
     | succ k2 ih =>
       rw [PeanoBloom, WithinBloomOfSingleBloom]
       intro h1
-      have h2 : k0 = k2 := (PeanoBloomInjective0 k0 k2).mp h1
+      have h2 : k0 = k2 := (PeanoBloomInjective k0 k2).mp h1
       simp only [h2]
   · intro h
     rw [h]
@@ -699,7 +672,7 @@ theorem BloomMinusSubBloomSelf («🪻0» «🪻1» : «🌸») : SubBloom (Bloo
   constructor
   · rw [SameBloomsWithin]
     intro «🪻»
-    rw [WithinMaximumIffWithinPart]
+    rw [WithinMaximum]
     constructor
     · rw [WithinBloomMinus]
       intro h
@@ -728,7 +701,7 @@ theorem RangePeanoBloomRangeNat (k0 k1 : ℕ) : k1 < k0 ↔ Within (PeanoBloom k
   | succ k3 ih =>
     constructor
     · intro h0
-      rw [RangePeanoBloom, WithinMaximumIffWithinPart, ←ih]
+      rw [RangePeanoBloom, WithinMaximum, ←ih]
       have h1 : k1 < (k3 + 1) := by exact h0
       have h2 : k1 < k3 ∨ k1 = k3 := by exact Nat.lt_succ_iff_lt_or_eq.mp h1
       cases h2 with
@@ -748,7 +721,7 @@ theorem RangePeanoBloomRangeNat (k0 k1 : ℕ) : k1 < k0 ↔ Within (PeanoBloom k
 
 theorem NotEmptyBloomPeanoBloomSucc (k : ℕ) : ¬EmptyBloom (PeanoBloom (k + 1)) := by
   rw [PeanoBloom]
-  exact BloomOfSingleBloomNotEmptyBloom (PeanoBloom k)
+  exact NotEmptyBloomBloomOfSingleBloom (PeanoBloom k)
 
 theorem IteratedPowerBloomLessThanEqualForPeanoBloom (k0 k1 : ℕ) :
   k0 ≤ k1 ↔ IteratedPowerBloomLessThanEqual (PeanoBloom k0) (PeanoBloom k1) :=
@@ -787,7 +760,7 @@ theorem IteratedPowerBloomLessThanEqualForPeanoBloom (k0 k1 : ℕ) :
   | k3 + 1 => by
     sorry
 
-theorem WithinPeanoBloom (k : ℕ) («🪻» : «🌸») : Within «🪻» (PeanoBloom (k + 1)) ↔ «🪻» = PeanoBloom k := by
+theorem WithinPeanoBloomSucc (k : ℕ) («🪻» : «🌸») : Within «🪻» (PeanoBloom (k + 1)) ↔ «🪻» = PeanoBloom k := by
   constructor
   · intro h
     rw [PeanoBloom, WithinBloomOfSingleBloom] at h
@@ -824,14 +797,14 @@ theorem BaseLevelWithinIteratedPowerBloomOfSomePeanoBloom («🪻0» : «🌸»)
     rcases h0 with ⟨k, h2⟩
     rw [IteratedPowerBloomLessThanEqual] at h2
     use (k + 1)
-    rw [IteratedPowerBloomInduction _ _ (NotEmptyBloomPeanoBloomSucc _)]
+    rw [IteratedPowerBloomNotEmptyBloom _ _ (NotEmptyBloomPeanoBloomSucc _)]
     simp_rw [PeanoBloom]
     sorry
   · intro h0
     rcases h0 with ⟨k, h1⟩
-    have h2 := LevelOfWithinSubBloomLevel «🪻0» (IteratedPowerBloom «🌺» (PeanoBloom k)) h1
-    have h3 := IteratedPowerBloomLevel «🌺» (PeanoBloom k)
-    rw [BaseCaseLevel, PeanoBloomLevel, MaximumOfSelf] at h3
+    have h2 := WithinImpLevelSubBloomLevel «🪻0» (IteratedPowerBloom «🌺» (PeanoBloom k)) h1
+    have h3 := LevelOfIteratedPowerBloom «🌺» (PeanoBloom k)
+    rw [LevelOfBaseCase, LevelOfPeanoBloom, MaximumOfSelf] at h3
     rw [h3] at h2
     exact (UniqueSubBloomBaseCase (Level «🪻0»)).mp h2
 
@@ -844,16 +817,18 @@ theorem NotEmptyBloomSuccPeanoBloom (k : ℕ) : ¬EmptyBloom (PeanoBloom (k + 1)
 
 theorem MaximumOfWithinPeanoBloom (k : ℕ) :
   MaximumOfWithin (PeanoBloom (k + 1)) = (PeanoBloom k):= by
-  induction k with
-  | zero =>
-    rw [PeanoBloom]
-    simp only [zero_add]
-    have h0 : PeanoBloom 1 = BloomOfSingleBloom (PeanoBloom 0) := by exact rfl
-    simp_rw [h0, MaximumOfWithinBloomOfSingleBloom]
-    rw [PeanoBloom]
-  | succ k ih =>
-    have h0 : PeanoBloom (k + 1 + 1) = BloomOfSingleBloom (PeanoBloom (k + 1)) := by exact rfl
-    simp_rw [h0, MaximumOfWithinBloomOfSingleBloom]
+  rw [← BloomDefinedByLevelAndWhatIsWithin, LevelOfMaximumOfWithin, SameBloomsWithin]
+  simp only [LevelOfPeanoBloom, and_true]
+  intro «🪻»
+  rw [WithinMaximumOfWithin]
+  simp only [WithinPeanoBloomSucc]
+  constructor
+  · intro h0
+    choose «🪻2» h0 using h0
+    simp only [h0.left, true_and] at h0
+    exact h0
+  · intro h0
+    use PeanoBloom k
 
 theorem IteratedPowerBloomNotCommutative : (IteratedPowerBloom (PeanoBloom 2) «🌺»)
   ≠ (IteratedPowerBloom «🌺» (PeanoBloom 2)) := by
@@ -863,7 +838,7 @@ noncomputable def AsymmMinimum («🪻0» «🪻1» : «🌸») := PropSubBloom 
 
 theorem PropSubBloomSubBloom (p : («🌸» → Prop)) («🪻» : «🌸») : SubBloom (PropSubBloom p «🪻») «🪻» := by
   rw [SubBloom,←BloomDefinedByLevelAndWhatIsWithin, SameBloomsWithin]
-  simp_rw [WithinMaximumIffWithinPart]
+  simp_rw [WithinMaximum]
   constructor
   · intro «🪻0»
     simp only [WithinPropSubBloom, or_iff_right_iff_imp, and_imp, imp_self, implies_true]
@@ -887,12 +862,11 @@ theorem BadMinimumExample (BadMinimum : «🌸» → «🌸» → «🌸»)
   (LevelOfBadMinimum : ∀ («🪻0» «🪻1» : «🌸»),
   Level (BadMinimum «🪻0» «🪻1») = BadMinimum (Level «🪻0») (Level «🪻1»)) : False := by
   let «🪻» := BadMinimum (BloomOfSmallerLevels (PeanoBloom 1)) (BloomOfSmallerLevels (PeanoBloom 2))
-  have h4 : «🪻» = BadMinimum (BloomOfSmallerLevels (PeanoBloom 1)) (BloomOfSmallerLevels (PeanoBloom 2)) := rfl
   have h0 : Level «🪻» = «🌺» := by
-    rw [LevelOfBadMinimum, BloomOfSmallerLevelsLevel, BloomOfSmallerLevelsLevel, ← BloomDefinedByLevelAndWhatIsWithin,
-        SameBloomsWithin, BaseCaseLevel]
+    rw [LevelOfBadMinimum, LevelOfBloomOfSmallerLevels, LevelOfBloomOfSmallerLevels, ← BloomDefinedByLevelAndWhatIsWithin,
+        SameBloomsWithin, LevelOfBaseCase]
     simp only [WithinBadMinimum, NotWithinBaseCase, iff_false, not_and, LevelOfBadMinimum,
-      PeanoBloomLevel, SelfBadMinimum, and_true]
+      LevelOfPeanoBloom, SelfBadMinimum, and_true]
     intro «🪻3» h
     by_contra h0
     have h1 := WithinBothPeanoBloomIffEqual 1 2 «🪻3» h h0
@@ -901,11 +875,12 @@ theorem BadMinimumExample (BadMinimum : «🌸» → «🌸» → «🌸»)
     intro «🪻3»
     constructor
     · intro h1
-      have h2 := LevelOfWithinSubBloomLevel _ _ h1
+      have h2 := WithinImpLevelSubBloomLevel _ _ h1
       rw [h0, UniqueSubBloomBaseCase] at h2
       exact h2
     · intro h5
-      rw [h4, WithinBadMinimum, BloomOfSmallerLevelsWithin, BloomOfSmallerLevelsWithin, h5]
+      unfold «🪻»
+      rw [WithinBadMinimum, WithinBloomOfSmallerLevels, WithinBloomOfSmallerLevels, h5]
       simp only [BaseCaseSubBloomAll, ne_eq, true_and]
       have h7 := PeanoBloomEqBaseImp0 1
       have h6 := PeanoBloomEqBaseImp0 2
@@ -929,23 +904,19 @@ theorem ReplaceLeavesIsPeanoBloomAdd (k0 k1 : ℕ) : ReplaceLeaves (PeanoBloom k
       simp only [zero_add]
     | k3 + 1 => by
       intro h
-      rw [← BloomDefinedByLevelAndWhatIsWithin, ReplaceLeavesLevel, PeanoBloomLevel, PeanoBloomLevel, PeanoBloomLevel,
+      rw [← BloomDefinedByLevelAndWhatIsWithin, LevelOfReplaceLeaves, LevelOfPeanoBloom, LevelOfPeanoBloom, LevelOfPeanoBloom,
           MaximumOfSelf, SameBloomsWithin]
       simp only [and_true]
       intro «🪻»
-      rw [(show k3 + 1 + k1 = k3 + k1 + 1 by ring), WithinPeanoBloom]
-      have h1 : ∀ (k8 : ℕ), ¬EmptyBloom (PeanoBloom (k8 + 1)) := by
-        intro k8
-        simp only [PeanoBloom]
-        exact BloomOfSingleBloomNotEmptyBloom _
+      rw [(show k3 + 1 + k1 = k3 + k1 + 1 by ring), WithinPeanoBloomSucc]
       constructor
       · intro h2
-        rw [←(WithinPeanoBloom (k3 + k1) «🪻»), WithinPeanoBloom]
-        rw [WithinReplaceLeaves _ _ _ (h1 _)] at h2
+        rw [←(WithinPeanoBloomSucc (k3 + k1) «🪻»), WithinPeanoBloomSucc]
+        rw [WithinReplaceLeaves _ _ _ (NotEmptyBloomPeanoBloomSucc _)] at h2
         rcases h2 with ⟨«🪻2», h0, h2⟩
         rw [h0]
         clear «🪻» h0
-        rw [WithinPeanoBloom] at h2
+        rw [WithinPeanoBloomSucc] at h2
         rw [h2]
         clear «🪻2» h2
         have h3 := h k3
@@ -958,74 +929,69 @@ theorem ReplaceLeavesIsPeanoBloomAdd (k0 k1 : ℕ) : ReplaceLeaves (PeanoBloom k
           match k4 with
           | 0 => by
             intro h0
-            rw [PeanoBloom, ReplaceLeavesBaseCase2, PeanoBloomWithinSucc]
+            rw [PeanoBloom, ReplaceLeavesBaseCase0, PeanoBloomWithinSucc]
           | k5 + 1 => by
             intro h0
-            simp only [h1, not_false_eq_true, WithinReplaceLeaves]
+            simp only [NotEmptyBloomPeanoBloomSucc, not_false_eq_true, WithinReplaceLeaves]
             use PeanoBloom k3
             simp only [PeanoBloomWithinSucc, and_true]
-            cases Classical.em (k1 = k5 + 1) with
-            | inl h2 =>
-              rw [h2] at h
-              simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, h]
-            | inr h2 =>
-              exact Nat.strong_induction_on k3 fun k6 =>
-              match k6 with
-              | 0 => by
-                intro h3
-                rw [PeanoBloom, ReplaceLeavesBaseCase]
-                simp only [zero_add]
-              | k7 + 1 => by
-                intro h3
-                rw [← BloomDefinedByLevelAndWhatIsWithin, PeanoBloomLevel, ReplaceLeavesLevel,
-                    SameBloomsWithin, PeanoBloomLevel, PeanoBloomLevel, MaximumOfSelf]
+            exact Nat.strong_induction_on k3 fun k6 =>
+            match k6 with
+            | 0 => by
+              intro h3
+              rw [PeanoBloom, ReplaceLeavesBaseCase]
+              simp only [zero_add]
+            | k7 + 1 => by
+              intro h3
+              rw [← BloomDefinedByLevelAndWhatIsWithin, LevelOfPeanoBloom, LevelOfReplaceLeaves,
+                  SameBloomsWithin, LevelOfPeanoBloom, LevelOfPeanoBloom, MaximumOfSelf]
+              simp only [and_true]
+              intro «🪻»
+              rw [(show (k7 + 1 + (k5 + 1)) = ((k7 + k5 + 1) + 1) by ring), WithinPeanoBloomSucc,
+                  WithinReplaceLeaves _ _ _ (NotEmptyBloomPeanoBloomSucc _)]
+              constructor
+              · intro h4
+                use PeanoBloom k7
+                rw [WithinPeanoBloomSucc, h4]
+                clear «🪻» h4
+                simp only [and_true]
+                rw [← BloomDefinedByLevelAndWhatIsWithin, LevelOfPeanoBloom, LevelOfReplaceLeaves, LevelOfPeanoBloom,
+                    LevelOfPeanoBloom, MaximumOfSelf, SameBloomsWithin]
                 simp only [and_true]
                 intro «🪻»
-                rw [(show (k7 + 1 + (k5 + 1)) = ((k7 + k5 + 1) + 1) by ring), WithinPeanoBloom,
-                    WithinReplaceLeaves _ _ _ (h1 _)]
+                rw [WithinPeanoBloomSucc]
+                constructor
+                · intro h5
+                  rw [h5]
+                  have h6 := h3 k7
+                  simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h6
+                  rw [←h6, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloomSucc]
+                · have h5 := h3 k7
+                  simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
+                  rw [←h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloomSucc]
+                  simp only [imp_self]
+              · intro h4
+                rcases h4 with ⟨«🪻2», h5, h6⟩
+                rw [WithinPeanoBloomSucc] at h6
+                rw [h6] at h5
+                rw [h5]
+                clear h5 h6 «🪻» «🪻2»
+                rw [← BloomDefinedByLevelAndWhatIsWithin, LevelOfReplaceLeaves, LevelOfPeanoBloom, LevelOfPeanoBloom, LevelOfPeanoBloom,
+                    MaximumOfSelf, SameBloomsWithin]
+                simp only [WithinPeanoBloomSucc, and_true]
+                intro «🪻»
                 constructor
                 · intro h4
-                  use PeanoBloom k7
-                  rw [WithinPeanoBloom, h4]
-                  clear «🪻» h4
-                  simp only [and_true]
-                  rw [← BloomDefinedByLevelAndWhatIsWithin, PeanoBloomLevel, ReplaceLeavesLevel, PeanoBloomLevel,
-                      PeanoBloomLevel, MaximumOfSelf, SameBloomsWithin]
-                  simp only [and_true]
-                  intro «🪻»
-                  rw [WithinPeanoBloom]
-                  constructor
-                  · intro h5
-                    rw [h5]
-                    have h6 := h3 k7
-                    simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h6
-                    rw [←h6, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloom]
-                  · have h5 := h3 k7
-                    simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
-                    rw [←h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloom]
-                    simp only [imp_self]
+                  have h5 := h3 k7
+                  simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
+                  rw [← h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloomSucc] at h4
+                  exact h4
                 · intro h4
-                  rcases h4 with ⟨«🪻2», h5, h6⟩
-                  rw [WithinPeanoBloom] at h6
-                  rw [h6] at h5
-                  rw [h5]
-                  clear h5 h6 «🪻» «🪻2»
-                  rw [← BloomDefinedByLevelAndWhatIsWithin, ReplaceLeavesLevel, PeanoBloomLevel, PeanoBloomLevel, PeanoBloomLevel,
-                      MaximumOfSelf, SameBloomsWithin]
-                  simp only [WithinPeanoBloom, and_true]
-                  intro «🪻»
-                  constructor
-                  · intro h4
-                    have h5 := h3 k7
-                    simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
-                    rw [← h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloom] at h4
-                    exact h4
-                  · intro h4
-                    rw [h4]
-                    clear «🪻» h4
-                    have h5 := h3 k7
-                    simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
-                    rw [← h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloom]
+                  rw [h4]
+                  clear «🪻» h4
+                  have h5 := h3 k7
+                  simp only [lt_add_iff_pos_right, Nat.lt_one_iff, pos_of_gt, forall_const] at h5
+                  rw [← h5, (show (k7 + (k5 + 1)) = ((k7 + k5) + 1) by ring), WithinPeanoBloomSucc]
 
 theorem SymmetricSameBloomsWithin («🪻0» «🪻1» : «🌸»)
   (h2 : SameBloomsWithin «🪻0» «🪻1») : SameBloomsWithin «🪻1» «🪻0» := by
@@ -1044,7 +1010,7 @@ theorem LiftBloomToLevelLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (L
   rw [LiftBloomToLevel]
   by_cases h1 : (Level «🪻0») = «🪻L»
   · simp only [h1, ↓reduceDIte]
-  · simp only [h1, ↓reduceDIte, LevelOfPropSubBloom, BloomOfSmallerLevelsLevel]
+  · simp only [h1, ↓reduceDIte, LevelOfPropSubBloom, LevelOfBloomOfSmallerLevels]
 
 theorem WithinLiftBloomToLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (Level «🪻0») «🪻L») :
   SameBloomsWithin (LiftBloomToLevel «🪻0» «🪻L» h0) «🪻0» := by
@@ -1054,10 +1020,24 @@ theorem WithinLiftBloomToLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (
   by_cases h1 : (Level «🪻0») = «🪻L»
   · simp only [h1, ↓reduceDIte]
   · simp only [h1, ↓reduceDIte]
-    rw [WithinPropSubBloom, BloomOfSmallerLevelsWithin]
+    rw [WithinPropSubBloom, WithinBloomOfSmallerLevels]
     simp only [ne_eq, and_iff_left_iff_imp]
     intro h2
-    have h3 := LevelOfWithinSubBloomLevel _ _ h2
+    have h3 := WithinImpLevelSubBloomLevel _ _ h2
     have h4 := TransitiveSubBloom _ _ _ h3 h0
     simp only [true_and, ne_eq, h4]
     exact TransitiveSubBloomButNotEqual _ _ _ h3 h0 h1
+
+theorem EmptyBloomBloomOfSmallerLevelsIffBaseCase («🪻» : «🌸») :
+  EmptyBloom (BloomOfSmallerLevels «🪻») ↔ «🪻» = «🌺» := by
+  constructor
+  · intro h0
+    by_contra h1
+    rw [EmptyBloom] at h0
+    have h2 := h0 «🌺»
+    rw [WithinBloomOfSmallerLevels, LevelOfBaseCase] at h2
+    simp only [BaseCaseSubBloomAll, ne_eq, true_and, not_not] at h2
+    simp only [h2, not_true_eq_false] at h1
+  · intro h0
+    rw [h0, BaseCaseBloomOfSmallerLevels]
+    exact EmptyBloomBaseCase

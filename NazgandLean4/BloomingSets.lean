@@ -982,47 +982,31 @@ theorem TransitiveSubBloomButNotEqual («🪻0» «🪻1» «🪻2» : «🌸»)
   have h4 := MutualSubBloomsEqual «🪻1» «🪻2»
   simp only [h1, h0, and_self, h2, iff_false, not_true_eq_false] at h4
 
-theorem ExistsUniqueLiftBloomToLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (Level «🪻0») «🪻L») :
-  ∃! («🪻» : «🌸»), (SameBloomsWithin «🪻0» «🪻» ∧ Level «🪻» = «🪻L») := by
-  cases Classical.em ((Level «🪻0») = «🪻L») with
-  | inl h1 =>
-    use «🪻0»
-    simp only [and_imp]
-    constructor
-    · simp only [SameBloomsWithinSelf, h1, and_self]
-    · intro «🪻» h2 h3
-      rw [← BloomDefinedByLevelAndWhatIsWithin]
-      simp only [h2, SymmetricSameBloomsWithin, h3, h1, and_self]
-  | inr h1 =>
-    use PropSubBloom (λ («🪻» : «🌸») ↦ Within «🪻» «🪻0») (BloomOfSmallerLevels «🪻L»)
-    simp only [and_imp]
-    constructor
-    · constructor
-      · rw [SameBloomsWithin]
-        intro «🪻»
-        rw [WithinPropSubBloom, BloomOfSmallerLevelsWithin]
-        simp only [ne_eq, iff_self_and]
-        intro h2
-        have h3 := LevelOfWithinSubBloomLevel _ _ h2
-        have h4 := TransitiveSubBloom _ _ _ h3 h0
-        simp only [true_and, ne_eq, h4]
-        exact TransitiveSubBloomButNotEqual _ _ _ h3 h0 h1
-      · rw [LevelOfPropSubBloom, BloomOfSmallerLevelsLevel]
-    · intro «🪻» h2 h3
-      rw [← BloomDefinedByLevelAndWhatIsWithin]
-      constructor
-      · rw [SameBloomsWithin]
-        intro «🪻1»
-        rw[WithinPropSubBloom, BloomOfSmallerLevelsWithin]
-        rw [SameBloomsWithin] at h2
-        simp only [ne_eq, iff_self_and, h2]
-        intro h4
-        constructor
-        · rw [(h2 _).symm] at h4
-          have h5 := LevelOfWithinSubBloomLevel _ _ h4
-          exact TransitiveSubBloom _ _ _ h5 h0
-        · rw [← (h2 _)] at h4
-          have h5 := LevelOfWithinSubBloomLevel _ _ h4
-          exact TransitiveSubBloomButNotEqual _ _ _ h5 h0 h1
-      · rw [LevelOfPropSubBloom, BloomOfSmallerLevelsLevel]
-        exact h3
+noncomputable
+def LiftBloomToLevel («🪻0» «🪻L» : «🌸») (_ : SubBloom (Level «🪻0») «🪻L») : «🌸» := by
+  if (Level «🪻0») = «🪻L»
+  then exact «🪻0»
+  else exact PropSubBloom (λ («🪻» : «🌸») ↦ Within «🪻» «🪻0») (BloomOfSmallerLevels «🪻L»)
+
+theorem LiftBloomToLevelLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (Level «🪻0») «🪻L») :
+  Level (LiftBloomToLevel «🪻0» «🪻L» h0) = «🪻L» := by
+  rw [LiftBloomToLevel]
+  by_cases h1 : (Level «🪻0») = «🪻L»
+  · simp only [h1, ↓reduceDIte]
+  · simp only [h1, ↓reduceDIte, LevelOfPropSubBloom, BloomOfSmallerLevelsLevel]
+
+theorem WithinLiftBloomToLevel («🪻0» «🪻L» : «🌸») (h0 : SubBloom (Level «🪻0») «🪻L») :
+  SameBloomsWithin (LiftBloomToLevel «🪻0» «🪻L» h0) «🪻0» := by
+  rw [SameBloomsWithin]
+  intro «🪻»
+  rw [LiftBloomToLevel]
+  by_cases h1 : (Level «🪻0») = «🪻L»
+  · simp only [h1, ↓reduceDIte]
+  · simp only [h1, ↓reduceDIte]
+    rw [WithinPropSubBloom, BloomOfSmallerLevelsWithin]
+    simp only [ne_eq, and_iff_left_iff_imp]
+    intro h2
+    have h3 := LevelOfWithinSubBloomLevel _ _ h2
+    have h4 := TransitiveSubBloom _ _ _ h3 h0
+    simp only [true_and, ne_eq, h4]
+    exact TransitiveSubBloomButNotEqual _ _ _ h3 h0 h1

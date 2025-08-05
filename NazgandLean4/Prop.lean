@@ -46,3 +46,6 @@ lemma squashImplies (q r : Prop) : (q → (q → r)) ↔ (q → r) := by
 
 lemma insightFromGeneralization (p₀ p₁ p₂ : Prop) : (p₀ ↔ (p₁ → p₂)) → (p₁ → (p₀ ↔ p₂)) := by
   tauto
+
+lemma SwapNot2Of3 (p₀ p₁ p₂ : Prop) : (p₀ ↔ (p₁ ↔ p₂)) ↔ (p₁ ↔ (p₀ ↔ p₂)) := by
+  tauto

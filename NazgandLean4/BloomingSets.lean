@@ -325,15 +325,17 @@ axiom «💐=🌺IteratedPower🌸≤∃» («🪻» : «🌸») (h : «💐» �
 
 theorem «∃🌸OfSameIterated💐Depth» (k : ℕ) :
   ∃ («🪻1» : «🌸»), (∀ («🪻2» : «🌸»), («🌸∈» «🪻2» «🪻1» ↔ «💐»^[k] «🪻2» = «🌺»)) := by
-  use «🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»)
+  use «PropSub🌸» (λ («🪻2» : «🌸») ↦ («💐»^[k] «🪻2» = «🌺»)) («🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»))
   induction k with
   | zero =>
     intro «🪻»
-    rw [Function.iterate_zero, id_eq, Function.iterate_zero, id_eq, «🌸∈🌸Of1🌸»]
+    rw [Function.iterate_zero, id_eq, Function.iterate_zero, id_eq]
+    simp only [id_eq, «🌸∈PropSub🌸», and_iff_left_iff_imp]
+    intro h0
+    rw [h0, «🌸∈🌸Of1🌸»]
   | succ k h0=>
     intro «🪻»
-    rw [Function.iterate_succ', Function.comp_apply, Function.iterate_succ', Function.comp_apply,
-      «🌸∈🌸OfSmaller💐s»]
+    rw [Function.iterate_succ', Function.comp_apply, Function.iterate_succ', Function.comp_apply]
     sorry
 
 theorem «Same🌸s🌸∈Self» («🪻» : «🌸») : «Same🌸s🌸∈» «🪻» «🪻» := by

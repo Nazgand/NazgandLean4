@@ -2,6 +2,7 @@ import Mathlib
 import NazgandLean4.WellOrderingPrinciple
 set_option maxHeartbeats 0
 set_option diagnostics true
+set_option pp.proofs true
 
 axiom «🌸» : Type
 axiom «🌺» : «🌸»
@@ -23,7 +24,7 @@ def «🌸Rank» («🪻» : «🌸») : ℕ := ExistUniqueMinP («∃Iterated�
 theorem «Iterated💐🌸Rank≤» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») ≤ k) : «💐»^[k] «🪻» = «🌺» := by
   have h0 := Nat.exists_eq_add_of_le' h
   choose k0 h0 using h0
-  simp only [h0, «🌸Rank», Function.iterate_add, Function.comp_apply,
+  simp only [h0, «🌸Rank», Function.iterate_add_apply,
     PExistUniqueMinP («∃Iterated💐=🌺» «🪻»), «Iterated💐🌺»]
 
 theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») > k) : «💐»^[k] «🪻» ≠ «🌺» := by
@@ -34,6 +35,43 @@ theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Ra
   rw [«🌸Rank»] at h
   rw [← Nat.not_lt] at h2
   simp only [h, not_true_eq_false] at h2
+
+theorem «🌸RankIterated💐» {«🪻»: «🌸»} (k : ℕ) :
+  «🌸Rank» («💐»^[k] «🪻») = «🌸Rank» «🪻» - k := by
+  induction k with
+  | zero =>
+    simp only [Function.iterate_zero, id_eq, tsub_zero]
+  | succ k h0 =>
+    simp_rw [«🌸Rank»] at *
+    have h1 := congr_arg Nat.pred h0
+    simp only [Nat.pred_eq_sub_one] at h1
+    rw [(show ExistUniqueMinP («∃Iterated💐=🌺» «🪻») - k - 1 =
+      ExistUniqueMinP («∃Iterated💐=🌺» «🪻») - (k + 1) by rfl)] at h1
+    rw [← h1]
+    clear h0 h1
+    have h0 := EqExistUniqueMinPIff («∃Iterated💐=🌺» («💐»^[k + 1] «🪻»))
+      (ExistUniqueMinP («∃Iterated💐=🌺» («💐»^[k] «🪻»)) - 1)
+    apply Eq.symm
+    rw [h0]
+    clear h0
+    constructor
+    · rw [← Function.iterate_add_apply, (Nat.succ_add_eq_add_succ (ExistUniqueMinP
+        _ - 1) k).symm, Function.iterate_add_apply]
+      have h0 : ExistUniqueMinP («∃Iterated💐=🌺» («💐»^[k] «🪻»)) ≤
+        ExistUniqueMinP («∃Iterated💐=🌺» («💐»^[k] «🪻»)) - 1 + 1 := le_tsub_add
+      rw [← «🌸Rank»] at *
+      exact «Iterated💐🌸Rank≤» h0
+    · intro k0 h0
+      rw [← «🌸Rank»] at h0
+      have h1 : k0 + 1 < «🌸Rank» («💐»^[k] «🪻») := Nat.add_lt_of_lt_sub h0
+      rw [← Function.iterate_add_apply, (Nat.succ_add_eq_add_succ k0 k).symm, Function.iterate_add_apply]
+      apply «Iterated💐🌸Rank>»
+      exact h1
+
+theorem «🌸Rank≤🌸Rank→🌸RankIterated💐≤🌸RankIterated💐» {«🪻0» «🪻1» : «🌸»} (k : ℕ)
+  (h : «🌸Rank» «🪻0» ≤ «🌸Rank» «🪻1») : «🌸Rank» («💐»^[k] «🪻0») ≤ «🌸Rank» («💐»^[k] «🪻1») := by
+  rw [«🌸RankIterated💐», «🌸RankIterated💐»]
+  exact Nat.sub_le_sub_right h k
 
 axiom «🌸∈» : «🌸» → «🌸» → Prop
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»
@@ -712,7 +750,7 @@ theorem «ReplaceLeaves🌺» («🪻» : «🌸») : (ReplaceLeaves «🌺» «
 
 theorem «NoRussel🌸» («🪻R» : «🌸») (h : ∀ («🪻0» : «🌸»), «🌸∈» «🪻0» «🪻R» ↔ ¬ «🌸∈» «🪻0» «🪻0») : False := by
   have h0 := (h «🪻R»).eq
-  exact Lean.Grind.false_of_not_eq_self (id (Eq.symm h0))
+  exact Lean.Grind.false_of_not_eq_self h0.symm
 
 theorem «¬Sub🌸→Not🌺» («🪻0» «🪻1» : «🌸») (h : ¬ «Sub🌸» «🪻0» «🪻1») : «🪻0» ≠ «🌺» := by
   by_contra h0

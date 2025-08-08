@@ -320,14 +320,18 @@ theorem «Sub🌸IteratedPower🌸Sub🌸» («🪻0» «🪻1» : «🌸») (k 
       · exact fun a => Or.inr a
     · exact «TransitiveSub🌸» _ _ _ h4 h3
 
-theorem «🌺IteratedPower🌸Sub🌸» («🪻» : «🌸») (k0 k1 : ℕ) (h : k0 ≤ k1) :
-  «Sub🌸» («Power🌸»^[k0] «🌺») («Power🌸»^[k1] «🪻») := by
+theorem «🌺IteratedPower🌸Sub🌸» (k0 k1 : ℕ) : ∀ («🪻» : «🌸»),
+  «Sub🌸» («Power🌸»^[k0] «🌺») («Power🌸»^[k0 + k1] «🪻») := by
   induction k1 with
   | zero =>
-    simp only [nonpos_iff_eq_zero, Function.iterate_zero, id_eq] at *
-    simp only [h, Function.iterate_zero, id_eq, «🌺Sub🌸All» «🪻»]
+    intro «🪻»
+    have h0 := «🌺Sub🌸All» «🪻»
+    rw [add_zero]
+    exact «Sub🌸IteratedPower🌸Sub🌸» _ _ _ h0
   | succ k1 h0 =>
-    sorry
+    intro «🪻»
+    rw [(show k0 + (k1 + 1) = k0 + k1 + 1 by ring), Function.iterate_succ, Function.comp_apply]
+    exact h0 («Power🌸» «🪻»)
 
 axiom PeanoLessThan1 : «🌸» → «🌸» → Prop
 axiom PeanoLessThan1Iff : ∀ («🪻0» «🪻1» : «🌸»), PeanoLessThan1 «🪻0» «🪻1» ↔

@@ -1,10 +1,49 @@
 import Mathlib
+import NazgandLean4.WellOrderingPrinciple
 set_option maxHeartbeats 0
+set_option diagnostics true
 
 axiom «🌸» : Type
 axiom «🌺» : «🌸»
 axiom «💐» : «🌸» → «🌸»
 axiom «💐🌺» : «💐» «🌺» = «🌺»
+axiom «∃Iterated💐=🌺» : ∀ («🪻» : «🌸»), (∃ (k : ℕ), («💐»^[k] «🪻» = «🌺»))
+
+theorem «Iterated💐🌺» {k : ℕ} : «💐»^[k] «🌺» = «🌺» := by
+  induction k with
+  | zero =>
+    simp only [Function.iterate_zero, id_eq]
+  | succ k h0 =>
+    rw [Function.iterate_succ', Function.comp_apply, h0, «💐🌺»]
+
+theorem «∃!MinIterated💐=🌺» («🪻» : «🌸») :
+  (∃! (k : ℕ), ∀ (k0 : ℕ), ((k0 < k → «💐»^[k0] «🪻» ≠ «🌺») ∧ (k0 ≥ k → «💐»^[k0] «🪻» = «🌺»))) := by
+  use ExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
+  simp only [ne_eq, ge_iff_le]
+  constructor
+  · intro k0
+    constructor
+    · intro h0
+      by_contra h1
+      let P := λ (k : ℕ) ↦ «💐»^[k] «🪻» = «🌺»
+      have h2 : P k0 := h1
+      have h3 := ExistUniqueMinPLe h2
+      have h4 : ¬ k0 < ExistUniqueMinP («∃Iterated💐=🌺» «🪻») :=
+        Nat.not_lt_of_le h3
+      simp only [h0, not_true_eq_false] at h4
+    · intro h0
+      have h1 : ∃ (k1 : ℕ), k0 = k1 + ExistUniqueMinP («∃Iterated💐=🌺» «🪻») :=
+        Nat.exists_eq_add_of_le' h0
+      choose k1 h1 using h1
+      have h2 := PExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
+      simp only [h1, Function.iterate_add, Function.comp_apply, h2, «Iterated💐🌺»]
+  · intro k h0
+    rw [EqExistUniqueMinPIff («∃Iterated💐=🌺» «🪻») k]
+    constructor
+    · exact (h0 k).right (Nat.le_refl k)
+    · intro k0 h1
+      exact (h0 k0).left h1
+
 axiom «🌸∈» : «🌸» → «🌸» → Prop
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»
 axiom «Empty🌸🌺» : «Empty🌸» «🌺»
@@ -72,13 +111,6 @@ theorem «Max🌸OfSelf» («🪻» : «🌸») : «Max🌸» «🪻» «🪻» 
   rw [«Same🌸s🌸∈», «Iterated💐Max🌸»]
   intro «🪻0»
   simp only [«🌸∈Max🌸», or_self]
-
-theorem «Iterated💐🌺» {k : ℕ} : «💐»^[k] «🌺» = «🌺» := by
-  induction k with
-  | zero =>
-    simp only [Function.iterate_zero, id_eq]
-  | succ k h0 =>
-    rw [Function.iterate_succ', Function.comp_apply, h0, «💐🌺»]
 
 theorem «¬🌸∈🌺» («🪻» : «🌸») : ¬ «🌸∈» «🪻» «🌺» := by
   have h := «Empty🌸🌺»
@@ -385,7 +417,14 @@ theorem «∃🌸OfSameIterated💐Depth» (k : ℕ) :
     rw [h0, «🌸∈🌸Of1🌸»]
   | succ k h0=>
     intro «🪻»
-    sorry
+    intro h1
+    have h3 := h1
+    rw [Function.iterate_succ, Function.comp_apply] at h1
+    have h2 := h0 _ h1
+    rw [Function.iterate_succ', Function.comp_apply, «🌸∈🌸OfSmaller💐s»]
+    constructor
+    · sorry
+    · sorry
 
 theorem «Same🌸s🌸∈Self» («🪻» : «🌸») : «Same🌸s🌸∈» «🪻» «🪻» := by
   simp only [«Same🌸s🌸∈», implies_true]
@@ -836,7 +875,6 @@ theorem «IteratedPower🌸≤ForPeano🌸» (k0 k1 : ℕ) :
     constructor
     · intro h6
       by_contra h1
-      simp only [Nat.exists_eq_add_one] at h1
       sorry
     · intro h0
       simp only [h0, Function.iterate_zero, id_eq]

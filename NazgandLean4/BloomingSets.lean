@@ -7,7 +7,6 @@ axiom «🌸» : Type
 axiom «🌺» : «🌸»
 axiom «💐» : «🌸» → «🌸»
 axiom «💐🌺» : «💐» «🌺» = «🌺»
-axiom «∃Iterated💐=🌺» : ∀ («🪻» : «🌸»), (∃ (k : ℕ), («💐»^[k] «🪻» = «🌺»))
 
 theorem «Iterated💐🌺» {k : ℕ} : «💐»^[k] «🌺» = «🌺» := by
   induction k with
@@ -16,33 +15,25 @@ theorem «Iterated💐🌺» {k : ℕ} : «💐»^[k] «🌺» = «🌺» := by
   | succ k h0 =>
     rw [Function.iterate_succ', Function.comp_apply, h0, «💐🌺»]
 
-theorem «∃!MinIterated💐=🌺» («🪻» : «🌸») :
-  (∃! (k : ℕ), ∀ (k0 : ℕ), ((k0 < k → «💐»^[k0] «🪻» ≠ «🌺») ∧ (k0 ≥ k → «💐»^[k0] «🪻» = «🌺»))) := by
-  use ExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
-  simp only [ne_eq, ge_iff_le]
-  constructor
-  · intro k0
-    constructor
-    · intro h0
-      by_contra h1
-      let P := λ (k : ℕ) ↦ «💐»^[k] «🪻» = «🌺»
-      have h2 : P k0 := h1
-      have h3 := ExistUniqueMinPLe h2
-      have h4 : ¬ k0 < ExistUniqueMinP («∃Iterated💐=🌺» «🪻») :=
-        Nat.not_lt_of_le h3
-      simp only [h0, not_true_eq_false] at h4
-    · intro h0
-      have h1 : ∃ (k1 : ℕ), k0 = k1 + ExistUniqueMinP («∃Iterated💐=🌺» «🪻») :=
-        Nat.exists_eq_add_of_le' h0
-      choose k1 h1 using h1
-      have h2 := PExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
-      simp only [h1, Function.iterate_add, Function.comp_apply, h2, «Iterated💐🌺»]
-  · intro k h0
-    rw [EqExistUniqueMinPIff («∃Iterated💐=🌺» «🪻») k]
-    constructor
-    · exact (h0 k).right (Nat.le_refl k)
-    · intro k0 h1
-      exact (h0 k0).left h1
+axiom «∃Iterated💐=🌺» : ∀ («🪻» : «🌸»), (∃ (k : ℕ), («💐»^[k] «🪻» = «🌺»))
+
+noncomputable
+def «🌸Rank» («🪻» : «🌸») : ℕ := ExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
+
+theorem «Iterated💐🌸Rank≤» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») ≤ k) : «💐»^[k] «🪻» = «🌺» := by
+  have h0 := Nat.exists_eq_add_of_le' h
+  choose k0 h0 using h0
+  simp only [h0, «🌸Rank», Function.iterate_add, Function.comp_apply,
+    PExistUniqueMinP («∃Iterated💐=🌺» «🪻»), «Iterated💐🌺»]
+
+theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») > k) : «💐»^[k] «🪻» ≠ «🌺» := by
+  by_contra h0
+  let P := (λ (k0 : ℕ) ↦ «💐»^[k0] «🪻» = «🌺»)
+  have h1 : P k := h0
+  have h2 := ExistUniqueMinPLe h1
+  rw [«🌸Rank»] at h
+  rw [← Nat.not_lt] at h2
+  simp only [h, not_true_eq_false] at h2
 
 axiom «🌸∈» : «🌸» → «🌸» → Prop
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»

@@ -36,6 +36,21 @@ theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Ra
   rw [← Nat.not_lt] at h2
   simp only [h, not_true_eq_false] at h2
 
+theorem «🌸Rank0↔🌺» {«🪻» : «🌸»} : «🌸Rank» «🪻» = 0 ↔ «🪻» = «🌺» := by
+  constructor
+  · rw [Nat.le_zero.symm]
+    intro h0
+    have h1 := «Iterated💐🌸Rank≤» h0
+    simp only [Function.iterate_zero, id_eq] at h1
+    exact h1
+  · intro h0
+    rw [h0]
+    rw [«🌸Rank»]
+    apply Eq.symm
+    rw [EqExistUniqueMinPIff]
+    simp only [Function.iterate_zero, id_eq, not_lt_zero', IsEmpty.forall_iff, implies_true,
+      and_self]
+
 theorem «🌸RankIterated💐» {«🪻»: «🌸»} (k : ℕ) :
   «🌸Rank» («💐»^[k] «🪻») = «🌸Rank» «🪻» - k := by
   induction k with
@@ -436,24 +451,16 @@ theorem «🌸Of1🌸Not🌺» («🪻» : «🌸») : «🌸Of1🌸» «🪻» 
   let h3 := h2 «🪻»
   simp only [h0, not_true_eq_false] at h3
 
-theorem «∃🌸OfSameIterated💐Depth» (k : ℕ) :
-  ∀ («🪻2» : «🌸»), («💐»^[k] «🪻2» = «🌺» → «🌸∈» «🪻2» («🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»))) := by
+theorem «∃🌸Of🌸Rank≤Max» (k : ℕ) :
+  ∀ («🪻2» : «🌸»), («🌸Rank» «🪻2» ≤ k → «🌸∈» «🪻2» («🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»))) := by
+  intro «🪻»
+  intro h0
   induction k with
   | zero =>
-    intro «🪻»
-    rw [Function.iterate_zero, id_eq, Function.iterate_zero, id_eq]
-    intro h0
-    rw [h0, «🌸∈🌸Of1🌸»]
-  | succ k h0=>
-    intro «🪻»
-    intro h1
-    have h3 := h1
-    rw [Function.iterate_succ, Function.comp_apply] at h1
-    have h2 := h0 _ h1
-    rw [Function.iterate_succ', Function.comp_apply, «🌸∈🌸OfSmaller💐s»]
-    constructor
-    · sorry
-    · sorry
+    rw [Nat.le_zero, «🌸Rank0↔🌺»] at h0
+    rw [h0, Function.iterate_zero, id_eq, «🌸∈🌸Of1🌸»]
+  | succ k h1 =>
+    sorry
 
 theorem «Same🌸s🌸∈Self» («🪻» : «🌸») : «Same🌸s🌸∈» «🪻» «🪻» := by
   simp only [«Same🌸s🌸∈», implies_true]
@@ -1171,3 +1178,20 @@ theorem «Empty🌸🌸OfSmaller💐s↔🌺» («🪻» : «🌸») :
   · intro h0
     rw [h0, «🌸OfSmaller💐s🌺»]
     exact «Empty🌸🌺»
+
+axiom «ReplaceAll🌸∈» : «🌸» → «🌸» → «🌸»
+noncomputable def ReplaceAll («🪻0» «🪻1» : «🌸») : «🌸» := ReplaceLeaves «🪻1» («ReplaceAll🌸∈» «🪻0» «🪻1»)
+axiom «🌸∈ReplaceAll🌸∈» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
+  («🌸∈» «🪻2» («ReplaceAll🌸∈» «🪻0» «🪻1») ↔ (∃ («🪻3» : «🌸»), («🪻2» = ReplaceAll «🪻3» «🪻1» ∧ «🌸∈» «🪻3» «🪻0»)))
+axiom «💐ReplaceAll🌸∈» : ∀ («🪻0» «🪻1» : «🌸»), «💐» («ReplaceAll🌸∈» «🪻0» «🪻1») = «Max🌸» («💐» «🪻0») («💐» «🪻1»)
+
+theorem ReplaceAllPeanoMul (k0 k1 : ℕ) : ReplaceAll («Peano🌸» k0) («Peano🌸» k1) = «Peano🌸» ((k0 + 1) * (k1 + 1) - 1) := by
+  induction k0 with
+  | zero =>
+    simp only [zero_add, one_mul, add_tsub_cancel_right]
+    rw [ReplaceAll, ← «Same🌸s🌸∈∧💐=💐↔=», «💐Peano🌸», «💐ReplaceLeaves», «💐Peano🌸», «💐ReplaceAll🌸∈»,
+      «💐Peano🌸», «💐Peano🌸», «Max🌸OfSelf», «Max🌸OfSelf», «Same🌸s🌸∈»]
+    simp only [and_true]
+    intro «🪻»
+    sorry
+  | succ k0 h0 => sorry

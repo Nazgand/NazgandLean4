@@ -89,6 +89,12 @@ theorem «🌸Rank≤🌸Rank→🌸RankIterated💐≤🌸RankIterated💐» {�
   exact Nat.sub_le_sub_right h k
 
 axiom «🌸∈» : «🌸» → «🌸» → Prop
+axiom «FiniteIterated🌸∈» : «🌸» → Prop
+axiom «FiniteIterated🌸∈Def» («🪻0» : «🌸») : «FiniteIterated🌸∈» «🪻0» ↔
+  ∀ («🪻» : «🌸»), («🌸∈» «🪻» «🪻0» → «FiniteIterated🌸∈» «🪻»)
+-- not the best way to say that «FiniteIterated🌸∈Def» terminates at a finite number of steps
+-- before finding a vacuous truth, but I do not know how to say it precisely
+axiom «FiniteIterated🌸∈All🌸» («🪻» : «🌸») : «FiniteIterated🌸∈» «🪻»
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»
 axiom «Empty🌸🌺» : «Empty🌸» «🌺»
 def «Same🌸s🌸∈» («🪻0» «🪻1» : «🌸») := ∀ («🪻» : «🌸»), («🌸∈» «🪻» «🪻0» ↔ «🌸∈» «🪻» «🪻1»)

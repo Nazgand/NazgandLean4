@@ -1,14 +1,14 @@
 import Mathlib
 import NazgandLean4.WellOrderingPrinciple
 set_option maxHeartbeats 0
-set_option diagnostics true
-set_option pp.proofs true
 
 axiom «🌸» : Type
 axiom «🌺» : «🌸»
 axiom «💐» : «🌸» → «🌸»
+@[simp, grind]
 axiom «💐🌺» : «💐» «🌺» = «🌺»
 
+@[simp, grind =]
 theorem «Iterated💐🌺» {k : ℕ} : «💐»^[k] «🌺» = «🌺» := by
   induction k with
   | zero =>
@@ -21,12 +21,14 @@ axiom «∃Iterated💐=🌺» : ∀ («🪻» : «🌸»), (∃ (k : ℕ), («�
 noncomputable
 def «🌸Rank» («🪻» : «🌸») : ℕ := ExistUniqueMinP («∃Iterated💐=🌺» «🪻»)
 
+@[simp, grind =]
 theorem «Iterated💐🌸Rank≤» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») ≤ k) : «💐»^[k] «🪻» = «🌺» := by
   have h0 := Nat.exists_eq_add_of_le' h
   choose k0 h0 using h0
   simp only [h0, «🌸Rank», Function.iterate_add_apply,
     PExistUniqueMinP («∃Iterated💐=🌺» «🪻»), «Iterated💐🌺»]
 
+@[simp, grind]
 theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Rank» «🪻») > k) : «💐»^[k] «🪻» ≠ «🌺» := by
   by_contra h0
   let P := (λ (k0 : ℕ) ↦ «💐»^[k0] «🪻» = «🌺»)
@@ -36,6 +38,7 @@ theorem «Iterated💐🌸Rank>» {«🪻» : «🌸»} {k : ℕ} (h : («🌸Ra
   rw [← Nat.not_lt] at h2
   simp only [h, not_true_eq_false] at h2
 
+@[simp, grind =]
 theorem «🌸Rank0↔🌺» {«🪻» : «🌸»} : «🌸Rank» «🪻» = 0 ↔ «🪻» = «🌺» := by
   constructor
   · rw [Nat.le_zero.symm]
@@ -51,6 +54,7 @@ theorem «🌸Rank0↔🌺» {«🪻» : «🌸»} : «🌸Rank» «🪻» = 0 �
     simp only [Function.iterate_zero, id_eq, not_lt_zero', IsEmpty.forall_iff, implies_true,
       and_self]
 
+@[simp, grind =]
 theorem «🌸RankIterated💐» {«🪻»: «🌸»} (k : ℕ) :
   «🌸Rank» («💐»^[k] «🪻») = «🌸Rank» «🪻» - k := by
   induction k with
@@ -85,22 +89,26 @@ theorem «🌸RankIterated💐» {«🪻»: «🌸»} (k : ℕ) :
 
 theorem «🌸Rank≤🌸Rank→🌸RankIterated💐≤🌸RankIterated💐» {«🪻0» «🪻1» : «🌸»} (k : ℕ)
   (h : «🌸Rank» «🪻0» ≤ «🌸Rank» «🪻1») : «🌸Rank» («💐»^[k] «🪻0») ≤ «🌸Rank» («💐»^[k] «🪻1») := by
-  rw [«🌸RankIterated💐», «🌸RankIterated💐»]
-  exact Nat.sub_le_sub_right h k
+  grind only [«Iterated💐🌸Rank>», = «🌸RankIterated💐», = «Iterated💐🌸Rank≤», cases Or]
 
 axiom «🌸∈» : «🌸» → «🌸» → Prop
+@[simp, grind]
 axiom «WellFounded🌸∈» : WellFounded «🌸∈»
+@[simp, grind =]
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»
+@[simp, grind]
 axiom «Empty🌸🌺» : «Empty🌸» «🌺»
+@[simp, grind =]
 def «Same🌸s🌸∈» («🪻0» «🪻1» : «🌸») := ∀ («🪻» : «🌸»), («🌸∈» «🪻» «🪻0» ↔ «🌸∈» «🪻» «🪻1»)
 axiom «Same🌸s🌸∈AllIterated💐s↔=» : ∀ («🪻0» «🪻1» : «🌸»), ((∀ (k : ℕ),
   «Same🌸s🌸∈» («💐»^[k] «🪻0») («💐»^[k] «🪻1»)) ↔ «🪻0» = «🪻1»)
 
+@[simp, grind =]
 theorem «Same🌸s🌸∈∧💐=💐↔=»  («🪻0» «🪻1» : «🌸») :
   («Same🌸s🌸∈» «🪻0» «🪻1» ∧ «💐» «🪻0» = «💐» «🪻1») ↔ «🪻0» = «🪻1» := by
-  simp only [← «Same🌸s🌸∈AllIterated💐s↔=»]
   constructor
-  · intro h0
+  · simp only [← «Same🌸s🌸∈AllIterated💐s↔=»]
+    intro h0
     obtain ⟨h1, h2⟩ := h0
     intro k
     induction k with
@@ -110,26 +118,24 @@ theorem «Same🌸s🌸∈∧💐=💐↔=»  («🪻0» «🪻1» : «🌸») :
       rw [Function.iterate_succ, Function.comp_apply]
       simp only [Function.comp_apply, h2]
   · intro h0
-    have h1 := h0 0
-    simp only [Function.iterate_zero, id_eq] at h1
-    simp only [h1, true_and]
-    intro k
-    have h2 := h0 (k + 1)
-    rw [Function.iterate_succ, Function.comp_apply, Function.comp_apply] at h2
-    exact h2
+    simp only [«Same🌸s🌸∈», h0, implies_true, and_self]
 
 axiom «PropSub🌸» : («🌸» → Prop) → «🌸» → «🌸»
+@[simp, grind]
 axiom «🌸∈PropSub🌸» : ∀ (p : («🌸» → Prop)) («🪻» «🪻0» : «🌸»),
   «🌸∈» «🪻0» («PropSub🌸» p «🪻») ↔ (p «🪻0» ∧ «🌸∈» «🪻0» «🪻»)
+@[simp, grind]
 axiom «💐PropSub🌸» : ∀ (p : («🌸» → Prop)) («🪻» : «🌸»),
   «💐» («PropSub🌸» p «🪻») = «💐» «🪻»
 
 axiom «Max🌸» : «🌸» → «🌸» → «🌸»
+@[simp, grind]
 axiom «🌸∈Max🌸» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
   «🌸∈» «🪻2» («Max🌸» «🪻0» «🪻1») ↔ («🌸∈» «🪻2» «🪻0» ∨ «🌸∈» «🪻2» «🪻1»)
+@[simp, grind]
 axiom «💐Max🌸» : ∀ («🪻0» «🪻1» : «🌸»), «💐» («Max🌸» «🪻0» «🪻1») = «Max🌸» («💐» «🪻0») («💐» «🪻1»)
 
-
+@[simp, grind =]
 theorem «Iterated💐Max🌸» {k : ℕ} («🪻2» «🪻3» : «🌸») :
   «💐»^[k] («Max🌸» «🪻2» «🪻3») = («Max🌸» («💐»^[k] «🪻2») («💐»^[k] «🪻3»)) := by
   induction k with
@@ -139,6 +145,7 @@ theorem «Iterated💐Max🌸» {k : ℕ} («🪻2» «🪻3» : «🌸») :
     rw [Function.iterate_succ', Function.comp_apply, h1, «💐Max🌸»]
     simp only [Function.comp_apply]
 
+@[grind =]
 theorem «SymmetricMax🌸» («🪻0» «🪻1» : «🌸») : «Max🌸» «🪻0» «🪻1» = «Max🌸» «🪻1» «🪻0» := by
   rw [← «Same🌸s🌸∈AllIterated💐s↔=»]
   have «Same🌸s🌸∈Max🌸Symmetry» («🪻2» «🪻3» : «🌸») :
@@ -150,6 +157,7 @@ theorem «SymmetricMax🌸» («🪻0» «🪻1» : «🌸») : «Max🌸» «�
   intro k
   simp only [«Iterated💐Max🌸», «Same🌸s🌸∈Max🌸Symmetry»]
 
+@[simp, grind =]
 theorem «Max🌸OfSelf» («🪻» : «🌸») : «Max🌸» «🪻» «🪻» = «🪻» := by
   rw [← «Same🌸s🌸∈AllIterated💐s↔=»]
   intro k
@@ -157,11 +165,13 @@ theorem «Max🌸OfSelf» («🪻» : «🌸») : «Max🌸» «🪻» «🪻» 
   intro «🪻0»
   simp only [«🌸∈Max🌸», or_self]
 
+@[simp, grind]
 theorem «¬🌸∈🌺» («🪻» : «🌸») : ¬ «🌸∈» «🪻» «🌺» := by
   have h := «Empty🌸🌺»
   rw [«Empty🌸»] at h
   exact h «🪻»
 
+@[simp, grind =]
 theorem «Max🌸Of🌺» («🪻» : «🌸») : «Max🌸» «🌺» «🪻» = «🪻» := by
   rw [← «Same🌸s🌸∈AllIterated💐s↔=»]
   intro k
@@ -169,6 +179,7 @@ theorem «Max🌸Of🌺» («🪻» : «🌸») : «Max🌸» «🌺» «🪻» 
   intro «🪻0»
   simp only [«🌸∈Max🌸», «¬🌸∈🌺», false_or]
 
+@[simp, grind =]
 theorem «Empty🌸Max🌸IffEmpty🌸Empty🌸» («🪻0» «🪻1» : «🌸») :
   «Empty🌸» («Max🌸» «🪻0» «🪻1») ↔ ((«Empty🌸» «🪻0») ∧ («Empty🌸» «🪻1»)) := by
   constructor
@@ -187,14 +198,17 @@ theorem «Empty🌸Max🌸IffEmpty🌸Empty🌸» («🪻0» «🪻1» : «🌸�
 
 def «Sub🌸» («🪻0» «🪻1» : «🌸») : Prop := («Max🌸» «🪻0» «🪻1») = «🪻1»
 
+@[simp, grind]
 theorem «Sub🌸Max🌸Self» («🪻0» «🪻1» : «🌸») : «Sub🌸» «🪻0» («Max🌸» «🪻0» «🪻1») := by
   rw [«Sub🌸», ← «Same🌸s🌸∈AllIterated💐s↔=»]
   intro k
   simp only [«Same🌸s🌸∈», «Iterated💐Max🌸», «🌸∈Max🌸», or_self_left, implies_true]
 
+@[simp, grind]
 theorem «🌺Sub🌸All» («🪻» : «🌸») : «Sub🌸» «🌺» «🪻» := by
   rw [«Sub🌸», «Max🌸Of🌺»]
 
+@[simp, grind =]
 theorem «∃!Sub🌸🌺» («🪻» : «🌸») : «Sub🌸» «🪻» «🌺» ↔ «🪻» = «🌺» := by
   constructor
   · intro h
@@ -204,6 +218,7 @@ theorem «∃!Sub🌸🌺» («🪻» : «🌸») : «Sub🌸» «🪻» «🌺�
     rw [h0]
     exact «🌺Sub🌸All» «🌺»
 
+@[simp, grind =]
 theorem «∃!Max🌸sEq🌺» («🪻0» «🪻1» : «🌸») :
   «Max🌸» «🪻0» «🪻1» = «🌺» ↔ («🪻0» = «🌺» ∧ «🪻1» = «🌺») := by
   constructor
@@ -218,6 +233,7 @@ theorem «∃!Max🌸sEq🌺» («🪻0» «🪻1» : «🌸») :
   · intro h0
     simp only [h0, «Max🌸OfSelf»]
 
+@[simp, grind]
 theorem «Sub🌸OfMax🌸» («🪻0» «🪻1» «🪻2» : «🌸») (h0 : «Sub🌸» «🪻0» «🪻1») : «Sub🌸» «🪻0» («Max🌸» «🪻1» «🪻2») := by
   rw [«Sub🌸»] at *
   nth_rw 2 [← h0]
@@ -226,19 +242,25 @@ theorem «Sub🌸OfMax🌸» («🪻0» «🪻1» «🪻2» : «🌸») (h0 : «
   intro k «🪻»
   exact Iff.symm or_assoc
 
+@[simp, grind]
 axiom «🌸∈→💐Sub🌸💐» : ∀ («🪻0» «🪻1» : «🌸»),
   «🌸∈» «🪻0» «🪻1» → «Sub🌸» («💐» «🪻0») («💐» «🪻1»)
 
 axiom «🌸OfSmaller💐s» : «🌸» → «🌸»
+@[simp, grind]
 axiom «🌸∈🌸OfSmaller💐s» : ∀ («🪻0» «🪻1» : «🌸»),
   «🌸∈» «🪻0» («🌸OfSmaller💐s» «🪻1») ↔ («Sub🌸» («💐» «🪻0») «🪻1» ∧ («💐» «🪻0») ≠ «🪻1»)
+@[simp, grind]
 axiom «💐🌸OfSmaller💐s» : ∀ («🪻» : «🌸»), «💐» («🌸OfSmaller💐s» «🪻») = «🪻»
 
 axiom «Power🌸» : «🌸» → «🌸»
+@[simp, grind]
 axiom «🌸∈Power🌸» : ∀ («🪻0» «🪻1» : «🌸»),
   «🌸∈» «🪻0» («Power🌸» «🪻1») ↔ «Sub🌸» «🪻0» «🪻1»
+@[simp, grind]
 axiom «💐Power🌸» : ∀ («🪻» : «🌸»), «💐» («Power🌸» «🪻») = «💐» «🪻»
 
+@[simp, grind]
 theorem «Sub🌸OfSelf» («🪻» : «🌸») : «Sub🌸» «🪻» «🪻» := by
   rw [«Sub🌸», «Max🌸OfSelf»]
 
@@ -246,6 +268,7 @@ noncomputable
 def «🌸Of1🌸» («🪻» : «🌸») : «🌸» :=
   «PropSub🌸» (λ («🪻2» : «🌸») ↦ «🪻2» = «🪻») («Power🌸» «🪻»)
 
+@[simp, grind =]
 theorem «🌸∈🌸Of1🌸» («🪻0» «🪻1» : «🌸») :
   «🌸∈» «🪻0» («🌸Of1🌸» «🪻1») ↔ «🪻0» = «🪻1» := by
   rw [«🌸Of1🌸», «🌸∈PropSub🌸», «🌸∈Power🌸»]
@@ -254,30 +277,37 @@ theorem «🌸∈🌸Of1🌸» («🪻0» «🪻1» : «🌸») :
   rw [h0]
   exact «Sub🌸OfSelf» «🪻1»
 
+@[simp, grind =]
 theorem «💐🌸Of1🌸» («🪻» : «🌸») : «💐» («🌸Of1🌸» «🪻») = «💐» «🪻» := by
   rw [«🌸Of1🌸», «💐PropSub🌸», «💐Power🌸»]
 
+@[simp, grind]
 theorem «¬Empty🌸🌸Of1🌸» («🪻» : «🌸») : ¬ «Empty🌸» («🌸Of1🌸» «🪻») := by
   rw [«Empty🌸»]
   simp only [not_forall, not_not]
   use «🪻»
   exact («🌸∈🌸Of1🌸» «🪻» «🪻»).mpr rfl
 
+@[simp, grind]
 theorem «¬Empty🌸→¬Empty🌸Max🌸» («🪻0» «🪻1» : «🌸») (h : ¬ «Empty🌸» «🪻0») : ¬ «Empty🌸» («Max🌸» «🪻0» «🪻1»)
   := by
   simp only [«Empty🌸Max🌸IffEmpty🌸Empty🌸», h, false_and, not_false_eq_true]
 
 axiom «Max🌸Of🌸∈» : «🌸» → «🌸»
+@[simp, grind]
 axiom «🌸∈Max🌸Of🌸∈» («🪻0» «🪻1» : «🌸») : «🌸∈» «🪻0» («Max🌸Of🌸∈» «🪻1») ↔
   ∃ («🪻2» : «🌸»), («🌸∈» «🪻2» «🪻1» ∧ «🌸∈» «🪻0» «🪻2»)
+@[simp, grind]
 axiom «💐Max🌸Of🌸∈» («🪻» : «🌸») : «💐» («Max🌸Of🌸∈» «🪻») = «💐» «🪻»
 
+@[simp, grind =]
 theorem «Max🌸Of🌸∈🌸Of1🌸» («🪻» : «🌸») :
   «Max🌸Of🌸∈» («🌸Of1🌸» «🪻») = «🪻» := by
   rw [← «Same🌸s🌸∈∧💐=💐↔=», «Same🌸s🌸∈», «💐Max🌸Of🌸∈», «💐🌸Of1🌸»]
   simp only [«🌸∈Max🌸Of🌸∈», «🌸∈🌸Of1🌸», exists_eq_left, implies_true,
     and_self]
 
+@[simp, grind =]
 theorem «Max🌸Of🌸∈Max🌸» («🪻0» «🪻1» : «🌸») :
   «Max🌸Of🌸∈» («Max🌸» «🪻0» «🪻1») =
   «Max🌸» («Max🌸Of🌸∈» «🪻0») («Max🌸Of🌸∈» «🪻1») := by
@@ -309,6 +339,7 @@ theorem «Max🌸Of🌸∈Max🌸» («🪻0» «🪻1» : «🌸») :
       use «🪻2»
       simp only [h0, or_true, and_self]
 
+@[simp, grind =]
 theorem «MutualSub🌸s=» («🪻0» «🪻1» : «🌸») :
   («Sub🌸» «🪻0» «🪻1» ∧ «Sub🌸» «🪻1» «🪻0») ↔ «🪻0» = «🪻1» := by
   constructor
@@ -320,6 +351,7 @@ theorem «MutualSub🌸s=» («🪻0» «🪻1» : «🌸») :
   · intro h0
     simp only [h0, «Sub🌸OfSelf», and_self]
 
+@[simp, grind]
 theorem «TransitiveSub🌸But≠» («🪻0» «🪻1» «🪻2» : «🌸») (h0 : «Sub🌸» «🪻0» «🪻1») (h1 : «Sub🌸» «🪻1» «🪻2»)
   (h2 : «🪻1» ≠ «🪻2») : «🪻0» ≠ «🪻2» := by
   by_contra h3
@@ -327,12 +359,14 @@ theorem «TransitiveSub🌸But≠» («🪻0» «🪻1» «🪻2» : «🌸») (
   have h4 := «MutualSub🌸s=» «🪻1» «🪻2»
   simp only [h1, h0, and_self, h2, iff_false, not_true_eq_false] at h4
 
+@[simp, grind]
 theorem «TransitiveSub🌸» («🪻0» «🪻1» «🪻2» : «🌸») (h0 : «Sub🌸» «🪻0» «🪻1») (h1 : «Sub🌸» «🪻1» «🪻2») :
   «Sub🌸» «🪻0» «🪻2» := by
   rw [«Sub🌸»] at h1
   rw [← h1]
   exact «Sub🌸OfMax🌸» «🪻0» «🪻1» «🪻2» h0
 
+@[simp, grind =]
 theorem «Max🌸Of🌸∈🌸OfSmaller💐s» («🪻» : «🌸») :
   «Max🌸Of🌸∈» («🌸OfSmaller💐s» «🪻») = «🌸OfSmaller💐s» «🪻» := by
   rw [← «Same🌸s🌸∈∧💐=💐↔=», «Same🌸s🌸∈», «💐Max🌸Of🌸∈»]
@@ -351,6 +385,7 @@ theorem «Max🌸Of🌸∈🌸OfSmaller💐s» («🪻» : «🌸») :
     simp only [«💐🌸Of1🌸», h0.left, ne_eq, h0.right, not_false_eq_true, and_self,
       «🌸∈🌸Of1🌸»]
 
+@[simp, grind =]
 theorem «💐IteratedPower🌸» («🪻» : «🌸») (k : ℕ) :
   «💐» («Power🌸»^[k] «🪻») = «💐» «🪻» := by
   induction k with
@@ -359,10 +394,12 @@ theorem «💐IteratedPower🌸» («🪻» : «🌸») (k : ℕ) :
   | _ k h0 =>
     rw [Function.iterate_succ', Function.comp_apply, «💐Power🌸», h0]
 
+@[simp, grind =]
 theorem «🌸∈IteratedPower🌸» («🪻0» «🪻1» : «🌸») (k : ℕ) :
   «🌸∈» «🪻1» («Power🌸»^[k + 1] «🪻0») ↔ «Sub🌸» «🪻1» («Power🌸»^[k] «🪻0»):= by
   rw [Function.iterate_succ', Function.comp_apply, «🌸∈Power🌸»]
 
+@[simp, grind]
 theorem «Sub🌸IteratedPower🌸Sub🌸» («🪻0» «🪻1» : «🌸») (k : ℕ) (h0 : «Sub🌸» «🪻0» «🪻1») :
   «Sub🌸» («Power🌸»^[k] «🪻0») («Power🌸»^[k] «🪻1») := by
   induction k with
@@ -397,6 +434,7 @@ theorem «Sub🌸IteratedPower🌸Sub🌸» («🪻0» «🪻1» : «🌸») (k 
       · exact fun a => Or.inr a
     · exact «TransitiveSub🌸» _ _ _ h4 h3
 
+@[simp, grind]
 theorem «🌺IteratedPower🌸Sub🌸» (k0 k1 : ℕ) : ∀ («🪻» : «🌸»),
   «Sub🌸» («Power🌸»^[k0] «🌺») («Power🌸»^[k0 + k1] «🪻») := by
   induction k1 with
@@ -410,9 +448,9 @@ theorem «🌺IteratedPower🌸Sub🌸» (k0 k1 : ℕ) : ∀ («🪻» : «🌸�
     rw [(show k0 + (k1 + 1) = k0 + k1 + 1 by ring), Function.iterate_succ, Function.comp_apply]
     exact h0 («Power🌸» «🪻»)
 
-axiom PeanoLessThan1 : «🌸» → «🌸» → Prop
-axiom PeanoLessThan1Iff : ∀ («🪻0» «🪻1» : «🌸»), PeanoLessThan1 «🪻0» «🪻1» ↔
-  («🌸∈» «🪻0» «🪻1» ∨ ∃ («🪻2» : «🌸»), («🌸∈» «🪻2» «🪻1» ∧ PeanoLessThan1 «🪻0» «🪻2»))
+inductive PeanoLessThan1 : «🌸» → «🌸» → Prop
+  | direct : ∀ «🪻0» «🪻1», «🌸∈» «🪻0» «🪻1» → PeanoLessThan1 «🪻0» «🪻1»
+  | transitive : ∀ «🪻0» «🪻1» «🪻2», «🌸∈» «🪻2» «🪻1» → PeanoLessThan1 «🪻0» «🪻2» → PeanoLessThan1 «🪻0» «🪻1»
 
 axiom ReplaceLeaves : «🌸» → «🌸» → «🌸»
 axiom «ReplaceLeavesEmpty🌸» : ∀ («🪻0» «🪻1» : «🌸»), «Empty🌸» «🪻0» → «Same🌸s🌸∈» (ReplaceLeaves «🪻0» «🪻1») «🪻1»
@@ -452,16 +490,16 @@ theorem «🌸Of1🌸Not🌺» («🪻» : «🌸») : «🌸Of1🌸» «🪻» 
   let h3 := h2 «🪻»
   simp only [h0, not_true_eq_false] at h3
 
-theorem «∃🌸Of🌸Rank≤Max» (k : ℕ) :
-  ∀ («🪻2» : «🌸»), («🌸Rank» «🪻2» ≤ k → «🌸∈» «🪻2» («🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»))) := by
-  intro «🪻»
-  intro h0
-  induction k with
-  | zero =>
-    rw [Nat.le_zero, «🌸Rank0↔🌺»] at h0
-    rw [h0, Function.iterate_zero, id_eq, «🌸∈🌸Of1🌸»]
-  | succ k h1 =>
-    sorry
+-- theorem «∃🌸Of🌸Rank≤Max» (k : ℕ) :
+--   ∀ («🪻2» : «🌸»), («🌸Rank» «🪻2» ≤ k → «🌸∈» «🪻2» («🌸OfSmaller💐s»^[k] («🌸Of1🌸» «🌺»))) := by
+--   intro «🪻»
+--   intro h0
+--   induction k with
+--   | zero =>
+--     rw [Nat.le_zero, «🌸Rank0↔🌺»] at h0
+--     rw [h0, Function.iterate_zero, id_eq, «🌸∈🌸Of1🌸»]
+--   | succ k h1 =>
+--     sorry
 
 theorem «Same🌸s🌸∈Self» («🪻» : «🌸») : «Same🌸s🌸∈» «🪻» «🪻» := by
   simp only [«Same🌸s🌸∈», implies_true]
@@ -628,18 +666,18 @@ theorem «🌸OfSmaller💐s🌺» : «🌸OfSmaller💐s» «🌺» = «🌺» 
   intro «🪻»
   simp only [«🌸∈🌸OfSmaller💐s», «∃!Sub🌸🌺», ne_eq, and_not_self, h0]
 
-theorem «IteratedPower🌸Empty🌸↔» («🪻» : «🌸») (k : ℕ) :
-  «Empty🌸» («Power🌸»^[k] «🪻») ↔ («Empty🌸» «🪻» ∧ k = 0) := by
-  constructor
-  · intro h0
-    simp_rw [«Empty🌸»] at *
-    constructor
-    · intro «🪻0»
-      sorry
-    · have h1 := «🌺IteratedPower🌸Sub🌸»
-      sorry
-  · intro h0
-    sorry
+-- theorem «IteratedPower🌸Empty🌸↔» («🪻» : «🌸») (k : ℕ) :
+--   «Empty🌸» («Power🌸»^[k] «🪻») ↔ («Empty🌸» «🪻» ∧ k = 0) := by
+--   constructor
+--   · intro h0
+--     simp_rw [«Empty🌸»] at *
+--     constructor
+--     · intro «🪻0»
+--       sorry
+--     · have h1 := «🌺IteratedPower🌸Sub🌸»
+--       sorry
+--   · intro h0
+--     sorry
 
 theorem «💐Sub🌸Of💐=🌺» («🪻0» «🪻1» : «🌸») (h0 : «💐» «🪻1» = «🌺») (h1 : «Sub🌸» «🪻0» «🪻1») :
   «💐» «🪻0» = «🌺» := by
@@ -765,55 +803,31 @@ theorem «¬Sub🌸→Not🌺» («🪻0» «🪻1» : «🌸») (h : ¬ «Sub�
   rw [h0] at h
   simp only [«🌺Sub🌸All» «🪻1», not_true_eq_false] at h
 
--- 🌸 containing all 🌸s the of the Russel🌸 restricted to maximum «💐» «🪻L»
--- not obviously inconsistent
-theorem «Russel🌸WithMax💐» («🪻R» «🪻L» «🪻L0» «🪻» : «🌸») (h1 : «Sub🌸» («💐» «🪻R») «🪻L0»)
-  (h2 : «💐» «🪻L0» = «🌺») (h3 : «🪻L0» = («🌸Of1🌸» «🪻»))
-  (h : ∀ («🪻0» : «🌸»), («🌸∈» «🪻0» «🪻R» ↔ (¬ «🌸∈» «🪻0» «🪻0» ∧ «Sub🌸» («💐» «🪻0») «🪻L»))) :
-  («💐» «🪻R» ≠ «🌺») ∧ («💐» («💐» «🪻R») = «🌺») ∧ (¬ «Sub🌸» («💐» «🪻R») «🪻L») ∧
-  («🪻L» ≠ «🪻L0») ∧ («💐» «🪻» = «🌺») ∧ (¬ «Sub🌸» («💐» «🪻R») «🪻L») := by
-  simp [h3] at *
-  clear h3
-  have h0 : ¬ «Sub🌸» («💐» «🪻R») «🪻L» := by
-    by_contra h9
-    have h10 := h «🪻R»
-    simp only [h9, and_true, iff_not_self] at h10
-  have h7 : «🪻L» ≠ («🌸Of1🌸» «🪻») := by
-    by_contra h8
-    simp [h8, h1] at *
-  have h4 := «¬Sub🌸→Not🌺» _ _ h0
-  have h6 : «💐» («💐» «🪻R») = «🌺» := «💐Sub🌸Of💐=🌺» («💐» «🪻R») («🌸Of1🌸» «🪻») h2 h1
-  have h8 : «💐» «🪻» = «🌺» := by
-    rw [«💐🌸Of1🌸»] at h2
-    exact h2
-  simp [*]
+-- theorem «PeanoLessThan1ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan1 («Peano🌸» k0) («Peano🌸» k1) := by
+--   constructor
+--   · intro h0
+--     sorry
+--   · intro h0
+--     sorry
 
-theorem «PeanoLessThan1ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan1 («Peano🌸» k0) («Peano🌸» k1) := by
-  constructor
-  · intro h0
-    rw [PeanoLessThan1Iff]
-    sorry
-  · intro h0
-    sorry
+-- theorem «PeanoLessThan2ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan2 («Peano🌸» k0) («Peano🌸» k1) := by
+--   constructor
+--   · intro h0
+--     sorry
+--   · intro h0
+--     sorry
 
-theorem «PeanoLessThan2ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan2 («Peano🌸» k0) («Peano🌸» k1) := by
-  constructor
-  · intro h0
-    sorry
-  · intro h0
-    sorry
+-- theorem «PeanoLessThan3ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan3 («Peano🌸» k0) («Peano🌸» k1) := by
+--   constructor
+--   · intro h0
+--     sorry
+--   · intro h0
+--     sorry
 
-theorem «PeanoLessThan3ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan3 («Peano🌸» k0) («Peano🌸» k1) := by
-  constructor
-  · intro h0
-    sorry
-  · intro h0
-    sorry
-
-theorem «💐=🌺IteratedPower🌸=SomePeano🌸» («🪻0» : «🌸») (h : «💐» «🪻0» = «🌺») :
-  ∃! (k : ℕ), («IteratedPower🌸≤» «🪻0» k ∧
-    ∀ (k0 : ℕ), k0 < k → ¬ «IteratedPower🌸≤» «🪻0» k) := by
-  sorry
+-- theorem «💐=🌺IteratedPower🌸=SomePeano🌸» («🪻0» : «🌸») (h : «💐» «🪻0» = «🌺») :
+--   ∃! (k : ℕ), («IteratedPower🌸≤» «🪻0» k ∧
+--     ∀ (k0 : ℕ), k0 < k → ¬ «IteratedPower🌸≤» «🪻0» k) := by
+--   sorry
 
 theorem «Peano🌸🌸∈Succ» (k0 k1 : ℕ) : «🌸∈» («Peano🌸» k0) («Peano🌸» k1) ↔ k1 = k0 + 1:= by
   constructor
@@ -865,36 +879,36 @@ theorem «🌸MinusSub🌸Self» («🪻0» «🪻1» : «🌸») : «Sub🌸» 
       exact h
   · rw [«💐Max🌸», «🌸Minus💐», «Max🌸OfSelf»]
 
-theorem «∃!Peano🌸🌸∈RangePeano🌸Succ🌸MinusRangePeano🌸» (k1 k3 : ℕ) :
-  «🌸∈» («Peano🌸» k1) («🌸Minus» («RangePeano🌸» (k3 + 1)) («RangePeano🌸» k3)) ↔
-  k1 = k3 := by
-  constructor
-  · rw [«🌸∈🌸Minus»]
-    intro h0
-    sorry
-  · intro h
-    rw [h]
-    sorry
+-- theorem «∃!Peano🌸🌸∈RangePeano🌸Succ🌸MinusRangePeano🌸» (k1 k3 : ℕ) :
+--   «🌸∈» («Peano🌸» k1) («🌸Minus» («RangePeano🌸» (k3 + 1)) («RangePeano🌸» k3)) ↔
+--   k1 = k3 := by
+--   constructor
+--   · rw [«🌸∈🌸Minus»]
+--     intro h0
+--     sorry
+--   · intro h
+--     rw [h]
+--     sorry
 
-theorem «RangePeano🌸RangeNat» (k0 k1 : ℕ) : k1 < k0 ↔ «🌸∈» («Peano🌸» k1) («RangePeano🌸» k0) := by
-  induction k0 with
-  | zero => simp only [not_lt_zero', «RangePeano🌸», «¬🌸∈🌺»]
-  | succ k3 ih =>
-    constructor
-    · intro h0
-      rw [«RangePeano🌸», «🌸∈Max🌸», ← ih]
-      have h1 : k1 < (k3 + 1) := by exact h0
-      have h2 : k1 < k3 ∨ k1 = k3 := by exact Nat.lt_succ_iff_lt_or_eq.mp h1
-      cases h2 with
-      | inl h2 => simp only [h2, true_or]
-      | inr h3 =>
-        simp only [h3, lt_self_iff_false, «Peano🌸🌸∈Succ», or_true]
-    · intro h0
-      cases Classical.em (k1 < k3) with
-      | inl h1 => exact Nat.lt_add_right 1 h1
-      | inr h1 =>
-        simp only [h1, false_iff] at ih
-        sorry
+-- theorem «RangePeano🌸RangeNat» (k0 k1 : ℕ) : k1 < k0 ↔ «🌸∈» («Peano🌸» k1) («RangePeano🌸» k0) := by
+--   induction k0 with
+--   | zero => simp only [not_lt_zero', «RangePeano🌸», «¬🌸∈🌺»]
+--   | succ k3 ih =>
+--     constructor
+--     · intro h0
+--       rw [«RangePeano🌸», «🌸∈Max🌸», ← ih]
+--       have h1 : k1 < (k3 + 1) := by exact h0
+--       have h2 : k1 < k3 ∨ k1 = k3 := by exact Nat.lt_succ_iff_lt_or_eq.mp h1
+--       cases h2 with
+--       | inl h2 => simp only [h2, true_or]
+--       | inr h3 =>
+--         simp only [h3, lt_self_iff_false, «Peano🌸🌸∈Succ», or_true]
+--     · intro h0
+--       cases Classical.em (k1 < k3) with
+--       | inl h1 => exact Nat.lt_add_right 1 h1
+--       | inr h1 =>
+--         simp only [h1, false_iff] at ih
+--         sorry
 
 -- theorem RangePeano🌸Sub🌸IteratedPower🌸 (k : ℕ) : ∀ («🪻0» «🪻1» : «🌸»),
 --   «IteratedPower🌸≤» «🪻0» «🪻1» ↔
@@ -904,28 +918,28 @@ theorem «¬Empty🌸Peano🌸Succ» (k : ℕ) : ¬ «Empty🌸» («Peano🌸»
   rw [«Peano🌸»]
   exact «¬Empty🌸🌸Of1🌸» («Peano🌸» k)
 
-theorem «IteratedPower🌸≤ForPeano🌸» (k0 k1 : ℕ) :
-  k0 ≤ k1 ↔ «IteratedPower🌸≤» («Peano🌸» k0) k1 :=
-  Nat.strong_induction_on k1 fun k2 =>
-  have h3 : ∀ (k : ℕ), «Power🌸»^[k] «🌺» = «🌺» ↔ k = 0 := by
-    intro k
-    constructor
-    · intro h6
-      by_contra h1
-      sorry
-    · intro h0
-      simp only [h0, Function.iterate_zero, id_eq]
-  match k2 with
-  | 0 => by
-    intro h0
-    simp only [nonpos_iff_eq_zero, «IteratedPower🌸≤», Function.iterate_zero, id_eq, «∃!Sub🌸🌺»]
-    constructor
-    · intro h1
-      simp only [h1, «Peano🌸»]
-    · intro h1
-      sorry
-  | k3 + 1 => by
-    sorry
+-- theorem «IteratedPower🌸≤ForPeano🌸» (k0 k1 : ℕ) :
+--   k0 ≤ k1 ↔ «IteratedPower🌸≤» («Peano🌸» k0) k1 :=
+--   Nat.strong_induction_on k1 fun k2 =>
+--   have h3 : ∀ (k : ℕ), «Power🌸»^[k] «🌺» = «🌺» ↔ k = 0 := by
+--     intro k
+--     constructor
+--     · intro h6
+--       by_contra h1
+--       sorry
+--     · intro h0
+--       simp only [h0, Function.iterate_zero, id_eq]
+--   match k2 with
+--   | 0 => by
+--     intro h0
+--     simp only [nonpos_iff_eq_zero, «IteratedPower🌸≤», Function.iterate_zero, id_eq, «∃!Sub🌸🌺»]
+--     constructor
+--     · intro h1
+--       simp only [h1, «Peano🌸»]
+--     · intro h1
+--       sorry
+--   | k3 + 1 => by
+--     sorry
 
 theorem «🌸∈Peano🌸Succ» (k : ℕ) («🪻» : «🌸») : «🌸∈» «🪻» («Peano🌸» (k + 1)) ↔ «🪻» = «Peano🌸» k := by
   constructor
@@ -940,22 +954,22 @@ theorem «Max🌸Of🌸∈🌸Peano🌸Succ» (k : ℕ) :
   simp_rw [«Peano🌸», «Max🌸Of🌸∈🌸Of1🌸»]
 
 --all «💐»=🌺 🌸s are generated by the «IteratedPower🌸» «🌸∈» the «💐»=🌺
-theorem «💐=🌺🌸∈IteratedPower🌸OfSomePeano🌸» («🪻0» : «🌸») : («💐» «🪻0» = «🌺») ↔
-  ∃ (k : ℕ), «🌸∈» «🪻0» («Power🌸»^[k] «🌺») := by
-  have h0 := «💐=🌺IteratedPower🌸≤∃» «🪻0»
-  constructor
-  · intro h1
-    simp [h1] at h0
-    choose k h0 using h0
-    use (k + 1)
-    rw [Function.iterate_succ', Function.comp_apply, «🌸∈Power🌸»]
-    rw [«IteratedPower🌸≤»] at h0
-    exact h0
-  · intro h1
-    choose k h1 using h1
-    have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
-    rw [«💐IteratedPower🌸», «💐🌺», ] at h2
-    sorry
+-- theorem «💐=🌺🌸∈IteratedPower🌸OfSomePeano🌸» («🪻0» : «🌸») : («💐» «🪻0» = «🌺») ↔
+--   ∃ (k : ℕ), «🌸∈» «🪻0» («Power🌸»^[k] «🌺») := by
+--   have h0 := «💐=🌺IteratedPower🌸≤∃» «🪻0»
+--   constructor
+--   · intro h1
+--     simp [h1] at h0
+--     choose k h0 using h0
+--     use (k + 1)
+--     rw [Function.iterate_succ', Function.comp_apply, «🌸∈Power🌸»]
+--     rw [«IteratedPower🌸≤»] at h0
+--     exact h0
+--   · intro h1
+--     choose k h1 using h1
+--     have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
+--     rw [«💐IteratedPower🌸», «💐🌺», ] at h2
+--     sorry
 
 theorem «Max🌸Of🌸∈Peano🌸» (k : ℕ) :
   «Max🌸Of🌸∈» («Peano🌸» (k + 1)) = («Peano🌸» k):= by
@@ -993,44 +1007,44 @@ theorem «🌸∈BothPeano🌸↔=» (k0 k1 : ℕ) («🪻» : «🌸») (h0 : �
     rw [h0, «Peano🌸🌸∈Succ»] at h1
     exact h1.symm
 
-theorem BadMinExample (BadMin : «🌸» → «🌸» → «🌸»)
-  (SelfBadMin : ∀ («🪻» : «🌸»), BadMin «🪻» «🪻» = «🪻»)
-  («🌸∈BadMin» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
-  «🌸∈» «🪻2» (BadMin «🪻0» «🪻1») ↔ («🌸∈» «🪻2» «🪻0» ∧ «🌸∈» «🪻2» «🪻1»))
-  («💐BadMin» : ∀ («🪻0» «🪻1» : «🌸»),
-  «💐» (BadMin «🪻0» «🪻1») = BadMin («💐» «🪻0») («💐» «🪻1»)) : False := by
-  let «🪻» := BadMin («🌸OfSmaller💐s» («Peano🌸» 1)) («🌸OfSmaller💐s» («Peano🌸» 2))
-  have h0 : «💐» «🪻» = «🌺» := by
-    rw [«💐BadMin», «💐🌸OfSmaller💐s», «💐🌸OfSmaller💐s», ← «Same🌸s🌸∈∧💐=💐↔=»,
-        «Same🌸s🌸∈», «💐🌺»]
-    simp only [«🌸∈BadMin», «¬🌸∈🌺», iff_false, not_and, «💐BadMin»,
-      «💐Peano🌸», SelfBadMin, and_true]
-    intro «🪻3» h
-    by_contra h0
-    have h1 := «🌸∈BothPeano🌸↔=» 1 2 «🪻3» h h0
-    simp only [OfNat.one_ne_ofNat] at h1
-  have h1 : ∀ («🪻3» : «🌸»), «🌸∈» «🪻3» «🪻» ↔ «💐» «🪻3» = «🌺» := by
-    intro «🪻3»
-    constructor
-    · intro h1
-      have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
-      rw [h0, «∃!Sub🌸🌺»] at h2
-      exact h2
-    · intro h5
-      unfold «🪻»
-      rw [«🌸∈BadMin», «🌸∈🌸OfSmaller💐s», «🌸∈🌸OfSmaller💐s», h5]
-      simp only [«🌺Sub🌸All», ne_eq, true_and]
-      have h7 := «Peano🌸=🌺↔0» 1
-      have h6 := «Peano🌸=🌺↔0» 2
-      simp only [one_ne_zero, iff_false, OfNat.ofNat_ne_zero] at h7 h6
-      constructor
-      · by_contra h8
-        simp only [h8, not_true_eq_false] at h7
-      · by_contra h8
-        simp only [h8, not_true_eq_false] at h6
-  have h2 : «🌸∈» «🪻» «🪻» := by
-    rw [h1, h0]
-  sorry
+-- theorem BadMinExample (BadMin : «🌸» → «🌸» → «🌸»)
+--   (SelfBadMin : ∀ («🪻» : «🌸»), BadMin «🪻» «🪻» = «🪻»)
+--   («🌸∈BadMin» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
+--   «🌸∈» «🪻2» (BadMin «🪻0» «🪻1») ↔ («🌸∈» «🪻2» «🪻0» ∧ «🌸∈» «🪻2» «🪻1»))
+--   («💐BadMin» : ∀ («🪻0» «🪻1» : «🌸»),
+--   «💐» (BadMin «🪻0» «🪻1») = BadMin («💐» «🪻0») («💐» «🪻1»)) : False := by
+--   let «🪻» := BadMin («🌸OfSmaller💐s» («Peano🌸» 1)) («🌸OfSmaller💐s» («Peano🌸» 2))
+--   have h0 : «💐» «🪻» = «🌺» := by
+--     rw [«💐BadMin», «💐🌸OfSmaller💐s», «💐🌸OfSmaller💐s», ← «Same🌸s🌸∈∧💐=💐↔=»,
+--         «Same🌸s🌸∈», «💐🌺»]
+--     simp only [«🌸∈BadMin», «¬🌸∈🌺», iff_false, not_and, «💐BadMin»,
+--       «💐Peano🌸», SelfBadMin, and_true]
+--     intro «🪻3» h
+--     by_contra h0
+--     have h1 := «🌸∈BothPeano🌸↔=» 1 2 «🪻3» h h0
+--     simp only [OfNat.one_ne_ofNat] at h1
+--   have h1 : ∀ («🪻3» : «🌸»), «🌸∈» «🪻3» «🪻» ↔ «💐» «🪻3» = «🌺» := by
+--     intro «🪻3»
+--     constructor
+--     · intro h1
+--       have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
+--       rw [h0, «∃!Sub🌸🌺»] at h2
+--       exact h2
+--     · intro h5
+--       unfold «🪻»
+--       rw [«🌸∈BadMin», «🌸∈🌸OfSmaller💐s», «🌸∈🌸OfSmaller💐s», h5]
+--       simp only [«🌺Sub🌸All», ne_eq, true_and]
+--       have h7 := «Peano🌸=🌺↔0» 1
+--       have h6 := «Peano🌸=🌺↔0» 2
+--       simp only [one_ne_zero, iff_false, OfNat.ofNat_ne_zero] at h7 h6
+--       constructor
+--       · by_contra h8
+--         simp only [h8, not_true_eq_false] at h7
+--       · by_contra h8
+--         simp only [h8, not_true_eq_false] at h6
+--   have h2 : «🌸∈» «🪻» «🪻» := by
+--     rw [h1, h0]
+--   sorry
 
 -- maybe shorter proof
 theorem «ReplaceLeavesIsPeano🌸Add» (k0 k1 : ℕ) : ReplaceLeaves («Peano🌸» k0) («Peano🌸» k1) = «Peano🌸» (k0 + k1) :=
@@ -1186,13 +1200,13 @@ axiom «🌸∈ReplaceAll🌸∈» : ∀ («🪻0» «🪻1» «🪻2» : «🌸
   («🌸∈» «🪻2» («ReplaceAll🌸∈» «🪻0» «🪻1») ↔ (∃ («🪻3» : «🌸»), («🪻2» = ReplaceAll «🪻3» «🪻1» ∧ «🌸∈» «🪻3» «🪻0»)))
 axiom «💐ReplaceAll🌸∈» : ∀ («🪻0» «🪻1» : «🌸»), «💐» («ReplaceAll🌸∈» «🪻0» «🪻1») = «Max🌸» («💐» «🪻0») («💐» «🪻1»)
 
-theorem ReplaceAllPeanoMul (k0 k1 : ℕ) : ReplaceAll («Peano🌸» k0) («Peano🌸» k1) = «Peano🌸» ((k0 + 1) * (k1 + 1) - 1) := by
-  induction k0 with
-  | zero =>
-    simp only [zero_add, one_mul, add_tsub_cancel_right]
-    rw [ReplaceAll, ← «Same🌸s🌸∈∧💐=💐↔=», «💐Peano🌸», «💐ReplaceLeaves», «💐Peano🌸», «💐ReplaceAll🌸∈»,
-      «💐Peano🌸», «💐Peano🌸», «Max🌸OfSelf», «Max🌸OfSelf», «Same🌸s🌸∈»]
-    simp only [and_true]
-    intro «🪻»
-    sorry
-  | succ k0 h0 => sorry
+-- theorem ReplaceAllPeanoMul (k0 k1 : ℕ) : ReplaceAll («Peano🌸» k0) («Peano🌸» k1) = «Peano🌸» ((k0 + 1) * (k1 + 1) - 1) := by
+--   induction k0 with
+--   | zero =>
+--     simp only [zero_add, one_mul, add_tsub_cancel_right]
+--     rw [ReplaceAll, ← «Same🌸s🌸∈∧💐=💐↔=», «💐Peano🌸», «💐ReplaceLeaves», «💐Peano🌸», «💐ReplaceAll🌸∈»,
+--       «💐Peano🌸», «💐Peano🌸», «Max🌸OfSelf», «Max🌸OfSelf», «Same🌸s🌸∈»]
+--     simp only [and_true]
+--     intro «🪻»
+--     sorry
+--   | succ k0 h0 => sorry

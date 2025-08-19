@@ -94,6 +94,12 @@ theorem «🌸Rank≤🌸Rank→🌸RankIterated💐≤🌸RankIterated💐» {�
 axiom «🌸∈» : «🌸» → «🌸» → Prop
 @[simp, grind]
 axiom «WellFounded🌸∈» : WellFounded «🌸∈»
+
+theorem «¬🌸∈Self» («🪻» : «🌸») : ¬ «🌸∈» «🪻» «🪻» := by
+  intro h0
+  have h1 := WellFounded.asymmetric «WellFounded🌸∈» «🪻» «🪻» h0
+  simp only [h0, not_true_eq_false] at h1
+
 @[simp, grind =]
 def «Empty🌸» («🪻0» : «🌸») := ∀ («🪻» : «🌸»), ¬ «🌸∈» «🪻» «🪻0»
 @[simp, grind]
@@ -1007,44 +1013,44 @@ theorem «🌸∈BothPeano🌸↔=» (k0 k1 : ℕ) («🪻» : «🌸») (h0 : �
     rw [h0, «Peano🌸🌸∈Succ»] at h1
     exact h1.symm
 
--- theorem BadMinExample (BadMin : «🌸» → «🌸» → «🌸»)
---   (SelfBadMin : ∀ («🪻» : «🌸»), BadMin «🪻» «🪻» = «🪻»)
---   («🌸∈BadMin» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
---   «🌸∈» «🪻2» (BadMin «🪻0» «🪻1») ↔ («🌸∈» «🪻2» «🪻0» ∧ «🌸∈» «🪻2» «🪻1»))
---   («💐BadMin» : ∀ («🪻0» «🪻1» : «🌸»),
---   «💐» (BadMin «🪻0» «🪻1») = BadMin («💐» «🪻0») («💐» «🪻1»)) : False := by
---   let «🪻» := BadMin («🌸OfSmaller💐s» («Peano🌸» 1)) («🌸OfSmaller💐s» («Peano🌸» 2))
---   have h0 : «💐» «🪻» = «🌺» := by
---     rw [«💐BadMin», «💐🌸OfSmaller💐s», «💐🌸OfSmaller💐s», ← «Same🌸s🌸∈∧💐=💐↔=»,
---         «Same🌸s🌸∈», «💐🌺»]
---     simp only [«🌸∈BadMin», «¬🌸∈🌺», iff_false, not_and, «💐BadMin»,
---       «💐Peano🌸», SelfBadMin, and_true]
---     intro «🪻3» h
---     by_contra h0
---     have h1 := «🌸∈BothPeano🌸↔=» 1 2 «🪻3» h h0
---     simp only [OfNat.one_ne_ofNat] at h1
---   have h1 : ∀ («🪻3» : «🌸»), «🌸∈» «🪻3» «🪻» ↔ «💐» «🪻3» = «🌺» := by
---     intro «🪻3»
---     constructor
---     · intro h1
---       have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
---       rw [h0, «∃!Sub🌸🌺»] at h2
---       exact h2
---     · intro h5
---       unfold «🪻»
---       rw [«🌸∈BadMin», «🌸∈🌸OfSmaller💐s», «🌸∈🌸OfSmaller💐s», h5]
---       simp only [«🌺Sub🌸All», ne_eq, true_and]
---       have h7 := «Peano🌸=🌺↔0» 1
---       have h6 := «Peano🌸=🌺↔0» 2
---       simp only [one_ne_zero, iff_false, OfNat.ofNat_ne_zero] at h7 h6
---       constructor
---       · by_contra h8
---         simp only [h8, not_true_eq_false] at h7
---       · by_contra h8
---         simp only [h8, not_true_eq_false] at h6
---   have h2 : «🌸∈» «🪻» «🪻» := by
---     rw [h1, h0]
---   sorry
+theorem BadMinExample (BadMin : «🌸» → «🌸» → «🌸»)
+  (SelfBadMin : ∀ («🪻» : «🌸»), BadMin «🪻» «🪻» = «🪻»)
+  («🌸∈BadMin» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»),
+  «🌸∈» «🪻2» (BadMin «🪻0» «🪻1») ↔ («🌸∈» «🪻2» «🪻0» ∧ «🌸∈» «🪻2» «🪻1»))
+  («💐BadMin» : ∀ («🪻0» «🪻1» : «🌸»),
+  «💐» (BadMin «🪻0» «🪻1») = BadMin («💐» «🪻0») («💐» «🪻1»)) : False := by
+  let «🪻» := BadMin («🌸OfSmaller💐s» («Peano🌸» 1)) («🌸OfSmaller💐s» («Peano🌸» 2))
+  have h0 : «💐» «🪻» = «🌺» := by
+    rw [«💐BadMin», «💐🌸OfSmaller💐s», «💐🌸OfSmaller💐s», ← «Same🌸s🌸∈∧💐=💐↔=»,
+        «Same🌸s🌸∈», «💐🌺»]
+    simp only [«🌸∈BadMin», «¬🌸∈🌺», iff_false, not_and, «💐BadMin»,
+      «💐Peano🌸», SelfBadMin, and_true]
+    intro «🪻3» h
+    by_contra h0
+    have h1 := «🌸∈BothPeano🌸↔=» 1 2 «🪻3» h h0
+    simp only [OfNat.one_ne_ofNat] at h1
+  have h1 : ∀ («🪻3» : «🌸»), «🌸∈» «🪻3» «🪻» ↔ «💐» «🪻3» = «🌺» := by
+    intro «🪻3»
+    constructor
+    · intro h1
+      have h2 := «🌸∈→💐Sub🌸💐» _ _ h1
+      rw [h0, «∃!Sub🌸🌺»] at h2
+      exact h2
+    · intro h5
+      unfold «🪻»
+      rw [«🌸∈BadMin», «🌸∈🌸OfSmaller💐s», «🌸∈🌸OfSmaller💐s», h5]
+      simp only [«🌺Sub🌸All», ne_eq, true_and]
+      have h7 := «Peano🌸=🌺↔0» 1
+      have h6 := «Peano🌸=🌺↔0» 2
+      simp only [one_ne_zero, iff_false, OfNat.ofNat_ne_zero] at h7 h6
+      constructor
+      · by_contra h8
+        simp only [h8, not_true_eq_false] at h7
+      · by_contra h8
+        simp only [h8, not_true_eq_false] at h6
+  have h2 : «🌸∈» «🪻» «🪻» := by
+    rw [h1, h0]
+  simp only [«¬🌸∈Self»] at h2
 
 -- maybe shorter proof
 theorem «ReplaceLeavesIsPeano🌸Add» (k0 k1 : ℕ) : ReplaceLeaves («Peano🌸» k0) («Peano🌸» k1) = «Peano🌸» (k0 + k1) :=

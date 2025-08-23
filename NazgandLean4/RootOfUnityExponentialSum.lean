@@ -5,10 +5,10 @@ set_option maxHeartbeats 0
 set_option linter.unreachableTactic false
 open Complex Classical NormedSpace BigOperators Finset Real
 
-lemma ExpTsumForm (z : ℂ) : cexp z = tsum (λ (k : ℕ) => z ^ k / k.factorial) := by
+theorem ExpTsumForm (z : ℂ) : cexp z = tsum (λ (k : ℕ) => z ^ k / k.factorial) := by
   rw [exp_eq_exp_ℂ, exp_eq_tsum_div]
 
-lemma ExpTaylorSeriesSummable (z : ℂ) : Summable (λ (k : ℕ) => z ^ k / k.factorial) := by
+theorem ExpTaylorSeriesSummable (z : ℂ) : Summable (λ (k : ℕ) => z ^ k / k.factorial) := by
   exact expSeries_div_summable ℂ z
 
 -- Rues is the Root of Unity Exponential Sum function
@@ -17,10 +17,10 @@ noncomputable
 def Rues (n : ℕ+) (z : ℂ) : ℂ :=
   tsum (λ (k : ℕ) => z ^ (n * k) / (n * k).factorial)
 
-lemma RuesSummable (n : ℕ+) (z : ℂ) : Summable (λ (k : ℕ) => z ^ (n * k) / (n * k).factorial) :=
+theorem RuesSummable (n : ℕ+) (z : ℂ) : Summable (λ (k : ℕ) => z ^ (n * k) / (n * k).factorial) :=
   (expSeries_div_summable ℂ z).comp_injective (strictMono_mul_left_of_pos n.pos).injective
 
-lemma RuesRealToReal (n : ℕ+) (x : ℝ) : (Rues n x).im = 0 := by
+theorem RuesRealToReal (n : ℕ+) (x : ℝ) : (Rues n x).im = 0 := by
   rw [Rues]
   let h₀ := ContinuousLinearMap.map_tsum Complex.imCLM (RuesSummable n x)
   simp only [imCLM_apply] at h₀
@@ -34,7 +34,7 @@ lemma RuesRealToReal (n : ℕ+) (x : ℝ) : (Rues n x).im = 0 := by
   norm_cast at *
   simp only [zero_div]
 
-lemma RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) : Rues n z = Rues n (z * rou) := by
+theorem RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) : Rues n z = Rues n (z * rou) := by
   simp_rw [Rues]
   congr
   ext1 k
@@ -44,7 +44,7 @@ lemma RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 
     exact pow_mul rou (↑n) k
   simp only [h₀, h₁, h, one_pow, mul_one]
 
-lemma RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
+theorem RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
   by_contra h₁
   rw [h₁] at h
   simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow, zero_ne_one] at h
@@ -54,18 +54,23 @@ noncomputable
 def RuesDiff (n : ℕ+) (m : ℤ) (z : ℂ) : ℂ :=
   tsum (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0)
 
-lemma RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) :
+theorem RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) :
   Summable (λ (k : ℕ) => if ↑↑n ∣ (↑k + m) then z ^ k / k.factorial else 0) := by
+  apply Summable.of_norm_bounded (Real.summable_pow_div_factorial ‖z‖)
+  intro k
+  split_ifs with h
+  · rw [norm_div, norm_pow]
+    simp only [Complex.norm_natCast, le_refl]
+  · simp only [norm_zero, norm_nonneg, pow_nonneg, Nat.cast_nonneg, div_nonneg]
+
+theorem RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
   sorry
 
-lemma RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
-  sorry
-
-lemma RuesDiffDeriv (n : ℕ+) (m : ℤ) : deriv (RuesDiff n m) = (RuesDiff n (m + 1)) := by
+theorem RuesDiffDeriv (n : ℕ+) (m : ℤ) : deriv (RuesDiff n m) = (RuesDiff n (m + 1)) := by
   refine deriv_eq ?h
   exact fun x => RuesDiffHasDeriv n m x
 
-lemma RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (RuesDiff n m) = RuesDiff n (k + m) := by
+theorem RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (RuesDiff n m) = RuesDiff n (k + m) := by
   induction' k with K Kih
   · simp only [iteratedDeriv_zero, CharP.cast_eq_zero, zero_add]
   · have h₀ := congrArg deriv Kih
@@ -75,7 +80,7 @@ lemma RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (Ru
       ring
     rw [h₁]
 
-lemma TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f : ℕ → α) {n : ℕ+} :
+theorem TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f : ℕ → α) {n : ℕ+} :
   ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
   have h₀ : (n : ℕ) ≠ 0 := PNat.ne_zero n
   let nMul : ℕ → ℕ := (λ (m : ℕ) => (n : ℕ) * m)
@@ -112,16 +117,16 @@ lemma TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f :
       simp only [Nat.cast_mul, hw]
   exact tsum_congr (h₃)
 
-lemma NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) : ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
+theorem NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) : ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
   exact TsumMulIte _
 
-lemma RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
+theorem RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
   ext1 z
   rw [Rues, RuesDiff]
   simp only [add_zero]
   rw [NeedZeroCoeff (λ (k : ℕ) => z ^ k / (Nat.factorial k)) n]
 
-lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) :
+theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) :
   RuesDiff n m (z * rou) = rou ^ (-m) * RuesDiff n m z := by
   simp_rw [RuesDiff, ←tsum_mul_left]
   congr
@@ -148,7 +153,7 @@ lemma RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou 
     ring
   · simp_rw [if_neg h₀b]
 
-lemma Dvd.dvd.addMultiple (n m k : ℤ): (n ∣ m) ↔ (n ∣ m + k * n) := by
+theorem Dvd.dvd.addMultiple (n m k : ℤ): (n ∣ m) ↔ (n ∣ m + k * n) := by
   have h₁ : n ∣ (k * n) := by
     exact Int.dvd_mul_left k n
   constructor
@@ -157,7 +162,7 @@ lemma Dvd.dvd.addMultiple (n m k : ℤ): (n ∣ m) ↔ (n ∣ m + k * n) := by
   · intros h₂
     exact (Int.dvd_add_left h₁).mp h₂
 
-lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + k * n) := by
+theorem RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + k * n) := by
   ext1 z
   simp_rw [RuesDiff]
   congr
@@ -166,7 +171,7 @@ lemma RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + 
   rw [Dvd.dvd.addMultiple (↑↑n) (↑K + m) k]
   ring_nf
 
-lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ ∈ range k,
+theorem RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ ∈ range k,
   RuesDiff (n * k) (n * k₀ + m) z := by
   simp_rw [RuesDiff]
   have h₀ : ∀ x ∈ range k,
@@ -261,12 +266,12 @@ lemma RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = 
     rw [(show ↑x + (↑↑n * ↑w + m) = ↑↑n * ↑w + ↑(x + m) by ring_nf)] at h₃
     exact (Int.dvd_iff_dvd_of_dvd_add h₃).mp h₄
 
-lemma RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
+theorem RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
   rw [RuesDiffIteratedDeriv, RuesDiffMPeriodic n m 1]
   simp only [one_mul]
   ring_nf
 
-lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
+theorem RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
   cexp (2 * ↑π * ((k * ↑x / ↑↑n) * I)) = (if ↑↑n ∣ k then ↑↑n else 0) := by
   have h₀ : ∀ (x : ℕ), (2 * ↑π * (↑k * ↑x / ↑↑n * I)) = ↑x * (2 * ↑π * (↑k / ↑↑n * I)) := by
     intros x
@@ -315,7 +320,7 @@ lemma RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
       field_simp
       ring_nf
 
-lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ ∈ range n,
+theorem RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ ∈ range n,
   cexp (z * cexp (2 * π * (k₀ / n) * I) + m * 2 * π * (k₀ / n) * I)) / n := by
   simp_rw [Complex.exp_add]
   have h₀ : ∀ (k : ℕ), cexp (z * cexp (2 * ↑π * (↑k / ↑↑n) * I)) =
@@ -362,11 +367,11 @@ lemma RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (�
   · simp_rw [if_neg hemf]
     simp only [zero_div]
 
-lemma RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff n m := by
+theorem RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff n m := by
   rw [←RuesDiffM0EqualsRues, RuesDiffIteratedDeriv]
   simp only [add_zero]
 
-lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
+theorem RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
   rw [RuesDiffMPeriodic n (m % n) (m / n)]
   nth_rw 1 [←Int.ediv_add_emod' m n]
   suffices h₀ : m / ↑↑n * ↑↑n + m % ↑↑n = m % ↑↑n + m / ↑↑n * ↑↑n
@@ -377,18 +382,18 @@ lemma RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
 noncomputable
 def RuesDiffZMod (n : ℕ+) (m : ZMod n) (z : ℂ) : ℂ := RuesDiff n m.val z
 
-lemma RuesDiffZModEqRuesDiff (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiffZMod n ↑m := by
+theorem RuesDiffZModEqRuesDiff (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiffZMod n ↑m := by
   ext1 z
   rw [RuesDiffZMod, RuesDiffMod]
   congr
   exact Eq.symm (ZMod.val_intCast m)
 
-lemma ExpPiMulIHalf : cexp (↑(π / 2) * I) = I := by
+theorem ExpPiMulIHalf : cexp (↑(π / 2) * I) = I := by
   rw [exp_mul_I]
   simp only [ofReal_div, ofReal_ofNat, Complex.cos_pi_div_two, Complex.sin_pi_div_two, one_mul,
     zero_add]
 
-lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
+theorem ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
   induction' k with K Kih
   · simp only [CharP.cast_eq_zero, mul_zero, zero_div, Complex.exp_zero, pow_zero]
   · simp_rw [Nat.cast_succ]
@@ -403,24 +408,24 @@ lemma ExpToNatPowersOfI (k : ℕ): exp (↑π * I * k / 2) = I ^ k := by
     rw [←h₂]
     exact rfl
 
-lemma RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m ∈ range n,
+theorem RuesNEqualsExpSum (n : ℕ+) (z : ℂ) : Rues n z = (∑ m ∈ range n,
   cexp (z * cexp (2 * π * (m / n) * I))) / n := by
   rw [←RuesDiffM0EqualsRues, RuesDiffEqualsExpSum]
   congr
   ext1 k
   simp only [Int.cast_zero, zero_mul, add_zero]
 
-lemma RuesZ0Equals1 (n : ℕ+) : Rues n 0 = 1 := by
+theorem RuesZ0Equals1 (n : ℕ+) : Rues n 0 = 1 := by
   rw [RuesNEqualsExpSum]
   simp only [zero_mul, Complex.exp_zero, sum_const, card_range, nsmul_eq_mul, mul_one, ne_eq,
     Nat.cast_eq_zero, PNat.ne_zero, not_false_eq_true, div_self]
 
-lemma RuesN1EqualsExp : Rues 1 = cexp := by
+theorem RuesN1EqualsExp : Rues 1 = cexp := by
   ext1 z
   rw [Rues, ExpTsumForm]
   simp only [PNat.one_coe, one_mul]
 
-lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
+theorem RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
   ext1 z
   rw [RuesNEqualsExpSum, Complex.cosh]
   have h₀ : range (2 : ℕ+) = {0, 1} := by
@@ -439,7 +444,7 @@ lemma RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
   simp_rw [h₁]
   simp only [mul_neg, mul_one]
 
-lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
+theorem RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z / (1 - I)) := by
   rw [RuesNEqualsExpSum, Complex.cosh, Complex.cosh]
   have h₀ : (4 : ℕ+) = (4 : ℕ) := by
     rfl
@@ -507,24 +512,24 @@ lemma RuesN4EqualsCoshCosh (z : ℂ) : Rues 4 z = cosh (z / (1 + I)) * cosh (z /
   simp_rw [←Complex.exp_nat_mul, ←Complex.exp_add]
   ring_nf
 
-lemma ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ ∈ range k, RuesDiff k k₀ z := by
+theorem ExpSumOfRuesDiff (k : ℕ+) (z : ℂ) : exp z = ∑ k₀ ∈ range k, RuesDiff k k₀ z := by
   rw [←RuesN1EqualsExp, ←RuesDiffM0EqualsRues]
   have h₀ := RuesDiffSumOfRuesDiff 1 k 0 z
   simp only [one_mul, PNat.val_ofNat, Nat.cast_one, add_zero] at h₀
   assumption
 
-lemma RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^ (n : ℕ) = 1 := by
+theorem RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^ (n : ℕ) = 1 := by
   rw [(Complex.exp_nat_mul _ n).symm, Complex.exp_eq_one_iff]
   use x
   field_simp
   ring_nf
 
-lemma Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
+theorem Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
     ∑ a ∈ s, ∑ b ∈ t, ∑ c ∈ u, f a b c = ∑ b ∈ t, ∑ c ∈ u, ∑ a ∈ s, f a b c := by
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
-lemma SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
+theorem SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
     (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
@@ -534,7 +539,7 @@ lemma SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α
   simp only [Nat.succ_eq_add_one, Nat.cast_add, Nat.cast_one, sum_range]
   sorry
 
-lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) =
+theorem RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) =
   ∑ k ∈ range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by
   rw [RuesDiffEqualsExpSum]
   simp only [RightDistribClass.right_distrib, Complex.exp_add, ExpSumOfRuesDiff n (z₀ * _),
@@ -579,7 +584,7 @@ lemma RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff 
       simp_rw [RuesDiffZModEqRuesDiff]
       norm_cast
 
-lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k ∈ range n,
+theorem RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = ∑ k ∈ range n,
   (RuesDiff n k z₀ * RuesDiff n (n - k) z₁) := by
   rw [←RuesDiffM0EqualsRues, RuesDiffArgumentSumRule]
   congr
@@ -589,10 +594,10 @@ lemma RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) = 
   congr 1
   ring_nf
 
-lemma RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
+theorem RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
   sorry
 
-lemma EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) :
+theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) :
   (f = iteratedDeriv n f) ↔ (f = ∑ k ∈ range n,
     (λ (z : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))) := by
   sorry

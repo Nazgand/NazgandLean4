@@ -456,7 +456,7 @@ theorem «🌺IteratedPower🌸Sub🌸» (k0 k1 : ℕ) : ∀ («🪻» : «🌸�
 
 inductive PeanoLessThan1 : «🌸» → «🌸» → Prop
   | direct : ∀ «🪻0» «🪻1», «🌸∈» «🪻0» «🪻1» → PeanoLessThan1 «🪻0» «🪻1»
-  | transitive : ∀ «🪻0» «🪻1» «🪻2», «🌸∈» «🪻2» «🪻1» → PeanoLessThan1 «🪻0» «🪻2» → PeanoLessThan1 «🪻0» «🪻1»
+  | transitive : ∀ «🪻0» «🪻1» «🪻2», PeanoLessThan1 «🪻2» «🪻1» → PeanoLessThan1 «🪻0» «🪻2» → PeanoLessThan1 «🪻0» «🪻1»
 
 axiom ReplaceLeaves : «🌸» → «🌸» → «🌸»
 axiom «ReplaceLeavesEmpty🌸» : ∀ («🪻0» «🪻1» : «🌸»), «Empty🌸» «🪻0» → «Same🌸s🌸∈» (ReplaceLeaves «🪻0» «🪻1») «🪻1»

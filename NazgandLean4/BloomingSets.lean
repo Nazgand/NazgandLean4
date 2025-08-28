@@ -2,9 +2,9 @@ import Mathlib
 import NazgandLean4.WellOrderingPrinciple
 set_option maxHeartbeats 0
 
-axiom «🌸» : Type
-axiom «🌺» : «🌸»
-axiom «💐» : «🌸» → «🌸»
+axiom «🌸» : Type -- '«🌸»' is also known as 'Bloom'
+axiom «🌺» : «🌸» -- '«🌺»' is also known as 'BaseCase'
+axiom «💐» : «🌸» → «🌸» -- '«💐»' is also known as 'Level'
 @[simp, grind]
 axiom «💐🌺» : «💐» «🌺» = «🌺»
 
@@ -110,7 +110,7 @@ axiom «Same🌸s🌸∈AllIterated💐s↔=» : ∀ («🪻0» «🪻1» : «�
   «Same🌸s🌸∈» («💐»^[k] «🪻0») («💐»^[k] «🪻1»)) ↔ «🪻0» = «🪻1»)
 
 @[simp, grind =]
-theorem «Same🌸s🌸∈∧💐=💐↔=»  («🪻0» «🪻1» : «🌸») :
+theorem «Same🌸s🌸∈∧💐=💐↔=» («🪻0» «🪻1» : «🌸») :
   («Same🌸s🌸∈» «🪻0» «🪻1» ∧ «💐» «🪻0» = «💐» «🪻1») ↔ «🪻0» = «🪻1» := by
   constructor
   · simp only [← «Same🌸s🌸∈AllIterated💐s↔=»]
@@ -465,8 +465,28 @@ axiom «💐ReplaceLeaves» : ∀ («🪻0» «🪻1» : «🌸»), «💐» (Re
 axiom «🌸∈ReplaceLeaves» : ∀ («🪻0» «🪻1» «🪻2» : «🌸»), (¬ «Empty🌸» «🪻0») →
   («🌸∈» «🪻2» (ReplaceLeaves «🪻0» «🪻1») ↔ (∃ («🪻3» : «🌸»), («🪻2» = ReplaceLeaves «🪻3» «🪻1» ∧ «🌸∈» «🪻3» «🪻0»)))
 
--- probably provable
-axiom «ReplaceLeaves🌺0» («🪻» : «🌸») : (ReplaceLeaves «🪻» «🌺») = «🪻»
+theorem «ReplaceLeaves🌺0» («🪻» : «🌸») : (ReplaceLeaves «🪻» «🌺») = «🪻» := by
+  induction «🪻» using WellFounded.induction «WellFounded🌸∈» with
+  | h «🪻» ih =>
+    rw [← «Same🌸s🌸∈∧💐=💐↔=», «💐ReplaceLeaves», «💐🌺», «SymmetricMax🌸», «Max🌸Of🌺»]
+    simp only [and_true]
+    by_cases hEmpty : «Empty🌸» «🪻»
+    case pos =>
+      have hSame : «Same🌸s🌸∈» (ReplaceLeaves «🪻» «🌺») «🌺» := by
+        apply «ReplaceLeavesEmpty🌸» _ _ hEmpty
+      have hSameBothEmpty : «Same🌸s🌸∈» «🪻» «🌺» := by
+        grind only [«¬🌸∈🌺», «Empty🌸», «Same🌸s🌸∈»]
+      grind only [«Empty🌸», «Same🌸s🌸∈»]
+    case neg =>
+      unfold «Same🌸s🌸∈»
+      intro «🪻2»
+      constructor
+      · intro hMemberReplace
+        rw [«🌸∈ReplaceLeaves» _ _ _ hEmpty] at hMemberReplace
+        grind only [«Empty🌸»]
+      · intro hMemberOriginal
+        rw [«🌸∈ReplaceLeaves» _ _ _ hEmpty]
+        grind only [«Empty🌸»]
 
 def PeanoLessThan2 («🪻0» «🪻1» : «🌸») : Prop :=
   ∃ («🪻2» : «🌸»), («🪻2» ≠ «🌺» ∧ ReplaceLeaves «🪻0» «🪻2» = «🪻1»)
@@ -795,7 +815,7 @@ theorem «ReplaceLeavesEmpty🌸Empty🌸» («🪻0» «🪻1» : «🌸») (h0
   rw [«Empty🌸»] at h1
   exact (iff_false_right (h1 «🪻»)).mp (h2 «🪻»)
 
-theorem «ReplaceLeaves🌺» («🪻» : «🌸») : (ReplaceLeaves «🌺» «🪻») = «🪻» := by
+theorem «ReplaceLeaves🌺1» («🪻» : «🌸») : (ReplaceLeaves «🌺» «🪻») = «🪻» := by
   rw [← «Same🌸s🌸∈∧💐=💐↔=», «💐ReplaceLeaves», «💐🌺», «Max🌸Of🌺»]
   have h0 := «ReplaceLeavesEmpty🌸» «🌺» «🪻» «Empty🌸🌺»
   simp only [h0, and_self]
@@ -1058,7 +1078,7 @@ theorem «ReplaceLeavesIsPeano🌸Add» (k0 k1 : ℕ) : ReplaceLeaves («Peano�
     match k2 with
     | 0 => by
       intro h
-      rw [«Peano🌸», «ReplaceLeaves🌺»]
+      rw [«Peano🌸», «ReplaceLeaves🌺1»]
       simp only [zero_add]
     | k3 + 1 => by
       intro h
@@ -1097,7 +1117,7 @@ theorem «ReplaceLeavesIsPeano🌸Add» (k0 k1 : ℕ) : ReplaceLeaves («Peano�
             match k6 with
             | 0 => by
               intro h3
-              rw [«Peano🌸», «ReplaceLeaves🌺»]
+              rw [«Peano🌸», «ReplaceLeaves🌺1»]
               simp only [zero_add]
             | k7 + 1 => by
               intro h3

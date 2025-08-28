@@ -454,9 +454,9 @@ theorem «🌺IteratedPower🌸Sub🌸» (k0 k1 : ℕ) : ∀ («🪻» : «🌸�
     rw [(show k0 + (k1 + 1) = k0 + k1 + 1 by ring), Function.iterate_succ, Function.comp_apply]
     exact h0 («Power🌸» «🪻»)
 
-inductive PeanoLessThan1 : «🌸» → «🌸» → Prop
-  | direct : ∀ «🪻0» «🪻1», «🌸∈» «🪻0» «🪻1» → PeanoLessThan1 «🪻0» «🪻1»
-  | transitive : ∀ «🪻0» «🪻1» «🪻2», PeanoLessThan1 «🪻2» «🪻1» → PeanoLessThan1 «🪻0» «🪻2» → PeanoLessThan1 «🪻0» «🪻1»
+inductive «Iterated🌸∈» : «🌸» → «🌸» → Prop
+  | direct : ∀ «🪻0» «🪻1», «🌸∈» «🪻0» «🪻1» → «Iterated🌸∈» «🪻0» «🪻1»
+  | transitive : ∀ «🪻0» «🪻1» «🪻2», «Iterated🌸∈» «🪻0» «🪻1» → «Iterated🌸∈» «🪻1» «🪻2» → «Iterated🌸∈» «🪻0» «🪻2»
 
 axiom ReplaceLeaves : «🌸» → «🌸» → «🌸»
 axiom «ReplaceLeavesEmpty🌸» : ∀ («🪻0» «🪻1» : «🌸»), «Empty🌸» «🪻0» → «Same🌸s🌸∈» (ReplaceLeaves «🪻0» «🪻1») «🪻1»
@@ -809,7 +809,7 @@ theorem «¬Sub🌸→Not🌺» («🪻0» «🪻1» : «🌸») (h : ¬ «Sub�
   rw [h0] at h
   simp only [«🌺Sub🌸All» «🪻1», not_true_eq_false] at h
 
--- theorem «PeanoLessThan1ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ PeanoLessThan1 («Peano🌸» k0) («Peano🌸» k1) := by
+-- theorem «Iterated🌸∈ForPeano🌸» (k0 k1 : ℕ) : k0 < k1 ↔ «Iterated🌸∈» («Peano🌸» k0) («Peano🌸» k1) := by
 --   constructor
 --   · intro h0
 --     sorry

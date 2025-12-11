@@ -2,6 +2,9 @@ import Mathlib
 set_option maxHeartbeats 0
 open Classical Finset
 
+lemma ImpliesIff (p₀ p₁ : Prop) : (p₀ → p₁) ↔ (p₁ ↔ (p₀ ∨ p₁)) := by
+  tauto
+
 lemma impliesOr (p q r : Prop) : (p → (q ∨ r)) ↔ ((p → q) ∨ (p → r)) := by
   tauto
 

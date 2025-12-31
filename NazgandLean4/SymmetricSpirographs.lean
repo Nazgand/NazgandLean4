@@ -110,11 +110,10 @@ lemma SimpleGeneralSpiro (k : ℕ+) (m : ℤ) (g : ℂ → ℂ)
   intros t
   rw [(show I * (t + 2 * ↑π / ↑↑k) * ↑m = (I * 2 * ↑m * ↑π / ↑↑k) + (I * t * ↑m) by ring), Complex.exp_add]
   field_simp
-  have h₀ : (I * (t * ↑↑k + 2 * ↑π)).exp = (I * t * ↑↑k).exp := by
-    rw [(show I * (t * ↑↑k + 2 * ↑π) = I * t * ↑↑k + 2 * ↑π * I by ring), Complex.exp_add, Complex.exp_two_pi_mul_I]
+  have h₀ : (I * (↑↑k * t + 2 * ↑π)).exp = (I * ↑↑k * t).exp := by
+    rw [(show I * (↑↑k * t + 2 * ↑π) = I * ↑↑k * t + 2 * ↑π * I by ring), Complex.exp_add, Complex.exp_two_pi_mul_I]
     simp only [mul_one]
   rw [h₀]
-  ring
 
 lemma SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k₀ m) :
   (λ (t : ℂ) => (f₀ (t * k₁ / k₀)) ^ (k₀ : ℕ)) ∈ SetSpiro k₁ (m * k₁) := by

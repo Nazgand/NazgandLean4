@@ -10,9 +10,8 @@ def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqtstn1₀, Soqtstn1₁]
-  simp only [Quaternion.ext_iff, Quaternion.re_neg, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
-    neg_zero, mul_imI, neg_imJ, QuaternionAlgebra.one_imJ, mul_imJ, neg_imK,
-    QuaternionAlgebra.one_imK, mul_imK]
+  simp only [Quaternion.ext_iff, re_neg, re_one, re_mul, imI_neg, imI_one, neg_zero, imI_mul,
+    imJ_neg, imJ_one, imJ_mul, imK_neg, imK_one, imK_mul]
   constructor
   · intros ha
     use x
@@ -98,9 +97,8 @@ def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qi
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₀, Soqqtstqm1₁]
-  simp only [Quaternion.ext_iff, sub_re, QuaternionAlgebra.one_re, mul_re, sub_imI, QuaternionAlgebra.one_imI,
-    sub_zero, mul_imI, sub_imJ, QuaternionAlgebra.one_imJ, mul_imJ, sub_imK,
-    QuaternionAlgebra.one_imK, mul_imK, one_div]
+  simp only [Quaternion.ext_iff, re_sub, re_one, re_mul, imI_sub, imI_one, sub_zero, imI_mul,
+    imJ_sub, imJ_one, imJ_mul, imK_sub, imK_one, imK_mul, one_div]
   ring_nf
   simp only [one_div]
   constructor
@@ -190,7 +188,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₁, Soqqtstqm1₃, Soqtstn1₁]
-  simp only [one_div, Quaternion.ext_iff, Quaternion.re_add, Quaternion.imI_add, Quaternion.imJ_add, Quaternion.imK_add]
+  simp only [one_div, Quaternion.ext_iff, re_add, imI_add, imJ_add, imK_add]
   constructor
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩

@@ -291,7 +291,8 @@ theorem RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
       field_simp
       simp only [Int.cast_mul, Int.cast_natCast]
       suffices h₃ : cexp (2 * ↑π * (↑k₂ * I)) = 1
-      · rw [h₃]
+      · rw [(show 2 * ↑π * (↑↑n * ↑k₂) * I / ↑↑n = 2 * ↑π * (↑k₂ * I) by field_simp [h₂])]
+        rw [h₃]
         simp only [one_pow]
       · refine Complex.exp_eq_one_iff.mpr ?h₃.a
         use k₂
@@ -306,6 +307,7 @@ theorem RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
       rw [(show 2 * ↑π * (↑k / ↑↑n * I) = (↑k / ↑↑n) * (2 * ↑π * I) by ring)] at h
       have h₃ := mul_right_cancel₀ Complex.two_pi_I_ne_zero h
       field_simp at h₃
+      rw [mul_comm] at h₃
       have h₄ : k = m * n := by
         exact mod_cast h₃
       have h₅ : (n : ℤ) ∣ k := by
@@ -320,7 +322,6 @@ theorem RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
       refine Complex.exp_eq_one_iff.mpr ?h₁.a
       use k
       field_simp
-      ring_nf
 
 theorem RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (∑ k₀ ∈ range n,
   cexp (z * cexp (2 * π * (k₀ / n) * I) + m * 2 * π * (k₀ / n) * I)) / n := by

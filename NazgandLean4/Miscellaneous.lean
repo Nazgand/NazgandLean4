@@ -45,7 +45,34 @@ theorem GeneralPigeonholePrinciple₁ (k : ℕ) (f : ℕ → ℝ) (slb : ℝ)
 theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f) (z₀ : ℂ) (k : ℕ) (h1 : k > 0) :
   deriv f = (λ (z : ℂ) ↦ z₀ * (f (z / k)) ^ k) ↔
   f = (λ (z : ℂ) ↦ (f 0) * ((f 0) ^ (k - 1) * z₀ * z).exp) := by
-  sorry
+  constructor
+  · sorry
+  · intro h
+    rw [h]
+    ext z
+    rw [deriv_const_mul]
+    · have h_inner : DifferentiableAt ℂ (fun z => (f 0) ^ (k - 1) * z₀ * z) z := by
+        apply DifferentiableAt.mul
+        · apply differentiableAt_const
+        · apply differentiableAt_id
+      change f 0 * deriv (Complex.exp ∘ (fun z => (f 0) ^ (k - 1) * z₀ * z)) z = _
+      rw [deriv_comp z Complex.differentiableAt_exp h_inner]
+      rw [deriv_const_mul _ differentiableAt_id]
+      rw [Complex.deriv_exp]
+      simp only [deriv_id'']
+      have hk : (k : ℂ) ≠ 0 := by
+        norm_cast
+        exact Nat.pos_iff_ne_zero.mp h1
+      rw [mul_pow, ←Complex.exp_nat_mul]
+      field_simp [hk]
+      ring_nf
+      have h_pow : k - 1 + 1 = k := Nat.sub_add_cancel (Nat.succ_le_of_lt h1)
+      rw [←pow_succ', h_pow]
+    · apply DifferentiableAt.comp
+      · apply Complex.differentiableAt_exp
+      · apply DifferentiableAt.mul
+        · apply differentiableAt_const
+        · apply differentiableAt_id
 
 theorem SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) :
   {r : ℝ | ∃(dv : ℕ → ℕ), ((∀(d : ℕ), db d > dv d) ∧

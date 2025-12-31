@@ -51,13 +51,11 @@ lemma SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) :
   have h₁ := SpiroPseudoPeriodic k m h₀ k t
   have h₂ : (2 : ℂ) * ↑↑↑k * ↑π / ↑↑k = 2 * ↑π := by
     field_simp
-    ring
   simp only [Int.cast_natCast] at *
   rw [h₂] at h₁
   rw [h₁]
   have h₃ : I * 2 * ↑↑k * ↑m * ↑π / ↑↑k = ↑m * 2 * ↑π * I := by
     field_simp
-    ring
   rw [h₃]
   have h₄ : (↑m * 2 * ↑π * I).exp = 1 := by
     rw [Complex.exp_eq_one_iff]
@@ -86,12 +84,10 @@ lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) 
   simp only [Int.cast_natCast] at h₁
   have h₅ : (2 : ℂ) * (↑↑k / ↑(m.gcd ↑↑k)) * ↑π / ↑↑k = 2 * ↑π / ↑(m.gcd ↑↑k) := by
     field_simp
-    ring_nf
   rw [h₅] at h₁
   rw [h₁]
   have h₆ : (I * 2 * (↑↑k / ↑(m.gcd ↑↑k)) * ↑m * ↑π / ↑↑k) = (I * 2 * ↑m * ↑π / ↑(m.gcd ↑↑k)) := by
     field_simp
-    ring_nf
   rw [h₆]
   have h₇ : ↑(Int.gcd m k) ∣ m := Int.gcd_dvd_left m ↑↑k
   obtain ⟨w₂, hw₂⟩ := h₇
@@ -99,6 +95,7 @@ lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) 
   have h₈ : I * 2 * ↑(↑(m.gcd ↑↑k) * w₂) * ↑π / ↑(m.gcd ↑↑k) = I * 2 * ↑π * ↑w₂ := by
     field_simp
     ring_nf
+    simp only [Int.cast_mul, Int.cast_natCast]
   rw [h₈]
   suffices h₉ : (I * 2 * ↑π * ↑w₂).exp = 1
   rw [h₉]
@@ -130,7 +127,6 @@ lemma SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSp
   ring_nf
   congr 1
   field_simp
-  ring_nf
 
 lemma SetSpiroRelated2 {f₀} (k: ℕ+) (m₀ m₁ : ℤ) (h₀ : f₀ ∈ SetSpiro k m₀) :
   (λ (t : ℂ) => exp (I * t * (m₁ - m₀)) * (f₀ t)) ∈ SetSpiro k m₁ := by

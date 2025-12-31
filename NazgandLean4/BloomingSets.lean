@@ -859,7 +859,7 @@ theorem «Peano🌸🌸∈Succ» (k0 k1 : ℕ) : «🌸∈» («Peano🌸» k0) 
   constructor
   · induction k1 with
     | zero =>
-      simp only [right_eq_add, Nat.add_eq_zero, one_ne_zero, and_false, imp_false, «Peano🌸», «¬🌸∈🌺»]
+      simp only [right_eq_add, Nat.add_eq_zero_iff, one_ne_zero, and_false, imp_false, «Peano🌸», «¬🌸∈🌺»]
       exact fun a => a
     | succ k2 ih =>
       rw [«Peano🌸», «🌸∈🌸Of1🌸»]

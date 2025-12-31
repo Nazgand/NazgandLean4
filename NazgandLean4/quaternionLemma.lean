@@ -10,7 +10,7 @@ def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqtstn1₀, Soqtstn1₁]
-  simp only [Quaternion.ext_iff, neg_re, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
+  simp only [Quaternion.ext_iff, Quaternion.re_neg, QuaternionAlgebra.one_re, mul_re, neg_imI, QuaternionAlgebra.one_imI,
     neg_zero, mul_imI, neg_imJ, QuaternionAlgebra.one_imJ, mul_imJ, neg_imK,
     QuaternionAlgebra.one_imK, mul_imK]
   constructor
@@ -190,7 +190,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp [Soqqtstqm1₁, Soqqtstqm1₃, Soqtstn1₁]
-  simp only [one_div, Quaternion.ext_iff, add_re, add_imI, add_imJ, add_imK]
+  simp only [one_div, Quaternion.ext_iff, Quaternion.re_add, Quaternion.imI_add, Quaternion.imJ_add, Quaternion.imK_add]
   constructor
   · intros h₀
     rcases h₀ with ⟨rx, ry, rz, hx, hSphere⟩

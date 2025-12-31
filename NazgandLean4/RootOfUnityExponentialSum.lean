@@ -149,6 +149,7 @@ theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : ro
       have h₅ : rou ^ m ≠ 0 := by
         exact zpow_ne_zero m h₄
       field_simp
+      exact rfl
     rw [h₁]
     ring
   · simp_rw [if_neg h₀b]
@@ -207,7 +208,7 @@ theorem RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z 
       exact (mul_lt_iff_lt_one_right h₆).mp h₄
     nth_rw 1 [(show -(k : ℤ) = ↑↑k * -1 by ring)] at h₅
     have h₈ : -1 < y := by
-      exact (mul_lt_mul_left h₆).mp h₅
+      exact (Int.mul_lt_mul_left h₆).mp h₅
     have h₉ : y = 0 := by
       linarith
     rw [h₉] at h₃
@@ -288,6 +289,7 @@ theorem RouGeometricSumEqIte (n : ℕ+) (k : ℤ): ∑ x ∈ range ↑n,
       obtain ⟨k₂, kDiv⟩ := hemt
       rw [kDiv]
       field_simp
+      simp only [Int.cast_mul, Int.cast_natCast]
       suffices h₃ : cexp (2 * ↑π * (↑k₂ * I)) = 1
       · rw [h₃]
         simp only [one_pow]
@@ -373,7 +375,7 @@ theorem RuesNMthIteratedDeriv (n m : ℕ+) : iteratedDeriv m (Rues n) = RuesDiff
 
 theorem RuesDiffMod (n : ℕ+) (m : ℤ) : RuesDiff n m = RuesDiff n (m % n) := by
   rw [RuesDiffMPeriodic n (m % n) (m / n)]
-  nth_rw 1 [←Int.ediv_add_emod' m n]
+  nth_rw 1 [←Int.ediv_mul_add_emod m n]
   suffices h₀ : m / ↑↑n * ↑↑n + m % ↑↑n = m % ↑↑n + m / ↑↑n * ↑↑n
   exact congrArg (RuesDiff n) h₀
   ring_nf
@@ -437,6 +439,7 @@ theorem RuesN2EqualsCosh : Rues 2 = Complex.cosh := by
     Multiset.map_singleton, Nat.cast_one, one_div, Multiset.sum_cons, Multiset.sum_singleton]
   have h₁ : cexp (2 * ↑π * (↑↑(2 : ℕ+))⁻¹ * I) = -1 := by
     have h₂ : 2 * (π : ℂ) * (↑↑(2 : ℕ+))⁻¹ = π := by
+      simp only [PNat.val_ofNat, Nat.cast_ofNat]
       field_simp
     rw [h₂]
     simp only [exp_pi_mul_I]
@@ -522,7 +525,7 @@ theorem RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^
   rw [(Complex.exp_nat_mul _ n).symm, Complex.exp_eq_one_iff]
   use x
   field_simp
-  ring_nf
+  exact rfl
 
 theorem Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
     ∑ a ∈ s, ∑ b ∈ t, ∑ c ∈ u, f a b c = ∑ b ∈ t, ∑ c ∈ u, ∑ a ∈ s, f a b c := by

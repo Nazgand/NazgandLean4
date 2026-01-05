@@ -639,7 +639,127 @@ theorem RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : �
     · rw [zero_pow hb, zero_div]
     · rfl
 
-theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) :
+theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) (df : Differentiable ℂ f) :
   (f = iteratedDeriv n f) ↔ (f = ∑ k ∈ range n,
-    (λ (z : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))) := by
-  sorry
+    (λ (_ : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))) := by
+  let g := ∑ k ∈ range n, (λ (z : ℂ) => iteratedDeriv k f 0) * (RuesDiff n (-k))
+  have h_lin_g : ∀ (m : ℕ), iteratedDeriv m g =
+    ∑ k ∈ range n, (λ (z : ℂ) => iteratedDeriv k f 0) * iteratedDeriv m (RuesDiff n (-k)) := by
+    intro m
+    induction m with
+    | zero =>
+      dsimp [g]
+      rfl
+    | succ m ih =>
+      rw [iteratedDeriv_succ, ih]
+      ext z
+      rw [deriv_sum]
+      · simp_rw [Finset.sum_apply]
+        apply sum_congr rfl
+        intros x hx
+        simp only [Pi.mul_apply]
+        rw [show ((fun z => iteratedDeriv x f 0) * iteratedDeriv m (RuesDiff n (-↑x))) =
+                 (fun z => iteratedDeriv x f 0 * iteratedDeriv m (RuesDiff n (-↑x)) z) by rfl]
+        rw [deriv_const_mul]
+        · rw [iteratedDeriv_succ]
+        · rw [RuesDiffIteratedDeriv]
+          apply HasDerivAt.differentiableAt (RuesDiffHasDeriv _ _ _)
+      · intros x hx
+        apply DifferentiableAt.const_mul
+        rw [RuesDiffIteratedDeriv]
+        apply HasDerivAt.differentiableAt (RuesDiffHasDeriv _ _ _)
+  have hg_sol : g = iteratedDeriv n g := by
+    nth_rewrite 1 [h_lin_g n]
+    apply sum_congr rfl
+    intros k hk
+    rw [RuesDiffIteratedDeriv]
+    rw [RuesDiffMPeriodic n (-k) 1]
+    ring_nf
+  constructor
+  · intro h
+    -- initial conditions
+    have h_init : ∀ k ∈ range n, iteratedDeriv k g 0 = iteratedDeriv k f 0 := by
+      intros k hk
+      rw [h_lin_g k]
+      simp only [sum_apply, Pi.mul_apply]
+      rw [Finset.sum_eq_single k]
+      · rw [RuesDiffIteratedDeriv, RuesDiffZ0EqualsIte]
+        simp only [add_neg_cancel, dvd_zero, ↓reduceIte, mul_one]
+      · intros b hb_range hb_ne
+        rw [RuesDiffIteratedDeriv, RuesDiffZ0EqualsIte]
+        simp only [mul_ite, mul_one, mul_zero, ite_eq_right_iff]
+        have h_ndiv : ¬ (n : ℤ) ∣ ↑k + -↑b := by
+          rw [Int.add_neg_eq_sub, ←Int.modEq_iff_dvd]
+          intro h_eq
+          apply hb_ne
+          apply Nat.ModEq.eq_of_lt_of_lt
+          · exact Int.natCast_modEq_iff.mp h_eq
+          · exact mem_range.mp hb_range
+          · exact mem_range.mp hk
+        simp only [h_ndiv, IsEmpty.forall_iff]
+      · intro h_nmem
+        exfalso
+        exact h_nmem hk
+    -- uniqueness
+    ext z
+    have h_all_derivs : ∀ k, iteratedDeriv k f 0 = iteratedDeriv k g 0 := by
+      intro k
+      let q := k / n
+      let r := k % n
+      have hk_eq : k = q * n + r := by
+        nth_rewrite 1 [←Nat.div_add_mod k n]
+        ring
+      rw [hk_eq]
+      -- periodicity of f
+      have hf_per : iteratedDeriv (q * n + r) f = iteratedDeriv r f := by
+        induction q with
+        | zero => simp only [zero_mul, zero_add]
+        | succ q ih =>
+          rw [show (q + 1) * ↑n + r = ↑n + (q * ↑n + r) by ring]
+          simp only [iteratedDeriv_eq_iterate] at h ih ⊢
+          rw [Function.iterate_add_apply, ih]
+          nth_rewrite 1 [← Function.iterate_add_apply, add_comm _ (r : ℕ), Function.iterate_add_apply, h.symm]
+          rfl
+      -- periodicity of g
+      have hg_per : iteratedDeriv (q * n + r) g = iteratedDeriv r g := by
+         induction q with
+        | zero => simp only [zero_mul, zero_add]
+        | succ q ih =>
+          rw [show (q + 1) * ↑n + r = ↑n + (q * ↑n + r) by ring]
+          simp only [iteratedDeriv_eq_iterate] at hg_sol ih ⊢
+          rw [Function.iterate_add_apply, ih]
+          nth_rewrite 1 [← Function.iterate_add_apply, add_comm _ (r : ℕ), Function.iterate_add_apply, hg_sol.symm]
+          rfl
+      rw [hf_per, hg_per]
+      rw [h_init]
+      exact mem_range.mpr (Nat.mod_lt k n.pos)
+    have hg_diff : Differentiable ℂ g := by
+       dsimp only [g]
+       apply Differentiable.sum
+       intro k _
+       apply Differentiable.mul
+       · intro z
+         apply differentiableAt_const
+       · intro z
+         apply (RuesDiffHasDeriv n (-↑k : ℤ) z).differentiableAt
+    have hf_ana : ∀ z, AnalyticAt ℂ f z := fun z => df.analyticAt z
+    have hg_ana : ∀ z, AnalyticAt ℂ g z := fun z => hg_diff.analyticAt z
+    have h_eq : f = g := by
+      apply AnalyticOnNhd.eq_of_eventuallyEq (𝕜 := ℂ)
+      · intros x _; exact hf_ana x
+      · intros x _; exact hg_ana x
+      · have hf_ser := (hf_ana 0).hasFPowerSeriesAt
+        have hg_ser := (hg_ana 0).hasFPowerSeriesAt
+        have h_ser_eq : (FormalMultilinearSeries.ofScalars ℂ (fun n ↦ iteratedDeriv n f 0 / n.factorial)) =
+                        (FormalMultilinearSeries.ofScalars ℂ (fun n ↦ iteratedDeriv n g 0 / n.factorial)) := by
+          ext n
+          simp [h_all_derivs]
+        have h_sub_ser := hf_ser.sub hg_ser
+        rw [h_ser_eq, sub_self] at h_sub_ser
+        have h_sub_ev := h_sub_ser.eventually_eq_zero
+        filter_upwards [h_sub_ev] with x hx
+        simp [sub_eq_zero] at hx
+        exact hx
+    exact congr_fun h_eq z
+  · intro h
+    exact h.trans (hg_sol.trans (congr_arg (iteratedDeriv (↑n)) h).symm)

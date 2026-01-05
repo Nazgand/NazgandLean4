@@ -2,6 +2,20 @@ import Mathlib
 set_option maxHeartbeats 0
 open Quaternion Classical
 
+lemma InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := Eq.symm (coe_inv x)
+
+lemma InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
+  rw [(show (2 : ℍ) = ↑(2 : ℝ) by rfl), InvQuaternionOfReal 2]
+  norm_num
+
+macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+  imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
+  not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
+  zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
+  Real.sqrt_eq_zero, zero_add, add_zero, imJ_mul, imK_mul, imI_smul, imJ_smul,
+  imK_smul, one_div, re_sub, imI_sub, imJ_sub, imK_sub, re_add, imI_add, imJ_add, imK_add,
+  re_neg, imI_neg, imJ_neg, imK_neg, re_one, imI_one, imJ_one, imK_one, Quaternion.ext_iff])
+
 --declare a Set Of Quaternions That Square To Negative 1
 def Soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
 def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 1)}
@@ -10,8 +24,7 @@ def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqtstn1₀, Set.mem_setOf_eq, Soqtstn1₁]
-  simp only [Quaternion.ext_iff, re_neg, re_one, re_mul, imI_neg, imI_one, neg_zero, imI_mul,
-    imJ_neg, imJ_one, imJ_mul, imK_neg, imK_one, imK_mul]
+  quat_simp
   constructor
   · intros ha
     use x
@@ -91,8 +104,7 @@ def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qi
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqqtstqm1₀, Set.mem_setOf_eq, Soqqtstqm1₁]
-  simp only [Quaternion.ext_iff, re_sub, re_one, re_mul, imI_sub, imI_one, sub_zero, imI_mul,
-    imJ_sub, imJ_one, imJ_mul, imK_sub, imK_one, imK_mul, one_div]
+  quat_simp
   ring_nf
   simp only [one_div]
   constructor
@@ -171,26 +183,9 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     rcases h₀ with ⟨hNorm, hr⟩
     simp only [hr, and_self, true_and]
     have hNormSqMr := congrArg (λ (x₀ : ℝ) => x₀ * x₀ - 1 / 4) hNorm
-    simp only [one_div, mul_one, ←Quaternion.normSq_eq_norm_mul_self, Quaternion.normSq_def'] at hNormSqMr
-    simp only [hr, inv_pow] at hNormSqMr
-    ring_nf at hNormSqMr
-    ring_nf
+    simp only [hr, ← normSq_eq_norm_mul_self, normSq_def', inv_pow, one_div, mul_one] at hNormSqMr
+    ring_nf at hNormSqMr ⊢
     rw [hNormSqMr]
-
-lemma InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := by
-  simp only [inv_def, normSq_def, star_coe, re_mul, re_coe, imI_coe, mul_zero, sub_zero, imJ_coe,
-    imK_coe, mul_inv_rev, coe_inv]
-
-lemma InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
-  rw [(show (2 : ℍ) = ↑(2 : ℝ) by rfl), InvQuaternionOfReal 2]
-  norm_num
-
-macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
-  imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
-  not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
-  zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
-  Real.sqrt_eq_zero, zero_add, add_zero, imJ_mul, imK_mul, Quaternion.imI_smul, Quaternion.imJ_smul,
-  Quaternion.imK_smul, InvTwo, one_div])
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
@@ -212,8 +207,8 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
         have h3g0 : (0 : ℝ) ≤ 3 := by linarith
         simp only [inv_pow, Real.sq_sqrt h3g0]
         have hSphere₂ := congrArg (λ (x₀ : ℝ) => x₀ * 4 / 3) hSphere
-        simp only [isUnit_iff_ne_zero, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
-          IsUnit.div_mul_cancel, div_self] at hSphere₂
+        simp only at hSphere₂
+        norm_num at hSphere₂
         rw [←hSphere₂]
         ring
     · have h2 : (2 : ℍ) = ↑(2 : ℝ) := rfl

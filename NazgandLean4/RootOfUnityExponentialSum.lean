@@ -539,9 +539,42 @@ theorem SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : 
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
   refine sum_congr rfl ?_
   intros k hk
-  rcases Nat.exists_eq_succ_of_ne_zero hn with ⟨n₀, rfl⟩
-  simp only [Nat.succ_eq_add_one, Nat.cast_add, Nat.cast_one, sum_range]
-  sorry
+  haveI : NeZero n := ⟨hn⟩
+  let j_sol := ((m - k : ZMod n).val)
+  rw [Finset.sum_eq_single j_sol]
+  · have h_cast : (j_sol : ZMod n) = m - k := by
+      dsimp only [j_sol]
+      apply ZMod.val_injective n
+      rw [ZMod.val_natCast, Nat.mod_eq_of_lt (ZMod.val_lt _)]
+    have h_div : ↑n ∣ m - ↑k - ↑j_sol := by
+      rw [←CharP.intCast_eq_zero_iff (ZMod n) n]
+      simp only [Int.cast_sub, Int.cast_natCast, j_sol]
+      rw [h_cast]
+      simp only [sub_self]
+    simp only [if_pos h_div]
+    congr
+  · intros b hb_range hb_ne
+    rw [if_neg]
+    intro h_div
+    apply hb_ne
+    rw [←CharP.intCast_eq_zero_iff (ZMod n) n] at h_div
+    simp only [Int.cast_sub, Int.cast_natCast] at h_div
+    rw [sub_eq_zero] at h_div
+    -- h_div is: m - k = b
+    have h_cast : (j_sol : ZMod n) = m - k := by
+      dsimp only [j_sol]
+      apply ZMod.val_injective n
+      rw [ZMod.val_natCast, Nat.mod_eq_of_lt (ZMod.val_lt _)]
+    have h_eq : (b : ZMod n) = (j_sol : ZMod n) := by
+      rw [←h_div]
+      exact h_cast.symm
+    replace h_eq := congrArg ZMod.val h_eq
+    rw [ZMod.val_natCast, ZMod.val_natCast, Nat.mod_eq_of_lt (mem_range.mp hb_range),
+      Nat.mod_eq_of_lt (ZMod.val_lt _)] at h_eq
+    exact h_eq
+  · intro h
+    exfalso
+    exact h (mem_range.mpr (ZMod.val_lt (m - k : ZMod n)))
 
 theorem RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDiff n m (z₀ + z₁) =
   ∑ k ∈ range n, (RuesDiff n k z₀ * RuesDiff n (m - k) z₁) := by

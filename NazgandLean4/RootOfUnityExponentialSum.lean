@@ -632,7 +632,12 @@ theorem RuesArgumentSumRule (n : ℕ+) (z₀ z₁ : ℂ) : Rues n (z₀ + z₁) 
   ring_nf
 
 theorem RuesDiffZ0EqualsIte (n : ℕ+) (m : ℤ) : RuesDiff n m 0 = ite ((n : ℤ) ∣ m) 1 0  := by
-  sorry
+  rw [RuesDiff, tsum_eq_single 0]
+  · simp only [Nat.cast_zero, zero_add, pow_zero, Nat.factorial_zero, Nat.cast_one, div_one]
+  · intros b hb
+    split_ifs
+    · rw [zero_pow hb, zero_div]
+    · rfl
 
 theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) :
   (f = iteratedDeriv n f) ↔ (f = ∑ k ∈ range n,

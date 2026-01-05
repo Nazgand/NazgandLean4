@@ -1,5 +1,9 @@
--- PDF document this is based on: https://github.com/Nazgand/NazgandMathBook/blob/master/RootOfUnityExponentialSumFunction.pdf
--- LEAN 3 code for this: https://github.com/Nazgand/NazgandMathBook/blob/master/NazgandLean3/src/RootOfUnityExponentialSum.lean
+/-
+PDF document this is based on:
+https://github.com/Nazgand/NazgandMathBook/blob/master/RootOfUnityExponentialSumFunction.pdf
+LEAN 3 code for this:
+https://github.com/Nazgand/NazgandMathBook/blob/master/NazgandLean3/src/RootOfUnityExponentialSum.lean
+-/
 import Mathlib
 set_option maxHeartbeats 0
 set_option linter.unreachableTactic false
@@ -34,17 +38,18 @@ theorem RuesRealToReal (n : ℕ+) (x : ℝ) : (Rues n x).im = 0 := by
   norm_cast at *
   simp only [zero_div]
 
-theorem RuesRotationallySymmetric (n : ℕ+) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) : Rues n z = Rues n (z * rou) := by
+theorem RuesRotationallySymmetric (n : ℕ+) (z Rou : ℂ) (h : Rou ^ (n : ℕ) = 1) :
+  Rues n z = Rues n (z * Rou) := by
   simp_rw [Rues]
   congr
   ext1 k
-  have h₀ : (z * rou) ^ (n * k) = z ^ (n * k) * rou ^ (n * k) := by
-    exact mul_pow z rou (↑n * k)
-  have h₁ : rou ^ (n * k) = (rou ^ (n : ℕ)) ^ k := by
-    exact pow_mul rou (↑n) k
+  have h₀ : (z * Rou) ^ (n * k) = z ^ (n * k) * Rou ^ (n * k) := by
+    exact mul_pow z Rou (↑n * k)
+  have h₁ : Rou ^ (n * k) = (Rou ^ (n : ℕ)) ^ k := by
+    exact pow_mul Rou (↑n) k
   simp only [h₀, h₁, h, one_pow, mul_one]
 
-theorem RouNot0 (n : ℕ+) (rou : ℂ) (h : rou ^ (n : ℕ) = 1) : rou ≠ 0 := by
+theorem RouNot0 (n : ℕ+) (Rou : ℂ) (h : Rou ^ (n : ℕ) = 1) : Rou ≠ 0 := by
   by_contra h₁
   rw [h₁] at h
   simp only [ne_eq, PNat.ne_zero, not_false_eq_true, zero_pow, zero_ne_one] at h
@@ -63,14 +68,78 @@ theorem RuesDiffSummable (n : ℕ+) (m : ℤ) (z : ℂ) :
     simp only [Complex.norm_natCast, le_refl]
   · simp only [norm_zero, norm_nonneg, pow_nonneg, Nat.cast_nonneg, div_nonneg]
 
-theorem RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) : HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
-  sorry
+theorem RuesDiffHasDeriv (n : ℕ+) (m : ℤ) (z : ℂ) :
+    HasDerivAt (RuesDiff n m) (RuesDiff n (m + 1) z) z := by
+  let f : ℕ → ℂ → ℂ := fun k w ↦ if (n : ℤ) ∣ (k : ℤ) + m then w ^ k / k.factorial else 0
+  let f' : ℕ → ℂ → ℂ := fun k w ↦ if (n : ℤ) ∣ (k : ℤ) + m then
+    (if k = 0 then 0 else w ^ (k - 1) / (k - 1).factorial) else 0
+  let R := ‖z‖ + 1
+  let u : ℕ → ℝ := fun k ↦ if k = 0 then 0 else R ^ (k - 1) / (k - 1).factorial
+  have h_sum_u : Summable u := by
+    rw [(summable_nat_add_iff 1).symm]
+    have h_eq : (fun k ↦ u (k + 1)) = (fun k ↦ R ^ k / k.factorial) := by
+      ext k
+      simp [u]
+    rw [h_eq]
+    exact expSeries_div_summable ℝ R
+  have h_deriv : ∀ k, ∀ w ∈ Metric.ball z 1, HasDerivAt (f k) (f' k w) w := by
+    intros k w hw
+    dsimp [f, f']
+    split_ifs with h_div
+    · rcases k with - | k
+      · simp only [pow_zero, Nat.factorial_zero, Nat.cast_one, div_one]
+        exact hasDerivAt_const w 1
+      · contradiction
+    · rename_i h_k0
+      have : (k : ℂ) ≠ 0 := by norm_cast
+      convert (hasDerivAt_pow k w).div_const (Nat.factorial k : ℂ) using 1
+      rw [← Nat.mul_factorial_pred h_k0, Nat.cast_mul]
+      field_simp [Nat.factorial_ne_zero, this]
+    · exact hasDerivAt_const w (0 : ℂ)
+  have h_bound : ∀ k w, w ∈ Metric.ball z 1 → ‖f' k w‖ ≤ u k := by
+    intros k w hw
+    dsimp only [f', u]
+    split_ifs with h_div
+    · rcases k with - | k <;> simp only [norm_zero, le_refl]
+    · simp only [norm_div, norm_pow, _root_.norm_natCast]
+      gcongr
+      rw [Metric.mem_ball, dist_eq_norm] at hw
+      calc ‖w‖ = ‖w - z + z‖ := by rw [sub_add_cancel]
+            _ ≤ ‖w - z‖ + ‖z‖ := norm_add_le _ _
+            _ ≤ 1 + ‖z‖ := by linarith [hw.le]
+            _ = R := by dsimp [R]; ring
+    · simp only [norm_zero, le_refl]
+    · simp only [norm_zero]
+      positivity
+  have h_f_z : Summable (f · z) := RuesDiffSummable n m z
+  have h_res := hasDerivAt_tsum_of_isPreconnected h_sum_u (Metric.isOpen_ball)
+    (convex_ball z 1).isPreconnected
+    h_deriv h_bound (Metric.mem_ball_self (by linarith)) h_f_z (Metric.mem_ball_self (by linarith))
+  convert h_res using 1
+  rw [tsum_eq_zero_add']
+  · dsimp only [RuesDiff, CharP.cast_eq_zero, zero_add, Int.cast_ofNat_Int, ↓dreduceIte,
+    Nat.cast_add, Nat.cast_one, Int.natCast_add, Nat.add_eq_zero_iff, one_ne_zero, and_false,
+    Nat.add_one_sub_one, f']
+    simp only [zero_add, ite_self]
+    refine tsum_congr (fun k ↦ ?_)
+    congr 1
+    ring_nf
+  · simp only [Nat.cast_add, Nat.cast_one, Nat.add_eq_zero_iff, one_ne_zero, and_false, ↓reduceIte,
+    add_tsub_cancel_right, f']
+    refine Summable.of_norm_bounded (Real.summable_pow_div_factorial ‖z‖) (fun k ↦ ?_)
+    split_ifs with h
+    · simp only [norm_div, norm_pow, Complex.norm_natCast]
+      gcongr
+    · simp only [norm_zero]
+      positivity
 
-theorem RuesDiffDeriv (n : ℕ+) (m : ℤ) : deriv (RuesDiff n m) = (RuesDiff n (m + 1)) := by
+theorem RuesDiffDeriv (n : ℕ+) (m : ℤ) :
+  deriv (RuesDiff n m) = (RuesDiff n (m + 1)) := by
   refine deriv_eq ?h
   exact fun x => RuesDiffHasDeriv n m x
 
-theorem RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) : iteratedDeriv k (RuesDiff n m) = RuesDiff n (k + m) := by
+theorem RuesDiffIteratedDeriv (k : ℕ) (n : ℕ+) (m : ℤ) :
+  iteratedDeriv k (RuesDiff n m) = RuesDiff n (k + m) := by
   induction' k with K Kih
   · simp only [iteratedDeriv_zero, CharP.cast_eq_zero, zero_add]
   · have h₀ := congrArg deriv Kih
@@ -117,7 +186,8 @@ theorem TsumMulIte {α} [TopologicalSpace α] [T2Space α] [AddCommMonoid α] (f
       simp only [Nat.cast_mul, hw]
   exact tsum_congr (h₃)
 
-theorem NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) : ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
+theorem NeedZeroCoeff (f : ℕ → ℂ) (n : ℕ+) :
+  ∑' (k : ℕ), f (n * k) = ∑' (k : ℕ), ite ((n : ℤ) ∣ k) (f k) 0 := by
   exact TsumMulIte _
 
 theorem RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
@@ -126,8 +196,8 @@ theorem RuesDiffM0EqualsRues (n : ℕ+) : RuesDiff n 0 = Rues n := by
   simp only [add_zero]
   rw [NeedZeroCoeff (λ (k : ℕ) => z ^ k / (Nat.factorial k)) n]
 
-theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : rou ^ (n : ℕ) = 1) :
-  RuesDiff n m (z * rou) = rou ^ (-m) * RuesDiff n m z := by
+theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z Rou : ℂ) (h : Rou ^ (n : ℕ) = 1) :
+  RuesDiff n m (z * Rou) = Rou ^ (-m) * RuesDiff n m z := by
   simp_rw [RuesDiff, ←tsum_mul_left]
   congr
   ext1 k
@@ -135,18 +205,18 @@ theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : ro
   have h₀ := Classical.em (↑↑n ∣ ↑k + m)
   rcases h₀ with h₀a | h₀b
   · simp_rw [if_pos h₀a]
-    rw [mul_pow z rou k]
-    have h₁ : rou ^ k = (rou ^ m)⁻¹ := by
+    rw [mul_pow z Rou k]
+    have h₁ : Rou ^ k = (Rou ^ m)⁻¹ := by
       obtain ⟨k₂, kmDiv⟩ := h₀a
-      have h₂ : rou ^ (↑k + m) = 1 := by
+      have h₂ : Rou ^ (↑k + m) = 1 := by
         rw [kmDiv, zpow_mul]
         simp only [zpow_natCast, h, one_zpow]
-      have h₃ := congrArg (λ (z₀ : ℂ) => z₀ * (rou ^ m)⁻¹) h₂
+      have h₃ := congrArg (λ (z₀ : ℂ) => z₀ * (Rou ^ m)⁻¹) h₂
       simp only [one_mul] at h₃
-      have h₄ := RouNot0 n rou h
+      have h₄ := RouNot0 n Rou h
       rw [zpow_add₀ h₄ ↑k m] at h₃
       rw [←h₃]
-      have h₅ : rou ^ m ≠ 0 := by
+      have h₅ : Rou ^ m ≠ 0 := by
         exact zpow_ne_zero m h₄
       field_simp
       exact rfl
@@ -154,22 +224,15 @@ theorem RuesDiffRotationallySymmetric (n : ℕ+) (m : ℤ) (z rou : ℂ) (h : ro
     ring
   · simp_rw [if_neg h₀b]
 
-theorem Dvd.dvd.addMultiple (n m k : ℤ): (n ∣ m) ↔ (n ∣ m + k * n) := by
-  have h₁ : n ∣ (k * n) := by
-    exact Int.dvd_mul_left k n
-  constructor
-  · intros h₀
-    exact Dvd.dvd.add h₀ h₁
-  · intros h₂
-    exact (Int.dvd_add_left h₁).mp h₂
-
 theorem RuesDiffMPeriodic (n : ℕ+) (m k : ℤ) : RuesDiff n m = RuesDiff n (m + k * n) := by
   ext1 z
   simp_rw [RuesDiff]
   congr
   ext1 K
   congr 1
-  rw [Dvd.dvd.addMultiple (↑↑n) (↑K + m) k]
+  have DvdAddMultiple (n m k : ℤ) : (n ∣ m) ↔ (n ∣ m + k * n) :=
+    Iff.symm Int.dvd_add_mul_self
+  rw [DvdAddMultiple (↑↑n) (↑K + m) k]
   ring_nf
 
 theorem RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = ∑ k₀ ∈ range k,
@@ -267,7 +330,8 @@ theorem RuesDiffSumOfRuesDiff (n k : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z 
     rw [(show ↑x + (↑↑n * ↑w + m) = ↑↑n * ↑w + ↑(x + m) by ring_nf)] at h₃
     exact (Int.dvd_iff_dvd_of_dvd_add h₃).mp h₄
 
-theorem RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) : iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
+theorem RuesDiffNthIteratedDeriv (n : ℕ+) (m : ℤ) :
+  iteratedDeriv n (RuesDiff n m) = RuesDiff n m := by
   rw [RuesDiffIteratedDeriv, RuesDiffMPeriodic n m 1]
   simp only [one_mul]
   ring_nf
@@ -334,7 +398,8 @@ theorem RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (
   clear h₀
   simp_rw [←tsum_mul_right]
   have h₁ : ∀ x ∈ range ↑n, Summable (λ (x_1 : ℕ) =>
-    (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 / ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
+    (z * cexp (2 * ↑π * (↑x / ↑↑n) * I)) ^ x_1 /
+    ↑(Nat.factorial x_1) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
     intros k _
     exact Summable.smul_const (ExpTaylorSeriesSummable (z * cexp (2 * ↑π * (↑k / ↑↑n) * I))) _
   have h₂ := (Summable.tsum_finsetSum h₁).symm
@@ -342,21 +407,25 @@ theorem RuesDiffEqualsExpSum (n : ℕ+) (m : ℤ) (z : ℂ) : RuesDiff n m z = (
   simp_rw [h₂]
   clear h₂
   simp_rw [mul_pow, ←Complex.exp_nat_mul]
-  have h₃ : ∀ (b x : ℕ), z ^ b * cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) / ↑(Nat.factorial b) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I) =
-            (z ^ b / ↑(Nat.factorial b)) * (cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
+  have h₃ : ∀ (b x : ℕ), z ^ b * cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) /
+    ↑(Nat.factorial b) * cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I) =
+    (z ^ b / ↑(Nat.factorial b)) * (cexp (↑b * (2 * ↑π * (↑x / ↑↑n) * I)) *
+    cexp (↑m * 2 * ↑π * (↑x / ↑↑n) * I)) := by
     intros b x
     ring_nf
   simp_rw [h₃, ←Finset.mul_sum, ←Complex.exp_add, ←tsum_div_const, RuesDiff]
   clear h₃
   congr
   ext1 k
-  have h₄ : ∀ (x : ℕ), ↑k * (2 * ↑π * (↑x / ↑↑n) * I) + ↑m * 2 * ↑π * (↑x / ↑↑n) * I = (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) := by
+  have h₄ : ∀ (x : ℕ), ↑k * (2 * ↑π * (↑x / ↑↑n) * I) + ↑m * 2 * ↑π * (↑x / ↑↑n) * I =
+    (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) := by
     intros x
     ring_nf
   simp_rw [h₄]
   clear h₄
   have h₅ := RouGeometricSumEqIte n (↑k + m)
-  have h₆ : ∀ (x : ℕ), (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) = (2 * ↑π * (↑(↑k + m) * ↑x / ↑↑n * I)) := by
+  have h₆ : ∀ (x : ℕ), (2 * ↑π * ((↑k + ↑m) * ↑x / ↑↑n) * I) =
+    (2 * ↑π * (↑(↑k + m) * ↑x / ↑↑n * I)) := by
     intros x
     simp only [Int.cast_add, Int.cast_natCast]
     ring_nf
@@ -528,13 +597,15 @@ theorem RouForm (n : ℕ+) (x : ℕ) : cexp (2 * ↑π * (↑x / ↑↑n) * I) ^
   field_simp
   exact rfl
 
-theorem Sum3Cycle {M α β γ : Type*} [AddCommMonoid M] {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
-    ∑ a ∈ s, ∑ b ∈ t, ∑ c ∈ u, f a b c = ∑ b ∈ t, ∑ c ∈ u, ∑ a ∈ s, f a b c := by
+theorem Sum3Cycle {M α β γ : Type*} [AddCommMonoid M]
+  {s : Finset α} {t : Finset β} {u : Finset γ} {f : α → β → γ → M} :
+  ∑ a ∈ s, ∑ b ∈ t, ∑ c ∈ u, f a b c = ∑ b ∈ t, ∑ c ∈ u, ∑ a ∈ s, f a b c := by
   rw [sum_comm]
   simp_rw [@sum_comm _ _ γ]
 
 theorem SumOfSumEqSum {α β : Type} [Ring β] {n : ℕ} (m : ℤ) (z₀ z₁ : α) (f : ZMod n → α → β) :
-    (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) = ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
+  (∑ i ∈ range n, ∑ j ∈ range n, if ↑n ∣ m - i - j then f i z₀ * f j z₁ else 0) =
+  ∑ k ∈ range n, f k z₀ * f (m - k) z₁ := by
   obtain rfl | hn := eq_or_ne n 0
   · simp only [range_zero, CharP.cast_eq_zero, zero_dvd_iff, sum_empty, sum_const_zero]
   refine sum_congr rfl ?_
@@ -599,7 +670,8 @@ theorem RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDif
     ring_nf
   simp_rw [h₁]
   clear h₁
-  have h₂ : ∀ (x x_1 : ℕ), (m : ℂ) - (x : ℂ) - (x_1 : ℂ) = @Int.cast ℂ Ring.toIntCast (m - (x : ℤ) - (x_1 : ℤ)) := by
+  have h₂ : ∀ (x x_1 : ℕ), (m : ℂ) - (x : ℂ) - (x_1 : ℂ) =
+    @Int.cast ℂ Ring.toIntCast (m - (x : ℤ) - (x_1 : ℤ)) := by
     intros x x_1
     norm_cast
   simp_rw [h₂, RouGeometricSumEqIte]
@@ -607,7 +679,8 @@ theorem RuesDiffArgumentSumRule (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) : RuesDif
   simp only [mul_ite, mul_zero, sum_div]
   simp_rw [RuesDiffZModEqRuesDiff]
   calc
-    _ = (∑ x ∈ range ↑n, ∑ x_1 ∈ range ↑n, if ↑↑n ∣ m - ↑x - ↑x_1 then RuesDiff n (↑x) z₀ * RuesDiff n (↑x_1) z₁ else 0) := by
+    _ = (∑ x ∈ range ↑n, ∑ x_1 ∈ range ↑n, if ↑↑n ∣ m - ↑x - ↑x_1 then
+      RuesDiff n (↑x) z₀ * RuesDiff n (↑x_1) z₁ else 0) := by
       congr! 2 with x _ x_1 _; split_ifs
       · simp only [Int.cast_natCast, isUnit_iff_ne_zero, ne_eq, Nat.cast_eq_zero, PNat.ne_zero,
         not_false_eq_true, IsUnit.mul_div_cancel_right, RuesDiffZModEqRuesDiff]
@@ -738,10 +811,9 @@ theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) (df : Differentia
        apply Differentiable.sum
        intro k _
        apply Differentiable.mul
-       · intro z
-         apply differentiableAt_const
-       · intro z
-         apply (RuesDiffHasDeriv n (-↑k : ℤ) z).differentiableAt
+       <;> intro z
+       · apply differentiableAt_const
+       · apply (RuesDiffHasDeriv n (-↑k : ℤ) z).differentiableAt
     have hf_ana : ∀ z, AnalyticAt ℂ f z := fun z => df.analyticAt z
     have hg_ana : ∀ z, AnalyticAt ℂ g z := fun z => hg_diff.analyticAt z
     have h_eq : f = g := by

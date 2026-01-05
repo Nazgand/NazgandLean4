@@ -6,7 +6,8 @@ theorem GeneralPigeonholePrinciple₀ (k : ℕ) (f : ℕ → ℝ) (slb : ℝ)
   ∃ m ∈ (Finset.range (k + 1)), f m > slb / (k + 1) := by
   by_contra h
   push_neg at h
-  have h1 : (Finset.range (k + 1)).sum f ≤ ∑ i ∈ Finset.range (k + 1), slb / (k + 1) := by
+  have h1 : (Finset.range (k + 1)).sum f ≤ ∑ i ∈ Finset.range (k + 1),
+    slb / (k + 1) := by
     apply Finset.sum_le_sum
     intros i hi
     exact h i hi
@@ -25,7 +26,8 @@ theorem GeneralPigeonholePrinciple₁ (k : ℕ) (f : ℕ → ℝ) (slb : ℝ)
   ∃ m ∈ (Finset.range (k + 1)), f m ≥ slb / (k + 1) := by
   by_contra h
   push_neg at h
-  have h1 : (Finset.range (k + 1)).sum f < ∑ i ∈ Finset.range (k + 1), slb / (k + 1) := by
+  have h1 : (Finset.range (k + 1)).sum f < ∑ i ∈ Finset.range (k + 1),
+    slb / (k + 1) := by
     apply Finset.sum_lt_sum
     · intros i hi
       exact le_of_lt (h i hi)
@@ -42,7 +44,8 @@ theorem GeneralPigeonholePrinciple₁ (k : ℕ) (f : ℕ → ℝ) (slb : ℝ)
   replace h1 := lt_of_mul_lt_mul_left h1 (le_of_lt h3)
   linarith
 
-theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f) (z₀ : ℂ) (k : ℕ) (h1 : k > 0) :
+theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f)
+  (z₀ : ℂ) (k : ℕ) (h1 : k > 0) :
   deriv f = (λ (z : ℂ) ↦ z₀ * (f (z / k)) ^ k) ↔
   f = (λ (z : ℂ) ↦ (f 0) * ((f 0) ^ (k - 1) * z₀ * z).exp) := by
   constructor
@@ -51,7 +54,8 @@ theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f) (z₀ : ℂ) (k
     rw [h]
     ext z
     rw [deriv_const_mul]
-    · have h_inner : DifferentiableAt ℂ (fun z => (f 0) ^ (k - 1) * z₀ * z) z := by
+    · have h_inner :
+        DifferentiableAt ℂ (fun z => (f 0) ^ (k - 1) * z₀ * z) z := by
         apply DifferentiableAt.mul
         · apply differentiableAt_const
         · apply differentiableAt_id

@@ -8,7 +8,8 @@ lemma InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
   rw [(show (2 : ℍ) = ↑(2 : ℝ) by rfl), InvQuaternionOfReal 2]
   norm_num
 
-macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul,
+  re_star, imI_star, neg_zero, mul_zero, sub_zero,
   imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
   not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
   zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
@@ -16,9 +17,10 @@ macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul, 
   imK_smul, one_div, re_sub, imI_sub, imJ_sub, imK_sub, re_add, imI_add, imJ_add, imK_add,
   re_neg, imI_neg, imJ_neg, imK_neg, re_one, imI_one, imJ_one, imK_one, Quaternion.ext_iff])
 
---declare a Set Of Quaternions That Square To Negative 1
+-- Declare a Set Of Quaternions That Square To Negative 1
 def Soqtstn1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ * q₀}
-def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 1)}
+def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ),
+  (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 1)}
 def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
@@ -78,7 +80,8 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
     let hNorm1 := congrArg Real.sqrt hSphere
     simp only [Real.sqrt_one] at hNorm1
     simp_rw [←hNorm1]
-    let hSqrtNormSquare := congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (QuaternionAlgebra.mk 0 x y z))
+    let hSqrtNormSquare :=
+      congrArg Real.sqrt (Quaternion.normSq_eq_norm_mul_self (QuaternionAlgebra.mk 0 x y z))
     simp only [norm_nonneg, Real.sqrt_mul_self] at hSqrtNormSquare
     simp_rw [←hSqrtNormSquare, Quaternion.normSq_def']
     ring_nf
@@ -95,11 +98,13 @@ lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_add]
     ring_nf
 
---declare a Set Of Quaternions q That Square To q Minus 1
+-- Declare a Set Of Quaternions q That Square To q Minus 1
 def Soqqtstqm1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | q₀ - 1 = q₀ * q₀}
-def Soqqtstqm1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ), (q₁ = ⟨1 / 2, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 3 / 4)}
+def Soqqtstqm1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ),
+  (q₁ = ⟨1 / 2, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 3 / 4)}
 def Soqqtstqm1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 1 / 2}
-def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qim ∈ Soqtstn1₁ ∧ q₃ = 1/2 + qim * (Real.sqrt 3) / 2)}
+def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]),
+  (qim ∈ Soqtstn1₁ ∧ q₃ = 1/2 + qim * (Real.sqrt 3) / 2)}
 
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
@@ -247,3 +252,21 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
       have h3 : (0 : ℝ) ≤ 3 := by linarith
       simp only [Real.sq_sqrt h3]
       nlinarith [hSphere]
+
+-- Declare a Set Of Quaternions Whose 4th Power Is Negative 1
+def Soqw4pin1₀ : Set ℍ[ℝ] := {q₀ : ℍ[ℝ] | -1 = q₀ ^ 4}
+def Soqw4pin1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz Pm1 : ℝ),
+  ((Pm1 ^ 2 = 1) ∧ q₁ * (Real.sqrt 2) = ⟨Pm1, rx, ry, rz⟩ ∧
+  rx * rx + ry * ry + rz * rz = 1)}
+def Soqw4pin1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ (q₂.re ^ 2 = 1 / 2)}
+def Soqw4pin1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]) (Pm1 : ℝ),
+  ((Pm1 ^ 2 = 1) ∧ qim ∈ Soqtstn1₁ ∧ q₃ * (Real.sqrt 2) = Pm1 + qim)}
+
+lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
+  sorry
+
+lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₂ : Soqw4pin1₀ = Soqw4pin1₂ := by
+  sorry
+
+lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₃ : Soqw4pin1₀ = Soqw4pin1₃ := by
+  sorry

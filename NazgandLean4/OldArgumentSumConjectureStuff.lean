@@ -1,5 +1,8 @@
--- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
--- This file will be removed when the full result is proved.
+/-
+Formalization of the conjecture at:
+https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
+This file will be removed when the full result is proved.
+-/
 import Mathlib
 open Finset Matrix
 
@@ -19,19 +22,23 @@ def SetOfSolutions {n : ℕ+} (DiffEqCoeff : (Fin (n + 2)) → ℂ) : Set (ℂ �
 
 -- the n different g functions are a basis of the set of solutions
 def VectorBasis {n : ℕ+} (DiffEqCoeff : (Fin (n + 2)) → ℂ) (g : (Fin (n + 1)) → ℂ → ℂ) : Prop :=
-  SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin (n + 1)) → ℂ), h = λ (z : ℂ) => ∑ (k : (Fin (n + 1))), b k * g k z} ∧
+  SetOfSolutions DiffEqCoeff = {h : ℂ → ℂ | ∃ (b : (Fin (n + 1)) → ℂ),
+    h = λ (z : ℂ) => ∑ (k : (Fin (n + 1))), b k * g k z} ∧
   (∀ (b0 b1 : (Fin (n + 1)) → ℂ), b0 = b1 ↔
   ∑ (k : (Fin (n + 1))), (λ (z : ℂ) ↦ b0 k * g k z) = ∑ (k : (Fin (n + 1))), (λ (z : ℂ) ↦ b1 k * g k z))
 
 -- the column vector of the functions in g
-def v {n : ℕ+} (g : (Fin (n + 1)) → ℂ → ℂ) (z : ℂ) :
+def Vec {n : ℕ+} (g : (Fin (n + 1)) → ℂ → ℂ) (z : ℂ) :
   Matrix (Fin (n + 1)) (Fin 1) ℂ := of λ (y : Fin (n + 1)) (_ : Fin 1) => g y z
 
--- This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis to a basis of one's choice
--- Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.
+/-
+This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis
+to a basis of one's choice
+Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.
+-/
 lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (_ : LeadCoeffNonZero DiffEqCoeff)
   (g₀ g₁ : (Fin (n + 1)) → ℂ → ℂ) (h₁ : VectorBasis DiffEqCoeff g₀) (h₂ : VectorBasis DiffEqCoeff g₁) :
-  ∃ (C : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ), (∀ z : ℂ, v g₀ z = C * v g₁ z) := by
+  ∃ (C : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ), (∀ z : ℂ, Vec g₀ z = C * Vec g₁ z) := by
   have h₃ : ∀ k : Fin (n + 1), g₀ k ∈ SetOfSolutions DiffEqCoeff := by
     intros k
     rw [h₁.left]
@@ -45,18 +52,20 @@ lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (
   choose b hb using h₃
   use of λ (y : Fin (n + 1)) (x : Fin (n + 1)) => b y x
   intros z
-  unfold v
+  unfold Vec
   clear h₁ h₂
   ext i j
   simp only [hb, of_apply, mul_apply]
 
 -- the simplified asymmetric conjecture works for all basises if it works for at least 1 basis
-theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ}
+  (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
   (g : (Fin (n + 1)) → ℂ → ℂ) (h₂ : VectorBasis DiffEqCoeff g)
   (ha : ∃ (g₀ : (Fin (n + 1)) → ℂ → ℂ) (A₀ : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ),
-  (VectorBasis DiffEqCoeff g₀) ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g₀ z₀)) * A₀ * (v g₀ z₁)))) :
+  (VectorBasis DiffEqCoeff g₀) ∧
+  ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (Vec g₀ z₀)) * A₀ * (Vec g₀ z₁)))) :
   ∃ (A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ),
-    ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+    ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (Vec g z₀)) * A * (Vec g z₁))) := by
   choose g₀ A₀ h₃ h₄ using ha
   choose C hC using BasisMatrixImageOfBasis h₀ g₀ g h₃ h₂
   use Cᵀ * A₀ * C
@@ -68,19 +77,22 @@ theorem AsymmArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → �
   simp only [Matrix.mul_assoc]
 
 -- the full symmetric conjecture works for all basises if it works for at least 1 basis
-theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
+theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ}
+  (h₀ : LeadCoeffNonZero DiffEqCoeff) {f : ℂ → ℂ}
   (g : (Fin (n + 1)) → ℂ → ℂ) (h₂ : VectorBasis DiffEqCoeff g)
-  (ha : ∃ (g₀ : (Fin (n + 1)) → ℂ → ℂ) (A₀ : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ), (VectorBasis DiffEqCoeff g₀) ∧
-    ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g₀ z₀)) * A₀ * (v g₀ z₁)))) :
+  (ha : ∃ (g₀ : (Fin (n + 1)) → ℂ → ℂ) (A₀ : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ),
+    (VectorBasis DiffEqCoeff g₀) ∧ ∀ (z₀ z₁ : ℂ),
+    ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (Vec g₀ z₀)) * A₀ * (Vec g₀ z₁)))) :
   ∃ (A : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ),
-    A = transpose A ∧ ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (v g z₀)) * A * (v g z₁))) := by
+    A = transpose A ∧ ∀ (z₀ z₁ : ℂ),
+    ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) = ((transpose (Vec g z₀)) * A * (Vec g z₁))) := by
   choose A₀ hA₀ using AsymmArgumentSumConjecture h₀ g h₂ ha
   use (1 / 2 : ℂ) • (A₀ + (transpose A₀))
   constructor
   · ext i j
     simp only [one_div, smul_apply, add_apply, transpose_apply, smul_eq_mul, smul_add]
     ring
-  · have hA₀2 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) = (v g z₀)ᵀ * A₀ᵀ * v g z₁ := by
+  · have hA₀2 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) = (Vec g z₀)ᵀ * A₀ᵀ * Vec g z₁ := by
       intros z₁ z₀
       have h₃ := congrArg (λ B => Bᵀ) (hA₀ z₀ z₁)
       simp only [transpose_mul, transpose_transpose] at h₃
@@ -89,25 +101,28 @@ theorem ArgumentSumConjecture {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (
         simp only [transpose_apply, of_apply]
       rw [h₄] at h₃
       rw [(show z₁ + z₀ = z₀ + z₁ by ring), h₃]
-      exact Eq.symm (Matrix.mul_assoc (v g z₁)ᵀ A₀ᵀ (v g z₀))
-    have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun _ _ => f (z₀ + z₁)) = (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+      exact Eq.symm (Matrix.mul_assoc (Vec g z₁)ᵀ A₀ᵀ (Vec g z₀))
+    have hA₀3 : ∀ (z₀ z₁ : ℂ), 2 • (of fun _ _ => f (z₀ + z₁)) = (Vec g z₀)ᵀ * (A₀ + A₀ᵀ) * Vec g z₁ := by
       intros z₀ z₁
       have h₃ := Mathlib.Tactic.LinearCombination.add_eq_eq (hA₀ z₀ z₁) (hA₀2 z₀ z₁)
-      have h₄ : (of fun _ _ => f (z₀ + z₁)) + (of fun _ _ => f (z₀ + z₁)) = 2 • (of fun (_ _ : Fin 1) => f (z₀ + z₁)) := by
+      have h₄ : (of fun _ _ => f (z₀ + z₁)) + (of fun _ _ => f (z₀ + z₁)) =
+        2 • (of fun (_ _ : Fin 1) => f (z₀ + z₁)) := by
         ext i j
         simp only [add_apply, of_apply, smul_apply, nsmul_eq_mul, Nat.cast_ofNat]
         ring
       rw [h₄] at h₃
       rw [h₃]
-      have h₅ : (v g z₀)ᵀ * (A₀ + A₀ᵀ) = (v g z₀)ᵀ * A₀ + (v g z₀)ᵀ * A₀ᵀ := by
-        exact Matrix.mul_add (v g z₀)ᵀ A₀ A₀ᵀ
+      have h₅ : (Vec g z₀)ᵀ * (A₀ + A₀ᵀ) = (Vec g z₀)ᵀ * A₀ + (Vec g z₀)ᵀ * A₀ᵀ := by
+        exact Matrix.mul_add (Vec g z₀)ᵀ A₀ A₀ᵀ
       rw [h₅]
-      exact Eq.symm (Matrix.add_mul ((v g z₀)ᵀ * A₀) ((v g z₀)ᵀ * A₀ᵀ) (v g z₁))
-    have hA₀4 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) = (1 / 2 : ℂ) • (v g z₀)ᵀ * (A₀ + A₀ᵀ) * v g z₁ := by
+      exact Eq.symm (Matrix.add_mul ((Vec g z₀)ᵀ * A₀) ((Vec g z₀)ᵀ * A₀ᵀ) (Vec g z₁))
+    have hA₀4 : ∀ (z₀ z₁ : ℂ), (of fun _ _ => f (z₀ + z₁)) =
+      (1 / 2 : ℂ) • (Vec g z₀)ᵀ * (A₀ + A₀ᵀ) * Vec g z₁ := by
       intros z₀ z₁
       have h₃ := congrArg (λ (B : Matrix (Fin 1) (Fin 1) ℂ) => (1 / 2 : ℂ) • B) (hA₀3 z₀ z₁)
       simp only [one_div, smul_of, nsmul_eq_mul, Nat.cast_ofNat] at h₃
-      have h₄ : (of ((2 : ℂ)⁻¹ • (2 * fun (_ _ : Fin 1) => f (z₀ + z₁)))) = (of fun _ _ => f (z₀ + z₁)) := by
+      have h₄ : (of ((2 : ℂ)⁻¹ • (2 * fun (_ _ : Fin 1) => f (z₀ + z₁)))) =
+        (of fun _ _ => f (z₀ + z₁)) := by
         ext _ _
         simp only [of_apply, Pi.smul_apply, Pi.mul_apply, Pi.ofNat_apply, smul_eq_mul, ne_eq,
           OfNat.ofNat_ne_zero, not_false_eq_true, inv_mul_cancel_left₀]

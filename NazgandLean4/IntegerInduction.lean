@@ -37,10 +37,12 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
     simp only [one_mul] at h₀
     exact h₀
 
-lemma associated_gcd_gcd (a b : ℤ) : Associated (IsBezout.gcd a b) (GCDMonoid.gcd a b) := by
+lemma associated_gcd_gcd (a b : ℤ) :
+  Associated (IsBezout.gcd a b) (GCDMonoid.gcd a b) := by
   exact IsBezout.associated_gcd_gcd ℤ
 
-lemma GcdLinearCombination (k₀ k₁ : ℤ) : (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
+lemma GcdLinearCombination (k₀ k₁ : ℤ) :
+  (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
   obtain ⟨m, n, h⟩ := IsBezout.gcd_eq_sum k₀ k₁
   have := associated_gcd_gcd k₀ k₁
   rw [Int.associated_iff] at this
@@ -53,7 +55,8 @@ lemma GcdLinearCombination (k₀ k₁ : ℤ) : (∃ (m₀ m₁ : ℤ), (Int.gcd 
     rw [Int.coe_gcd]
     linarith
 
-lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) : (∀ (m : ℤ), p m ↔ p (m + (Int.gcd k₀ k₁))) ↔
+lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) :
+  (∀ (m : ℤ), p m ↔ p (m + (Int.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by
   constructor
   · intros h₀

@@ -9,7 +9,7 @@ def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re 
 
 lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
-  dsimp [Soqtstn1₀, Soqtstn1₁]
+  dsimp only [Soqtstn1₀, Set.mem_setOf_eq, Soqtstn1₁]
   simp only [Quaternion.ext_iff, re_neg, re_one, re_mul, imI_neg, imI_one, neg_zero, imI_mul,
     imJ_neg, imJ_one, imJ_mul, imK_neg, imK_one, imK_mul]
   constructor
@@ -19,17 +19,11 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     use z
     simp only [and_self, and_true]
     rcases ha with ⟨hSphere3, h0x, h0y, h0z⟩
-    ring_nf at h0x
-    ring_nf at h0y
-    ring_nf at h0z
-    simp only [zero_eq_mul, mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h0x
-    simp only [zero_eq_mul, mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h0y
-    simp only [zero_eq_mul, mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h0z
+    ring_nf at h0x h0y h0z
+    simp only [zero_eq_mul, mul_eq_zero, OfNat.ofNat_ne_zero, or_false] at h0x h0y h0z
     have hr₀ : (¬ r = 0) → False := by
       intros hrn0
-      simp only [hrn0, false_or] at h0x
-      simp only [hrn0, false_or] at h0y
-      simp only [hrn0, false_or] at h0z
+      simp only [hrn0, false_or] at h0x h0y h0z
       simp_rw [h0x, h0y, h0z] at hSphere3
       simp only [mul_zero, sub_zero] at hSphere3
       have hrnn := mul_self_nonneg r
@@ -51,7 +45,7 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     simp_rw [hr]
     simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, zero_sub, zero_mul,
       and_self, and_true]
-    simp_rw [hrx,hry,hrz]
+    simp_rw [hrx, hry, hrz]
     let hSphere2 := congrArg (λ (xk : ℝ) => -xk) hSphere
     simp only [neg_add_rev] at hSphere2
     rw [←hSphere2]
@@ -59,7 +53,7 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
 
 lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
   ext ⟨r, x, y, z⟩
-  dsimp [Soqtstn1₁, Soqtstn1₂]
+  dsimp only [Soqtstn1₁, Set.mem_setOf_eq, Soqtstn1₂]
   simp only [Quaternion.ext_iff]
   constructor
   · intros h
@@ -96,7 +90,7 @@ def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]), (qi
 
 lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
-  dsimp [Soqqtstqm1₀, Soqqtstqm1₁]
+  dsimp only [Soqqtstqm1₀, Set.mem_setOf_eq, Soqqtstqm1₁]
   simp only [Quaternion.ext_iff, re_sub, re_one, re_mul, imI_sub, imI_one, sub_zero, imI_mul,
     imJ_sub, imJ_one, imJ_mul, imK_sub, imK_one, imK_mul, one_div]
   ring_nf
@@ -111,7 +105,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     have EqSplit : ∀ (x₀ : ℝ), x₀ = r * x₀ * 2 → (x₀ = 0 ∨ r = 1 / 2) := by
       intro x₀ h
       have hFactored : x₀ * (1 - r * 2) = 0 := by linarith
-      simp at hFactored
+      simp only [mul_eq_zero] at hFactored
       apply hFactored.imp_right
       intro h
       field_simp
@@ -122,9 +116,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     have hr₀ : (¬ r = 1/2) → False := by
       intros hrn0
       simp only [one_div] at hrn0
-      simp only [one_div, hrn0, or_false] at hx₂
-      simp only [one_div, hrn0, or_false] at hy₂
-      simp only [one_div, hrn0, or_false] at hz₂
+      simp only [one_div, hrn0, or_false] at hx₂ hy₂ hz₂
       simp [hx₂, hy₂, hz₂] at h₁
       let h₂ := congrArg (λ (x₀ : ℝ) => x₀ - r + 1) h₁
       simp only [add_sub_cancel_right, neg_add_cancel] at h₂
@@ -151,7 +143,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
 
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
   ext ⟨r, x, y, z⟩
-  dsimp [Soqqtstqm1₁, Soqqtstqm1₂]
+  dsimp only [Soqqtstqm1₁, Set.mem_setOf_eq, Soqqtstqm1₂]
   simp only [one_div, Quaternion.ext_iff]
   constructor
   · intros h₀
@@ -185,9 +177,13 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     ring_nf
     rw [hNormSqMr]
 
+lemma InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := by
+  simp only [inv_def, normSq_def, star_coe, re_mul, re_coe, imI_coe, mul_zero, sub_zero, imJ_coe,
+    imK_coe, mul_inv_rev, coe_inv]
+
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
-  dsimp [Soqqtstqm1₁, Soqqtstqm1₃, Soqtstn1₁]
+  dsimp only [Soqqtstqm1₁, Set.mem_setOf_eq, Soqqtstqm1₃, Soqtstn1₁]
   simp only [one_div, Quaternion.ext_iff, re_add, imI_add, imJ_add, imK_add]
   constructor
   · intros h₀
@@ -209,13 +205,40 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
           IsUnit.div_mul_cancel, div_self] at hSphere₂
         rw [←hSphere₂]
         ring
-    · constructor
-      · sorry
+    · have h2 : (2 : ℍ) = ⟨2, 0, 0, 0⟩ := rfl
+      constructor
+      · rw [hr, h2]
+        simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+          imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
+          not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
+          zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
+          Real.sqrt_eq_zero, zero_add, add_zero, imJ_mul, imK_mul]
       · constructor
-        · sorry
+        · rw [hx, h2]
+          field_simp
+          simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+            imJ_star, imK_star, mul_inv_rev, imI_smul, smul_eq_mul, div_eq_mul_inv,
+            Algebra.mul_smul_comm, imI_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
+            isUnit_iff_ne_zero, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
+            not_false_eq_true, IsUnit.inv_mul_cancel_right, zero_add, add_zero, imJ_mul, imK_mul]
+          ring
         · constructor
-          · sorry
-          · sorry
+          · rw [hy, h2]
+            field_simp
+            simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+              imJ_star, imK_star, mul_inv_rev, imJ_smul, smul_eq_mul, div_eq_mul_inv,
+              Algebra.mul_smul_comm, imJ_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
+              imI_mul, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
+              not_false_eq_true, inv_mul_cancel_right₀, zero_add, add_zero, imK_mul]
+            ring
+          · rw [hz, h2]
+            field_simp
+            simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+              imJ_star, imK_star, mul_inv_rev, imK_smul, smul_eq_mul, div_eq_mul_inv,
+              Algebra.mul_smul_comm, imK_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
+              imI_mul, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
+              not_false_eq_true, inv_mul_cancel_right₀, zero_add, add_zero, imJ_mul]
+            ring
   · intros h₀
     rcases h₀ with ⟨qim, hx₁, hx₂⟩
     rcases hx₁ with ⟨rx, ry, rz, hQim, hSphere⟩
@@ -225,6 +248,18 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
     use y
     use z
     simp only [and_self, and_true]
+    have h2 : (2 : ℍ) = ↑(2 : ℝ) := rfl
     constructor
-    · sorry
-    · sorry
+    · rw [hr]
+      simp only [h2, InvQuaternionOfReal 2, re_coe, div_eq_mul_inv, re_mul, hQimR, imI_coe,
+        mul_zero, sub_zero, imJ_coe, imK_coe, imI_mul, imJ_mul, imK_mul]
+      norm_num
+    · rw [hx, hy, hz]
+      simp only [h2, InvQuaternionOfReal 2, imI_coe, div_eq_mul_inv, imI_mul, re_mul, hQimR, re_coe,
+        mul_zero, sub_zero, imJ_coe, imK_coe, imJ_mul, imK_mul]
+      norm_num
+      simp only [hQimI, hQimJ, hQimK]
+      ring_nf
+      have h3 : (0 : ℝ) ≤ 3 := by linarith
+      simp only [Real.sq_sqrt h3]
+      nlinarith [hSphere]

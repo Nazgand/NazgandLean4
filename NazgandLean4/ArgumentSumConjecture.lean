@@ -34,9 +34,9 @@ theorem ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀
     let h := fun z₀ => (z₀ + z₁)
     have hh₂ : DifferentiableAt ℂ h₂ (h z) := by
       refine Differentiable.differentiableAt ?h
-      sorry
+      exact (ContDiff.differentiable_iteratedDeriv K h₀ (WithTop.coe_lt_top (K : ℕ∞)))
     have hh : DifferentiableAt ℂ h z := by
-      sorry
+      exact differentiableAt_id.add (differentiableAt_const z₁)
     have hcomp := deriv_comp z hh₂ hh
     have hrwh₂ : h₂ = iteratedDeriv K f := rfl
     have hrwh : h = fun z₀ => z₀ + z₁ := rfl

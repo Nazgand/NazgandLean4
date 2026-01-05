@@ -181,6 +181,17 @@ lemma InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := by
   simp only [inv_def, normSq_def, star_coe, re_mul, re_coe, imI_coe, mul_zero, sub_zero, imJ_coe,
     imK_coe, mul_inv_rev, coe_inv]
 
+lemma InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
+  rw [(show (2 : ℍ) = ↑(2 : ℝ) by rfl), InvQuaternionOfReal 2]
+  norm_num
+
+macro "quat_simp" : tactic => `(tactic| simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
+  imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
+  not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
+  zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
+  Real.sqrt_eq_zero, zero_add, add_zero, imJ_mul, imK_mul, Quaternion.imI_smul, Quaternion.imJ_smul,
+  Quaternion.imK_smul, InvTwo, one_div])
+
 lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqqtstqm1₁, Set.mem_setOf_eq, Soqqtstqm1₃, Soqtstn1₁]
@@ -205,39 +216,20 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
           IsUnit.div_mul_cancel, div_self] at hSphere₂
         rw [←hSphere₂]
         ring
-    · have h2 : (2 : ℍ) = ⟨2, 0, 0, 0⟩ := rfl
+    · have h2 : (2 : ℍ) = ↑(2 : ℝ) := rfl
       constructor
       · rw [hr, h2]
-        simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
-          imJ_star, imK_star, mul_inv_rev, re_smul, smul_eq_mul, ne_eq, OfNat.ofNat_ne_zero,
-          not_false_eq_true, inv_mul_cancel_right₀, div_eq_mul_inv, Algebra.mul_smul_comm, re_coe,
-          zero_mul, imI_coe, sub_self, imJ_coe, imK_coe, imI_mul, Nat.ofNat_nonneg,
-          Real.sqrt_eq_zero, zero_add, add_zero, imJ_mul, imK_mul]
+        quat_simp
       · constructor
         · rw [hx, h2]
-          field_simp
-          simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
-            imJ_star, imK_star, mul_inv_rev, imI_smul, smul_eq_mul, div_eq_mul_inv,
-            Algebra.mul_smul_comm, imI_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
-            isUnit_iff_ne_zero, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
-            not_false_eq_true, IsUnit.inv_mul_cancel_right, zero_add, add_zero, imJ_mul, imK_mul]
+          quat_simp
           ring
         · constructor
           · rw [hy, h2]
-            field_simp
-            simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
-              imJ_star, imK_star, mul_inv_rev, imJ_smul, smul_eq_mul, div_eq_mul_inv,
-              Algebra.mul_smul_comm, imJ_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
-              imI_mul, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
-              not_false_eq_true, inv_mul_cancel_right₀, zero_add, add_zero, imK_mul]
+            quat_simp
             ring
           · rw [hz, h2]
-            field_simp
-            simp only [inv_def, normSq_def, re_mul, re_star, imI_star, neg_zero, mul_zero, sub_zero,
-              imJ_star, imK_star, mul_inv_rev, imK_smul, smul_eq_mul, div_eq_mul_inv,
-              Algebra.mul_smul_comm, imK_mul, re_coe, zero_mul, imI_coe, sub_self, imJ_coe, imK_coe,
-              imI_mul, ne_eq, Nat.ofNat_nonneg, Real.sqrt_eq_zero, OfNat.ofNat_ne_zero,
-              not_false_eq_true, inv_mul_cancel_right₀, zero_add, add_zero, imJ_mul]
+            quat_simp
             ring
   · intros h₀
     rcases h₀ with ⟨qim, hx₁, hx₂⟩
@@ -250,14 +242,11 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := 
     simp only [and_self, and_true]
     have h2 : (2 : ℍ) = ↑(2 : ℝ) := rfl
     constructor
-    · rw [hr]
-      simp only [h2, InvQuaternionOfReal 2, re_coe, div_eq_mul_inv, re_mul, hQimR, imI_coe,
-        mul_zero, sub_zero, imJ_coe, imK_coe, imI_mul, imJ_mul, imK_mul]
-      norm_num
-    · rw [hx, hy, hz]
-      simp only [h2, InvQuaternionOfReal 2, imI_coe, div_eq_mul_inv, imI_mul, re_mul, hQimR, re_coe,
-        mul_zero, sub_zero, imJ_coe, imK_coe, imJ_mul, imK_mul]
-      norm_num
+    · rw [hr, h2]
+      quat_simp
+      simp only [hQimR, zero_mul, mul_zero, add_zero]
+    · rw [hx, hy, hz, h2]
+      quat_simp
       simp only [hQimI, hQimJ, hQimK]
       ring_nf
       have h3 : (0 : ℝ) ≤ 3 := by linarith

@@ -138,8 +138,10 @@ theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Typ
     have h₁ : (1 : ℕ∞) ≤ ⊤ := OrderTop.le_top 1
     have h₂ : ∀ i ∈ u, DifferentiableAt 𝕜 (iteratedDeriv K (A i)) x := by
       intros i ih
-      sorry
-    sorry
+      exact (ContDiff.differentiable_iteratedDeriv K (h i ih) (WithTop.coe_lt_top (K : ℕ∞))) x
+    simp_rw [← Finset.sum_apply]
+    rw [deriv_sum h₂]
+    simp only [iteratedDeriv_succ, Finset.sum_apply]
 
 theorem ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)

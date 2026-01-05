@@ -2,7 +2,7 @@ import Mathlib
 set_option maxHeartbeats 0
 open Classical Finset
 
-lemma IntegerInduction (p : ℤ → Prop) :
+theorem IntegerInduction (p : ℤ → Prop) :
   (∀ (n : ℤ), p n) ↔ ((∃ (k : ℤ), p k) ∧ (∀ (m : ℤ), p m ↔ p (m + 1))) := by
   constructor
   · intros h₀
@@ -16,7 +16,7 @@ lemma IntegerInduction (p : ℤ → Prop) :
     obtain ⟨k, hk⟩ := he
     exact fun n => (Succ.rec_linear hi n k).mpr hk
 
-lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
+theorem WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
   (∀ (m : ℤ), p m ↔ p (m + k)) ↔ (∀ (m k₀ : ℤ), p m ↔ p (m + k₀ * k)) := by
   constructor
   · intros h
@@ -37,11 +37,11 @@ lemma WavelengthRestate (p : ℤ → Prop) (k : ℤ) :
     simp only [one_mul] at h₀
     exact h₀
 
-lemma associated_gcd_gcd (a b : ℤ) :
+theorem associated_gcd_gcd (a b : ℤ) :
   Associated (IsBezout.gcd a b) (GCDMonoid.gcd a b) := by
   exact IsBezout.associated_gcd_gcd ℤ
 
-lemma GcdLinearCombination (k₀ k₁ : ℤ) :
+theorem GcdLinearCombination (k₀ k₁ : ℤ) :
   (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
   obtain ⟨m, n, h⟩ := IsBezout.gcd_eq_sum k₀ k₁
   have := associated_gcd_gcd k₀ k₁
@@ -55,7 +55,7 @@ lemma GcdLinearCombination (k₀ k₁ : ℤ) :
     rw [Int.coe_gcd]
     linarith
 
-lemma WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) :
+theorem WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) :
   (∀ (m : ℤ), p m ↔ p (m + (Int.gcd k₀ k₁))) ↔
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by
   constructor

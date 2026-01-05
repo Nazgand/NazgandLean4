@@ -2,9 +2,9 @@ import Mathlib
 set_option maxHeartbeats 0
 open Quaternion Classical
 
-lemma InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := Eq.symm (coe_inv x)
+theorem InvQuaternionOfReal (x : ℝ) : (x : ℍ)⁻¹ = ↑(x⁻¹ : ℝ) := Eq.symm (coe_inv x)
 
-lemma InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
+theorem InvTwo : (2 : ℍ)⁻¹ = ↑(1/2 : ℝ) := by
   rw [(show (2 : ℍ) = ↑(2 : ℝ) by rfl), InvQuaternionOfReal 2]
   norm_num
 
@@ -23,7 +23,7 @@ def Soqtstn1₁ : Set ℍ[ℝ] := {q₁ : ℍ[ℝ] | ∃ (rx ry rz : ℝ),
   (q₁ = ⟨0, rx, ry, rz⟩ ∧ rx * rx + ry * ry + rz * rz = 1)}
 def Soqtstn1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.re = 0}
 
-lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
+theorem EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqtstn1₀, Set.mem_setOf_eq, Soqtstn1₁]
   quat_simp
@@ -66,7 +66,7 @@ lemma EqualSetsSoqtstn1₀AndSoqtstn1₁ : Soqtstn1₀ = Soqtstn1₁ := by
     rw [←hSphere2]
     ring
 
-lemma EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
+theorem EqualSetsSoqtstn1₁AndSoqtstn1₂ : Soqtstn1₁ = Soqtstn1₂ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqtstn1₁, Set.mem_setOf_eq, Soqtstn1₂]
   simp only [Quaternion.ext_iff]
@@ -106,7 +106,7 @@ def Soqqtstqm1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ q₂.r
 def Soqqtstqm1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]),
   (qim ∈ Soqtstn1₁ ∧ q₃ = 1/2 + qim * (Real.sqrt 3) / 2)}
 
-lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
+theorem EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqqtstqm1₀, Set.mem_setOf_eq, Soqqtstqm1₁]
   quat_simp
@@ -134,7 +134,8 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
       intros hrn0
       simp only [one_div] at hrn0
       simp only [one_div, hrn0, or_false] at hx₂ hy₂ hz₂
-      simp [hx₂, hy₂, hz₂] at h₁
+      simp only [hx₂, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, sub_zero, hy₂,
+        neg_zero, hz₂, sub_self, add_zero] at h₁
       let h₂ := congrArg (λ (x₀ : ℝ) => x₀ - r + 1) h₁
       simp only [add_sub_cancel_right, neg_add_cancel] at h₂
       have hSquareNn := mul_self_nonneg (r - 1 / 2)
@@ -158,7 +159,7 @@ lemma EqualSetsSoqqtstqm1₀AndSoqqtstqm1₁ : Soqqtstqm1₀ = Soqqtstqm1₁ := 
     rw [hXSquare]
     ring
 
-lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
+theorem EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqqtstqm1₁, Set.mem_setOf_eq, Soqqtstqm1₂]
   simp only [one_div, Quaternion.ext_iff]
@@ -192,7 +193,7 @@ lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₂ : Soqqtstqm1₁ = Soqqtstqm1₂ := 
     ring_nf at hNormSqMr ⊢
     rw [hNormSqMr]
 
-lemma EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
+theorem EqualSetsSoqqtstqm1₁AndSoqqtstqm1₃ : Soqqtstqm1₁ = Soqqtstqm1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqqtstqm1₁, Set.mem_setOf_eq, Soqqtstqm1₃, Soqtstn1₁]
   simp only [one_div, Quaternion.ext_iff, re_add, imI_add, imJ_add, imK_add]
@@ -262,11 +263,134 @@ def Soqw4pin1₂ : Set ℍ[ℝ] := {q₂ : ℍ[ℝ] | ‖q₂‖ = 1 ∧ (q₂.r
 def Soqw4pin1₃ : Set ℍ[ℝ] := {q₃ : ℍ[ℝ] | ∃ (qim : ℍ[ℝ]) (Pm1 : ℝ),
   ((Pm1 ^ 2 = 1) ∧ qim ∈ Soqtstn1₁ ∧ q₃ * (Real.sqrt 2) = Pm1 + qim)}
 
-lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
+theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
   sorry
 
-lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₂ : Soqw4pin1₀ = Soqw4pin1₂ := by
-  sorry
+theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₂ : Soqw4pin1₀ = Soqw4pin1₂ := by
+  ext q
+  dsimp only [Soqw4pin1₀, Set.mem_setOf_eq, Soqw4pin1₂]
+  simp only [one_div]
+  constructor
+  · intros h
+    have hNormSq : ‖q‖ = 1 := by
+      have hNormPow4 : ‖q‖ ^ 4 = 1 := by
+        rw [←norm_pow, ←h]
+        simp only [norm_neg, one_mem, CStarRing.norm_of_mem_unitary]
+      have hNormPos : 0 ≤ ‖q‖ := norm_nonneg q
+      rw [pow_eq_one_iff_of_nonneg hNormPos (by norm_num : 4 ≠ 0)] at hNormPow4
+      exact hNormPow4
+    constructor
+    · exact hNormSq
+    · let q2 := q * q
+      have hq2 : q2 * q2 = -1 := by
+        rw [←pow_two]
+        convert h
+        ring_nf
+        dsimp only [q2]
+        rw [← pow_two, ← pow_mul]
+        norm_num
+        exact h.symm
+      have hq2Re : q2.re = 0 := by
+        have hRe : (q2 * q2).re = -1 := by rw [hq2]; rfl
+        rw [re_mul] at hRe
+        have hNormSqQ2 : ‖q2‖ = 1 := by
+          rw [norm_mul, hNormSq]
+          norm_num
+        have hImSq : ‖q2.im‖ ^ 2 = 1 - q2.re ^ 2 := by
+          have h : ‖q2‖ ^ 2 = q2.re ^ 2 + ‖q2.im‖ ^ 2 := by
+            rw [pow_two ‖q2‖, ← normSq_eq_norm_mul_self]
+            rw [pow_two ‖q2.im‖, ← normSq_eq_norm_mul_self]
+            simp only [normSq_def, re_mul, re_star, imI_star, mul_neg, sub_neg_eq_add, imJ_star,
+              imK_star, im, QuaternionAlgebra.re_im, mul_zero, QuaternionAlgebra.imI_im, zero_add,
+              QuaternionAlgebra.imJ_im, QuaternionAlgebra.imK_im]
+            ring
+          rw [hNormSqQ2] at h
+          norm_num at h
+          linarith
+        ring_nf at hRe
+        rw [pow_two, ←normSq_eq_norm_mul_self, Quaternion.normSq_def] at hImSq
+        simp only [im, re_mul, QuaternionAlgebra.re_im, re_star, mul_zero, QuaternionAlgebra.imI_im,
+          imI_star, mul_neg, sub_neg_eq_add, zero_add, QuaternionAlgebra.imJ_im, imJ_star,
+          QuaternionAlgebra.imK_im, imK_star] at hImSq
+        ring_nf at hImSq
+        have hReSub : q2.re ^ 2 - (1 - q2.re ^ 2) = -1 := by
+          convert hRe using 1
+          rw [← hImSq]
+          ring
+        have hReZero : 2 * q2.re ^ 2 = 0 := by linarith
+        simp only [mul_eq_zero, OfNat.ofNat_ne_zero, ne_eq, not_false_eq_true, pow_eq_zero_iff,
+          false_or] at hReZero
+        exact hReZero
+      have hReSimple : q2.re = 2 * q.re ^ 2 - ‖q‖ ^ 2 := by
+        rw [re_mul, pow_two ‖q‖, ←normSq_eq_norm_mul_self]
+        simp only [normSq, re_mul, re_star, imI_star, mul_neg, sub_neg_eq_add, imJ_star, imK_star,
+          MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk]
+        ring
+      rw [hq2Re, hNormSq] at hReSimple
+      linarith
+  · intros h
+    rcases h with ⟨hNorm, hRe⟩
+    have hq2Re : (q * q).re = 0 := by
+      rw [re_mul]
+      have hNormSq : ‖q‖ ^ 2 = 1 := by rw [hNorm]; norm_num
+      have hNormSqSplit : q.re ^ 2 + ‖q.im‖ ^ 2 = 1 := by
+        have h : ‖q‖ ^ 2 = q.re ^ 2 + ‖q.im‖ ^ 2 := by
+          rw [pow_two ‖q‖, ←normSq_eq_norm_mul_self, pow_two ‖q.im‖, ←normSq_eq_norm_mul_self]
+          simp only [normSq_def, re_mul, re_star, imI_star, mul_neg, sub_neg_eq_add, imJ_star,
+            imK_star, im, QuaternionAlgebra.re_im, mul_zero, QuaternionAlgebra.imI_im, zero_add,
+            QuaternionAlgebra.imJ_im, QuaternionAlgebra.imK_im]
+          ring
+        rw [← h, hNormSq]
+      have hImVecSq : ‖q.im‖ ^ 2 = 1 - q.re ^ 2 := by linarith
+      have h_re_eq : q.re * q.re - q.imI * q.imI - q.imJ * q.imJ - q.imK * q.imK = q.re ^ 2 - ‖q.im‖ ^ 2 := by
+        rw [pow_two ‖q.im‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def]
+        simp only [im, re_mul, QuaternionAlgebra.re_im, re_star, mul_zero, QuaternionAlgebra.imI_im,
+          imI_star, mul_neg, sub_neg_eq_add, zero_add, QuaternionAlgebra.imJ_im, imJ_star,
+          QuaternionAlgebra.imK_im, imK_star]
+        ring
+      rw [h_re_eq, hImVecSq, hRe]
+      norm_num
+    have hq2Norm : ‖q * q‖ = 1 := by
+      rw [norm_mul, hNorm]
+      norm_num
+    have hq2Sq : (q * q) * (q * q) = -1 := by
+      apply ext
+      · rw [re_mul]
+        have hImVecSq : ‖(q * q).im‖ ^ 2 = 1 := by
+          have h : ‖q * q‖ ^ 2 = (q * q).re ^ 2 + ‖(q * q).im‖ ^ 2 := by
+            rw [pow_two ‖q * q‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def']
+            rw [pow_two ‖(q * q).im‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def]
+            simp only [re_mul, imI_mul, imJ_mul, imK_mul, im, QuaternionAlgebra.re_im, re_star,
+              mul_zero, QuaternionAlgebra.imI_im, imI_star, neg_sub, zero_sub,
+              QuaternionAlgebra.imJ_im, imJ_star, neg_add_rev, QuaternionAlgebra.imK_im, imK_star]
+            ring
+          rw [hq2Norm, hq2Re] at h
+          simp only [one_pow, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
+            zero_add] at h
+          exact h.symm
+        rw [hq2Re]
+        simp only [mul_zero, zero_sub, re_neg, QuaternionAlgebra.re_one]
+        have hSum : (q * q).imI * (q * q).imI + (q * q).imJ * (q * q).imJ +
+          (q * q).imK * (q * q).imK = ‖(q * q).im‖ ^ 2 := by
+          rw [pow_two, ←normSq_eq_norm_mul_self, Quaternion.normSq_def]
+          simp only [imI_mul, imJ_mul, imK_mul, im, re_mul, QuaternionAlgebra.re_im, re_star,
+            mul_zero, QuaternionAlgebra.imI_im, imI_star, neg_sub, zero_sub,
+            QuaternionAlgebra.imJ_im, imJ_star, neg_add_rev, QuaternionAlgebra.imK_im, imK_star]
+          ring
+        trans -((q * q).imI * (q * q).imI + (q * q).imJ * (q * q).imJ + (q * q).imK * (q * q).imK)
+        · ring
+        rw [hSum, hImVecSq]
+      · simp only [imI_mul, hq2Re, zero_mul, mul_zero, add_zero, imJ_mul, imK_mul, zero_add,
+        imI_neg, QuaternionAlgebra.imI_one, neg_zero]
+        ring
+      · simp only [imJ_mul, hq2Re, zero_mul, imI_mul, imK_mul, zero_sub, mul_zero, add_zero,
+        imJ_neg, QuaternionAlgebra.imJ_one, neg_zero]
+        ring
+      · simp only [imK_mul, hq2Re, zero_mul, imI_mul, imJ_mul, zero_add, mul_zero, add_zero,
+        imK_neg, QuaternionAlgebra.imK_one, neg_zero]
+        ring
+    rw [← hq2Sq]
+    simp only [mul_assoc, pow_succ, pow_zero, one_mul]
 
-lemma EqualSetsSoqw4pin1₀AndSoqw4pin1₃ : Soqw4pin1₀ = Soqw4pin1₃ := by
+theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₃ : Soqw4pin1₀ = Soqw4pin1₃ := by
   sorry

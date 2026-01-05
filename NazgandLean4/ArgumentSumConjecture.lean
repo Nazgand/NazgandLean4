@@ -24,7 +24,7 @@ def DiffEq.IsVectorBasis (de : DiffEq) (g : (Fin de.Degree) → ℂ → ℂ) : P
       (λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b₁ k * g k z) → b₀ = b₁))
 
 -- simplify the shifted iterated derivative
-lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
+theorem ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
     iteratedDeriv k (fun z₀ => f (z₀ + z₁)) = (fun z₀ => iteratedDeriv k f (z₀ + z₁)) := by
   induction' k with K Kih
   · simp only [iteratedDeriv_zero]
@@ -48,7 +48,7 @@ lemma ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ :
     rfl
 
 -- A solution with input shifted by a constant z₁ is still a solution
-lemma ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈ de.SetOfSolutions) :
+theorem ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈ de.SetOfSolutions) :
   (λ (z₀ : ℂ) => f (z₀ + z₁)) ∈ de.SetOfSolutions := by
   unfold DiffEq.SetOfSolutions
   unfold DiffEq.SetOfSolutions at h₀
@@ -68,7 +68,7 @@ lemma ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈
     intros z₀
     exact h₂ (z₀ + z₁)
 
-lemma ExtractedFunctionExists {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ExtractedFunctionExists {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₁ : ℂ) :
   ∃ b : (Fin de.Degree → ℂ), (fun z₀ => f (z₀ + z₁)) =
   fun z => ∑ (k : (Fin de.Degree)), b k * g k z := by
@@ -84,14 +84,14 @@ noncomputable def ExtractedFunctions {de : DiffEq} {f : ℂ → ℂ}
   exact Classical.choose (ExtractedFunctionExists h₁ g h₂ z₁) k
 
 -- The convenient to define one
-lemma ExtractedFunctionsUse0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ExtractedFunctionsUse0 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₁ : ℂ) :
   (fun z₀ => f (z₀ + z₁)) = fun z₀ => ∑ (k : (Fin de.Degree)),
    (ExtractedFunctions h₁ g h₂ k z₁) * g k z₀ := by
   exact Classical.choose_spec (ExtractedFunctionExists h₁ g h₂ z₁)
 
 -- The one we actually need
-lemma ExtractedFunctionsUse1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ExtractedFunctionsUse1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₀ : ℂ) :
   (fun z₁ => f (z₀ + z₁)) = fun z₁ => ∑ (k : (Fin de.Degree)),
    (ExtractedFunctions h₁ g h₂ k z₁) * g k z₀ := by
@@ -101,7 +101,7 @@ lemma ExtractedFunctionsUse1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.Se
 noncomputable def KeyDifferentialOperator (de : DiffEq) (f : ℂ → ℂ) : ℂ → ℂ :=
   λ (z: ℂ) => ∑ (k : (Fin (de.Degree + 1))), (de.Coeff k) * (iteratedDeriv k f z)
 
-lemma AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ}
+theorem AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₀ z₁ : ℂ), 0 = KeyDifferentialOperator de (fun z₁ => ∑ (k : (Fin de.Degree)),
    (ExtractedFunctions h₁ g h₂ k z₁) * g k z₀) z₁ := by
@@ -124,7 +124,7 @@ lemma AppliedDifferentialOperator0 {de : DiffEq} {f : ℂ → ℂ}
   simp only [Set.mem_setOf_eq] at h₅
   exact h₅.right z₁
 
-lemma iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v}
+theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type v}
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] {ι : Type u_1}
   {u : Finset ι} {A : ι → 𝕜 → F} (h : ∀ i ∈ u, ContDiff 𝕜 ⊤ (A i)) (k : ℕ) :
   iteratedDeriv k (fun y => Finset.sum u fun i => A i y) =
@@ -141,12 +141,12 @@ lemma iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Type 
       sorry
     sorry
 
-lemma ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ}
+theorem ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)
   : ∀ (k : (Fin de.Degree)), Differentiable ℂ (ExtractedFunctions h₁ g h₂ k) := by
   sorry
 
-lemma ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ}
+theorem ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)
   (z₀ : ℂ) : ∀ (k : (Fin de.Degree)),
   ContDiff ℂ ⊤ (λ (z₁ : ℂ) => ((ExtractedFunctions h₁ g h₂ k z₁) * g k z₀)) := by
@@ -155,13 +155,13 @@ lemma ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ}
     (ExtractedFunctionsDifferentiable0 h₁ g h₂ k) (g k z₀)
   exact Differentiable.contDiff h₀
 
-lemma AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ}
+theorem AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₀ z₁ : ℂ), 0 = ∑ (k : (Fin de.Degree)),
   (KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ * g k z₀) := by
   sorry
 
-lemma ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ}
+theorem ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₁ : ℂ) (k : (Fin de.Degree)),
   0 = KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ := by
@@ -175,7 +175,7 @@ lemma ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ}
     exact AppliedDifferentialOperator1 h₁ g h₂ z₀ z₁
   exact congrFun (h0 h1) k
 
-lemma ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (k : (Fin de.Degree)), (ExtractedFunctions h₁ g h₂ k) ∈ de.SetOfSolutions := by
   intros k
@@ -190,7 +190,7 @@ lemma ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : f 
     rw [KeyDifferentialOperator] at h1
     exact h1
 
-lemma MatrixEntriesExist {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem MatrixEntriesExist {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (k : (Fin de.Degree)), ∃ (b : (Fin de.Degree) → ℂ),
   (ExtractedFunctions h₁ g h₂ k) = λ (z : ℂ) => ∑ (k : (Fin de.Degree)), b k * g k z := by
@@ -207,13 +207,13 @@ noncomputable def MatrixEntries {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de
   (Fin de.Degree) → ℂ := by
   exact Classical.choose (MatrixEntriesExist h₁ g h₂ k)
 
-lemma MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (k : (Fin de.Degree)) :
   ExtractedFunctions h₁ g h₂ k = fun z₁ =>
   ∑ (k_1 : (Fin de.Degree)), (MatrixEntries h₁ g h₂ k) k_1 * g k_1 z₁ := by
   exact Classical.choose_spec (MatrixEntriesExist h₁ g h₂ k)
 
-lemma ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₀ z₁ : ℂ) :
   f (z₀ + z₁) = ∑ (k : (Fin de.Degree)), ∑ (k_1 : (Fin de.Degree)),
   MatrixEntries h₁ g h₂ k k_1 * g k_1 z₁ * g k z₀ := by
@@ -229,7 +229,7 @@ lemma ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfS
 def Vec {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) :
   Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
 
-lemma ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ),
   ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =
@@ -256,7 +256,7 @@ lemma ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.Set
   ext m
   ring_nf
 
-lemma ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ), (A = transpose A ∧
     ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =

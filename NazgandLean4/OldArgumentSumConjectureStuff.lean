@@ -32,11 +32,11 @@ def Vec {n : ℕ+} (g : (Fin (n + 1)) → ℂ → ℂ) (z : ℂ) :
   Matrix (Fin (n + 1)) (Fin 1) ℂ := of λ (y : Fin (n + 1)) (_ : Fin 1) => g y z
 
 /-
-This lemma will be useful to help solve the conjecture by allowing one to transform the arbitrary basis
+This theorem will be useful to help solve the conjecture by allowing one to transform the arbitrary basis
 to a basis of one's choice
-Note the matric C is invertable because this lemma goes both from g₀ to g₁ and from g₁ to g₀.
+Note the matric C is invertable because this theorem goes both from g₀ to g₁ and from g₁ to g₀.
 -/
-lemma BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (_ : LeadCoeffNonZero DiffEqCoeff)
+theorem BasisMatrixImageOfBasis {n : ℕ+} {DiffEqCoeff : (Fin (n + 2)) → ℂ} (_ : LeadCoeffNonZero DiffEqCoeff)
   (g₀ g₁ : (Fin (n + 1)) → ℂ → ℂ) (h₁ : VectorBasis DiffEqCoeff g₀) (h₂ : VectorBasis DiffEqCoeff g₁) :
   ∃ (C : Matrix (Fin (n + 1)) (Fin (n + 1)) ℂ), (∀ z : ℂ, Vec g₀ z = C * Vec g₁ z) := by
   have h₃ : ∀ k : Fin (n + 1), g₀ k ∈ SetOfSolutions DiffEqCoeff := by

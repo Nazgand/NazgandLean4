@@ -11,20 +11,20 @@ open Complex Classical Real
 def SetSpiro (k : ℕ+) (m : ℤ) :
   Set (ℂ → ℂ) := {f : (ℂ → ℂ) | ∀ (t : ℂ), f (t + 2 * π / k) = exp (I * 2 * m * π / k) * f t}
 
-lemma SpiroLinearCombination {f₀ f₁} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) (h₁ : f₁ ∈ SetSpiro k m)
+theorem SpiroLinearCombination {f₀ f₁} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) (h₁ : f₁ ∈ SetSpiro k m)
   (w₀ w₁ : ℂ) : (λ (t : ℂ) => w₀ * f₀ t + w₁ * f₁ t) ∈ SetSpiro k m := by
   simp only [SetSpiro, Set.mem_setOf_eq] at *
   intros t
   simp only [h₀, h₁]
   ring
 
-lemma SpiroOffset {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m)
+theorem SpiroOffset {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m)
   (o : ℂ) : (λ (t : ℂ) => f₀ (t + o)) ∈ SetSpiro k m := by
   simp only [SetSpiro, Set.mem_setOf_eq] at *
   intros t
   rw [(show t + 2 * ↑π / ↑↑k + o = (t + o) + 2 * ↑π / ↑↑k by ring), h₀]
 
-lemma SpiroPseudoPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m)
+theorem SpiroPseudoPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m)
   : ∀ (n : ℤ) (t : ℂ), f₀ (t + 2 * n * π / k) = exp (I * 2 * n * m * π / k) * f₀ t := by
   rw [IntegerInduction]
   simp only [SetSpiro, Set.mem_setOf_eq, Int.cast_add, Int.cast_one] at *
@@ -47,7 +47,7 @@ lemma SpiroPseudoPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro 
         f₀ (t - 2 * ↑π / ↑↑k) by ring_nf), ←Complex.exp_add]
       ring_nf
 
-lemma SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) : ∀ (t : ℂ), f₀ (t + 2 * π) = f₀ t := by
+theorem SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) : ∀ (t : ℂ), f₀ (t + 2 * π) = f₀ t := by
   intros t
   have h₁ := SpiroPseudoPeriodic k m h₀ k t
   have h₂ : (2 : ℂ) * ↑↑↑k * ↑π / ↑↑k = 2 * ↑π := by
@@ -65,7 +65,7 @@ lemma SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) :
   rw [h₄]
   simp only [one_mul]
 
-lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) :
+theorem SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) :
   ∀ (t : ℂ), f₀ (t + 2 * π / (Int.gcd m k)) = f₀ t := by
   have h₂ : ↑(Int.gcd m k) ∣ (k : ℤ) := Int.gcd_dvd_right m ↑↑k
   obtain ⟨w, hw⟩ := h₂
@@ -106,7 +106,7 @@ lemma SpiroPeriodic2 {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) 
   use w₂
   ring_nf
 
-lemma SimpleGeneralSpiro (k : ℕ+) (m : ℤ) (g : ℂ → ℂ)
+theorem SimpleGeneralSpiro (k : ℕ+) (m : ℤ) (g : ℂ → ℂ)
   : (λ (t : ℂ) => exp (I * t * m) * g (exp (I * t * k))) ∈ SetSpiro k m := by
   simp only [SetSpiro, Set.mem_setOf_eq] at *
   intros t
@@ -118,7 +118,7 @@ lemma SimpleGeneralSpiro (k : ℕ+) (m : ℤ) (g : ℂ → ℂ)
     simp only [mul_one]
   rw [h₀]
 
-lemma SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k₀ m) :
+theorem SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k₀ m) :
   (λ (t : ℂ) => (f₀ (t * k₁ / k₀)) ^ (k₀ : ℕ)) ∈ SetSpiro k₁ (m * k₁) := by
   simp only [SetSpiro, Set.mem_setOf_eq, Int.cast_mul, Int.cast_natCast] at *
   intros t
@@ -131,7 +131,7 @@ lemma SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSp
   congr 1
   field_simp
 
-lemma SetSpiroRelated2 {f₀} (k: ℕ+) (m₀ m₁ : ℤ) (h₀ : f₀ ∈ SetSpiro k m₀) :
+theorem SetSpiroRelated2 {f₀} (k: ℕ+) (m₀ m₁ : ℤ) (h₀ : f₀ ∈ SetSpiro k m₀) :
   (λ (t : ℂ) => exp (I * t * (m₁ - m₀)) * (f₀ t)) ∈ SetSpiro k m₁ := by
   simp only [SetSpiro, Set.mem_setOf_eq] at *
   intros t

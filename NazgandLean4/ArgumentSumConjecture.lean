@@ -59,7 +59,7 @@ theorem ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f �
   rcases h₀ with ⟨h₁, h₂⟩
   constructor
   · refine Differentiable.contDiff ?left.hf
-    sorry
+    exact (h₁.differentiable (by simp)).comp (differentiable_id.add (differentiable_const z₁))
   · have hShID : ∀ (k : ℕ), (iteratedDeriv k fun z₀ => f (z₀ + z₁)) =
       fun z₀ => iteratedDeriv k f (z₀ + z₁) := by
       intros k

@@ -488,5 +488,37 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
       exact hMem
     exact hGoal
 
-theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₃ : Soqw4pin1₀ = Soqw4pin1₃ := by
-  sorry
+theorem EqualSetsSoqw4pin1₁AndSoqw4pin1₃ : Soqw4pin1₁ = Soqw4pin1₃ := by
+  ext ⟨r, x, y, z⟩
+  dsimp only [Soqw4pin1₁, Set.mem_setOf_eq, Soqw4pin1₃, Soqtstn1₁]
+  constructor
+  · -- Forward: Soqw4pin1₁ → Soqw4pin1₃
+    intro ⟨rx, ry, rz, Pm1, hPm1Sq, hq, hSphere⟩
+    use ⟨0, rx, ry, rz⟩
+    use Pm1
+    constructor
+    · exact hPm1Sq
+    constructor
+    · use rx, ry, rz
+    · -- q * √2 = Pm1 + qim
+      rw [hq]
+      ext
+      · simp only [re_add, re_coe, add_zero]
+      · simp only [imI_add, imI_coe, zero_add]
+      · simp only [imJ_add, imJ_coe, zero_add]
+      · simp only [imK_add, imK_coe, zero_add]
+  · -- Backward: Soqw4pin1₃ → Soqw4pin1₁
+    intro ⟨qim, Pm1, hPm1Sq, hQim, hq⟩
+    rcases hQim with ⟨rx, ry, rz, hQimEq, hSphere⟩
+    use rx, ry, rz, Pm1
+    constructor
+    · exact hPm1Sq
+    constructor
+    · -- q * √2 = ⟨Pm1, rx, ry, rz⟩
+      rw [hq, hQimEq]
+      ext
+      · simp only [re_add, re_coe, add_zero]
+      · simp only [imI_add, imI_coe, zero_add]
+      · simp only [imJ_add, imJ_coe, zero_add]
+      · simp only [imK_add, imK_coe, zero_add]
+    · exact hSphere

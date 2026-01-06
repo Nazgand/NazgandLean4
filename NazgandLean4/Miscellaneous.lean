@@ -78,7 +78,7 @@ theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f)
         · apply differentiableAt_const
         · apply differentiableAt_id
 
-theorem SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d > dv d)) :
+theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d > dv d)) :
   Summable (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
   -- Each term is bounded by 1 / 2^d since db k ≥ 2 for all k
   have h_bound : ∀ d, (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k ≤ 1 / 2^d := by
@@ -148,7 +148,67 @@ theorem SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d
       · norm_num
     exact this
 
-theorem SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) :
+theorem VaryingBase.One (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) : 1 =
+  tsum (λ (d : ℕ) ↦ ((db d) - 1 : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
+  symm
+  apply HasSum.tsum_eq
+  rw [hasSum_iff_tendsto_nat_of_nonneg]
+  · let S := λ n ↦ 1 - 1 / ∏ k ∈ Finset.range n, (db k : ℝ)
+    apply Filter.Tendsto.congr (f₁ := S)
+    · intro n
+      induction n with
+      | zero => simp only [one_div, Finset.range_zero, Finset.prod_empty, inv_one, sub_self,
+        Nat.cast_prod, Finset.sum_empty, S]
+      | succ n ih =>
+        rw [Finset.sum_range_succ, ← ih]
+        simp only [S]
+        have hprod_pos : (∏ k ∈ Finset.range (n + 1), (db k : ℝ)) ≠ 0 := by
+          apply ne_of_gt; apply Finset.prod_pos; intros k _
+          exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k))
+        have hprod_prev_pos : (∏ k ∈ Finset.range n, (db k : ℝ)) ≠ 0 := by
+          apply ne_of_gt; apply Finset.prod_pos; intros k _
+          exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k))
+        have hdb_pos : (db n : ℝ) ≠ 0 := by
+          apply ne_of_gt; exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 n))
+        rw [Finset.prod_range_succ, Finset.prod_range_succ]
+        field_simp [hprod_pos, hprod_prev_pos, hdb_pos]
+        simp only [Nat.cast_mul, Nat.cast_prod]
+        ring
+    · -- Limit S n -> 1
+      rw [← sub_zero 1]
+      apply Filter.Tendsto.sub tendsto_const_nhds
+      have h_le : ∀ n, (2 : ℝ)^n ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
+        intro n
+        calc (2 : ℝ)^n = ∏ _ ∈ Finset.range n, 2 := by simp
+            _ ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
+              apply Finset.prod_le_prod
+              · intros; norm_num
+              · intros k _; exact Nat.ofNat_le_cast.mpr (h0 k)
+      -- Upper bound limit (1/2)^n -> 0
+      have h_geom : Filter.Tendsto (fun n => (1/2 : ℝ)^n) Filter.atTop (nhds 0) := by
+        apply tendsto_pow_atTop_nhds_zero_of_lt_one
+        · norm_num
+        · norm_num
+      apply tendsto_of_tendsto_of_tendsto_of_le_of_le (tendsto_const_nhds (x := 0)) h_geom
+      · intro n
+        simp only [one_div, inv_nonneg]
+        apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
+      · intro n
+        simp only [one_div, inv_pow]
+        rw [inv_eq_one_div, inv_eq_one_div, one_div_le_one_div]
+        · exact h_le n
+        · apply Finset.prod_pos; intros
+          exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 _))
+        · apply pow_pos; norm_num
+  · intro i
+    apply div_nonneg
+    · simp only [sub_nonneg]
+      norm_cast
+      exact le_of_lt (h0 i)
+    · rw [Nat.cast_prod]
+      apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
+
+theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) :
   {r : ℝ | ∃(dv : ℕ → ℕ), ((∀(d : ℕ), db d > dv d) ∧
   r = tsum (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k))}
   = {r : ℝ | r ≥ 0 ∧ r ≤ 1} := by

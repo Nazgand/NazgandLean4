@@ -143,7 +143,8 @@ theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Typ
     rw [deriv_sum h₂]
     simp only [iteratedDeriv_succ, Finset.sum_apply]
 
-theorem DiffEq_Solution_Analytic {de : DiffEq} {f : ℂ → ℂ} (h : de.IsSolution f) : AnalyticOnNhd ℂ f Set.univ := by
+theorem DiffEq_Solution_Analytic {de : DiffEq} {f : ℂ → ℂ} (h : de.IsSolution f) :
+  AnalyticOnNhd ℂ f Set.univ := by
   rw [DiffEq.IsSolution] at h
   exact ContDiff.analyticOnNhd h.1
 
@@ -159,7 +160,8 @@ theorem DiffEq_Zero_IC_Implies_Zero {de : DiffEq} {h : ℂ → ℂ} (h_sol : de.
       let m := k - de.Degree
       have hm : m + de.Degree = k := Nat.sub_add_cancel (Nat.le_of_not_lt hk)
       have h_ode := funext h_sol.2
-      have h_diff_ode : iteratedDeriv m (fun z => ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv j h z) 0 = 0 := by
+      have h_diff_ode :
+        iteratedDeriv m (fun z => ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv j h z) 0 = 0 := by
         rw [← h_ode]
         simp only [iteratedDeriv_const, ite_self]
       have h_smooth : ContDiff ℂ ⊤ h := by
@@ -179,9 +181,10 @@ theorem DiffEq_Zero_IC_Implies_Zero {de : DiffEq} {h : ℂ → ℂ} (h_sol : de.
             intro j
             apply Differentiable.const_mul
             apply h_smooth.differentiable_iteratedDeriv _ (WithTop.coe_lt_top _)
-          have h_sum_eq : (fun z => ∑ j, de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) = ∑ j, (fun z => de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) := by
-             ext
-             simp only [Finset.sum_apply]
+          have h_sum_eq : (fun z => ∑ j, de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) =
+            ∑ j, (fun z => de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) := by
+            ext
+            simp only [Finset.sum_apply]
           rw [h_sum_eq, deriv_sum (fun j _ => (h_diff j).differentiableAt)]
           apply Finset.sum_congr rfl
           intro j _
@@ -297,7 +300,8 @@ theorem ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ}
     simp only [Set.mem_setOf_eq]
     use (fun k => if k = j then 1 else 0)
     simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
-  have h_lin_sys : ∀ z, W.mulVec (fun k => ExtractedFunctions h₁ g h₂ k z) = fun (j : Fin de.Degree) => iteratedDeriv (j : ℕ) f z := by
+  have h_lin_sys : ∀ z, W.mulVec (fun k => ExtractedFunctions h₁ g h₂ k z) =
+    fun (j : Fin de.Degree) => iteratedDeriv (j : ℕ) f z := by
     intro z
     ext j
     have h_eq := ExtractedFunctionsUse0 h₁ g h₂ z
@@ -530,12 +534,12 @@ theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f
     -- LHS: f(z₀ + z₁)
     -- RHS: (v(z₀)ᵀ * A * v(z₁))₀₀ = (v(z₀)ᵀ * (1/2)(B + Bᵀ) * v(z₁))₀₀
     --    = (1/2) * ((v(z₀)ᵀ * B * v(z₁))₀₀ + (v(z₀)ᵀ * Bᵀ * v(z₁))₀₀)
-    have hLHS_B := congrFun (congrFun hB' 0) 0
+    have hLHS_B  := congrFun (congrFun hB' 0) 0
     have hLHS_BT := congrFun (congrFun hBT 0) 0
     simp only [of_apply] at hLHS_B hLHS_BT
     -- The RHS of our goal
     have hRHS : ((transpose (Vec g z₀)) * A * (Vec g z₁)) 0 0 =
-                (1/2 : ℂ) * (((transpose (Vec g z₀)) * B * (Vec g z₁)) 0 0 +
+                (1/2 : ℂ) * (((transpose (Vec g z₀)) * B  * (Vec g z₁)) 0 0 +
                              ((transpose (Vec g z₀)) * Bᵀ * (Vec g z₁)) 0 0) := by
       simp only [A, Matrix.smul_mul, Matrix.mul_smul, smul_apply, smul_eq_mul,
                  Matrix.add_mul, Matrix.mul_add, add_apply]

@@ -348,7 +348,43 @@ theorem AppliedDifferentialOperator1 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (z₀ z₁ : ℂ), 0 = ∑ (k : (Fin de.Degree)),
   (KeyDifferentialOperator de (ExtractedFunctions h₁ g h₂ k) z₁ * g k z₀) := by
-  sorry
+  intros z₀ z₁
+  have h₀ := AppliedDifferentialOperator0 h₁ g h₂ z₀ z₁
+  unfold KeyDifferentialOperator at h₀ ⊢
+  have h_sol_g : ∀ j : Fin de.Degree, g j ∈ de.SetOfSolutions := by
+    rw [h₂.left]
+    intro j
+    simp only [Set.mem_setOf_eq]
+    use (fun k => if k = j then 1 else 0)
+    simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
+  have h_smooth : ∀ i ∈ Finset.univ, ContDiff ℂ ⊤ (fun z => ExtractedFunctions h₁ g h₂ i z * g i z₀) := by
+    intro i _
+    exact (ExtractedFunctionsDifferentiable1 h₁ g h₂ z₀) i
+  have h_iter_sum : ∀ (n : ℕ), iteratedDeriv n (fun z => ∑ k, ExtractedFunctions h₁ g h₂ k z * g k z₀) =
+      fun z => ∑ k, iteratedDeriv n (fun z => ExtractedFunctions h₁ g h₂ k z * g k z₀) z := by
+    intro n
+    exact iteratedDerivSum h_smooth n
+  simp_rw [h_iter_sum] at h₀
+  have h_iter_const_mul : ∀ (n : ℕ) (k : Fin de.Degree),
+      iteratedDeriv n (fun z => ExtractedFunctions h₁ g h₂ k z * g k z₀) =
+      fun z => iteratedDeriv n (ExtractedFunctions h₁ g h₂ k) z * g k z₀ := by
+    intro n k
+    have h1 : (fun z => ExtractedFunctions h₁ g h₂ k z * g k z₀) =
+              (fun z => g k z₀ * ExtractedFunctions h₁ g h₂ k z) := by
+      ext z; ring
+    rw [h1]
+    have h_diff := ExtractedFunctionsDifferentiable0 h₁ g h₂ k
+    have h_smooth : ContDiff ℂ ⊤ (ExtractedFunctions h₁ g h₂ k) := h_diff.contDiff
+    ext z
+    rw [iteratedDeriv_const_mul ((h_smooth.of_le le_top).contDiffAt (x := z))]
+    ring
+  simp_rw [h_iter_const_mul] at h₀
+  simp_rw [Finset.sum_mul, Finset.mul_sum] at h₀ ⊢
+  rw [Finset.sum_comm] at h₀
+  convert h₀ using 2
+  apply Finset.sum_congr rfl
+  intro k _
+  ring
 
 theorem ExtractedFunctionsAreSolutions0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :

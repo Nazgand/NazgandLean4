@@ -87,10 +87,11 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
       have := (h0 d).2
       have h1 : dv d ≤ db d - 1 := Nat.le_sub_one_of_lt this
       calc (dv d : ℝ) ≤ (db d - 1 : ℕ) := Nat.cast_le.mpr h1
-        _ = (db d : ℝ) - 1 := by simp [Nat.cast_sub (Nat.one_le_of_lt (h0 d).1)]
+        _ = (db d : ℝ) - 1 := by simp only [Nat.cast_sub (Nat.one_le_of_lt (h0 d).1),
+          Nat.cast_one]
     have h_denom_bound : (2 : ℝ)^(d+1) ≤ ∏ k ∈ Finset.range (d + 1), (db k : ℝ) := by
       have h1 : (2 : ℝ)^(d+1) = ∏ _k ∈ Finset.range (d + 1), (2 : ℝ) := by
-        simp [Finset.prod_const, Finset.card_range]
+        simp only [Finset.prod_const, Finset.card_range]
       rw [h1]
       apply Finset.prod_le_prod
       · intros k _
@@ -143,7 +144,7 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
   · -- 1/2^d is a convergent geometric series
     have : Summable (λ d ↦ (1 : ℝ) / 2^d) := by
       convert summable_geometric_of_lt_one (r := (1/2 : ℝ)) _ _
-      · simp [one_div, inv_pow]
+      · simp only [one_div, inv_pow]
       · norm_num
       · norm_num
     exact this
@@ -179,7 +180,8 @@ theorem VaryingBase.One (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) : 1 =
       apply Filter.Tendsto.sub tendsto_const_nhds
       have h_le : ∀ n, (2 : ℝ)^n ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
         intro n
-        calc (2 : ℝ)^n = ∏ _ ∈ Finset.range n, 2 := by simp
+        calc (2 : ℝ)^n = ∏ _ ∈ Finset.range n, 2 := by simp only [Finset.prod_const,
+          Finset.card_range]
             _ ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
               apply Finset.prod_le_prod
               · intros; norm_num
@@ -212,4 +214,145 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
   {r : ℝ | ∃(dv : ℕ → ℕ), ((∀(d : ℕ), db d > dv d) ∧
   r = tsum (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k))}
   = {r : ℝ | r ≥ 0 ∧ r ≤ 1} := by
-  sorry
+  ext r
+  constructor
+  · rintro ⟨dv, h_dv, rfl⟩
+    have h_summable := VaryingBase.SummableSum db dv (λ d ↦ ⟨h0 d, h_dv d⟩)
+    constructor
+    · -- r ≥ 0
+      apply tsum_nonneg
+      intro d
+      apply div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
+    · -- r ≤ 1
+      rw [VaryingBase.One db h0]
+      apply Summable.tsum_le_tsum
+      · intro b
+        apply div_le_div_of_nonneg_right
+        · rw [le_sub_iff_add_le]
+          norm_cast
+          exact h_dv b
+        · rw [Nat.cast_prod]
+          apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
+      · exact h_summable
+      · convert VaryingBase.SummableSum db (fun d ↦ db d - 1)
+          (fun d ↦ ⟨h0 d, Nat.sub_one_lt (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 d)))⟩) with i
+        rw [Nat.cast_sub (Nat.le_of_lt (h0 i))]
+        simp only [Nat.cast_one]
+  · -- Reverse direction
+    rintro ⟨h_ge_0, h_le_1⟩
+    rcases lt_or_eq_of_le h_le_1 with hr_lt | rfl
+    · -- Case r < 1: Construct greedy expansion
+      let rem : ℕ → ℝ := Nat.rec r (λ n x ↦ Int.fract (x * db n))
+      let dv : ℕ → ℕ := λ n ↦ ⌊rem n * db n⌋₊
+      have h_rem_ge_0 : ∀ n, 0 ≤ rem n := by
+        intro n; induction n with
+        | zero => simp only [rem]; exact h_ge_0
+        | succ n ih => simp only [rem]; exact Int.fract_nonneg _
+      have h_rem_lt_1 : ∀ n, rem n < 1 := by
+        intro n; induction n with
+        | zero => simp only [rem]; exact hr_lt
+        | succ n ih => simp only [rem]; exact Int.fract_lt_one _
+      use dv
+      constructor
+      · intro d
+        simp only [dv]
+        rw [mul_comm, gt_iff_lt, Nat.floor_lt]
+        · rw [mul_comm]
+          apply mul_lt_of_lt_one_left (Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 d)))
+          exact h_rem_lt_1 d
+        · apply mul_nonneg (Nat.cast_nonneg _) (h_rem_ge_0 d)
+      · -- Prove convergence
+        symm
+        apply HasSum.tsum_eq
+        rw [hasSum_iff_tendsto_nat_of_nonneg]
+        · -- Define partial sums and error term
+          let P (n : ℕ) : ℝ := ∏ k ∈ Finset.range n, (db k : ℝ)
+          let S (n : ℕ) : ℝ := ∑ i ∈ Finset.range n, ((dv i : ℝ) / P (i + 1))
+          have h_error : ∀ n, r - S n = rem n / P n := by
+             intro n
+             induction n with
+             | zero =>
+               dsimp [S, P, rem]
+               simp only [sub_zero, div_one]
+             | succ n ih =>
+               simp only [S] at *
+               rw [Finset.sum_range_succ, ← sub_sub, ih]
+               simp only [P]
+               rw [Finset.prod_range_succ]
+               have h_db_pos : (db n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 n)))
+               have h_Pn_pos : P n ≠ 0 := by
+                 apply Finset.prod_ne_zero_iff.mpr
+                 intro k _
+                 exact Nat.cast_ne_zero.mpr (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 k)))
+               have h_Pn_db_ne_zero : P n * (db n : ℝ) ≠ 0 := mul_ne_zero h_Pn_pos h_db_pos
+               rw [div_sub_div _ _ h_Pn_pos h_Pn_db_ne_zero]
+               rw [div_eq_div_iff (mul_ne_zero h_Pn_pos h_Pn_db_ne_zero) h_Pn_db_ne_zero]
+               ring_nf
+               have h_rem_succ : rem (n + 1) = rem n * db n - dv n := by
+                 simp only [rem, dv]
+                 rw [Int.fract]
+                 congr
+                 rw [Int.floor_eq_iff]
+                 constructor
+                 · norm_cast
+                   exact Nat.floor_le (mul_nonneg (h_rem_ge_0 n) (Nat.cast_nonneg _))
+                 · norm_cast
+                   convert Nat.lt_floor_add_one (rem n * (db n : ℝ))
+                   simp [rem]
+               rw [add_comm 1 n, h_rem_succ]
+               ring
+          -- Use error equation to prove limit
+          have h_eq : ∀ n, S n = r - (rem n / P n) := by
+            intro n
+            rw [← h_error n]
+            ring
+          apply Filter.Tendsto.congr (f₁ := fun n ↦ r - (rem n / P n))
+          · intro n
+            rw [← h_eq n]
+            dsimp only [S, P]
+            congr with i
+            rw [Nat.cast_prod]
+          · rw [← sub_zero r]
+            refine Filter.Tendsto.sub ?_ ?_
+            · simp only [sub_zero]
+              apply tendsto_const_nhds
+            -- rem n / P n -> 0
+            apply tendsto_of_tendsto_of_tendsto_of_le_of_le (tendsto_const_nhds (x := 0))
+            · -- Upper bound
+              apply Filter.Tendsto.comp (tendsto_inv_atTop_zero)
+              apply tendsto_pow_atTop_atTop_of_one_lt (r := 2)
+              norm_num
+            · intro n
+              apply div_nonneg (h_rem_ge_0 n)
+              apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
+            · intro n
+              dsimp only [Function.comp_apply]
+              have h_le_P : (2 : ℝ) ^ n ≤ P n := by
+                induction n with
+                | zero =>
+                  dsimp only [Finset.range_zero, Finset.prod_empty, P]
+                  simp only [pow_zero, le_refl]
+                | succ n ih =>
+                  dsimp only [P]
+                  rw [Finset.prod_range_succ, pow_succ]
+                  apply mul_le_mul ih (Nat.cast_le.mpr (Nat.succ_le_of_lt (h0 n))) (by norm_num)
+                  apply (pow_pos (by norm_num) n).le.trans ih
+              have h_Pn_pos : 0 < P n := by
+                apply lt_of_lt_of_le (pow_pos (by norm_num) n) h_le_P
+              rw [div_eq_mul_inv]
+              apply le_trans (mul_le_of_le_one_left (inv_nonneg.mpr (le_of_lt h_Pn_pos)) (le_of_lt (h_rem_lt_1 n)))
+              rw [inv_eq_one_div, inv_eq_one_div]
+              exact one_div_le_one_div_of_le (pow_pos (by norm_num) n) h_le_P
+        · intro b
+          apply div_nonneg (Nat.cast_nonneg _)
+          rw [Nat.cast_prod]
+          apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
+    · -- Case r = 1
+      use (fun d ↦ db d - 1)
+      constructor
+      · intro d
+        exact Nat.sub_one_lt (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 d)))
+      · rw [VaryingBase.One db h0]
+        congr
+        funext d
+        simp only [Nat.cast_sub, Nat.one_le_of_lt (h0 _), Nat.cast_one]

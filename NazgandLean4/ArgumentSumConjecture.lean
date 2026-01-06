@@ -486,4 +486,60 @@ theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f
   ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ), (A = transpose A ∧
     ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =
     ((transpose (Vec g z₀)) * A * (Vec g z₁)))) := by
-  sorry
+  -- Get any matrix B that satisfies the equation (not necessarily symmetric)
+  obtain ⟨B, hB⟩ := ArgumentSumMatrixForm h₁ g h₂
+  -- Construct the symmetric matrix A = (B + Bᵀ)/2
+  let A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ := (1/2 : ℂ) • (B + Bᵀ)
+  use A
+  constructor
+  · -- Prove A = transpose A
+    ext i j
+    simp only [transpose_apply]
+    -- Need to unfold A to see the symmetry
+    show (1 / 2 : ℂ) * (B i j + Bᵀ i j) = (1 / 2 : ℂ) * (B j i + Bᵀ j i)
+    simp only [transpose_apply]
+    ring
+  · -- Prove the matrix equation holds
+    intro z₀ z₁
+    -- From hB: f(z₀ + z₁) = v(z₀)ᵀ * B * v(z₁)
+    have hB' := hB z₀ z₁
+    -- Also: f(z₀ + z₁) = f(z₁ + z₀) = v(z₁)ᵀ * B * v(z₀)
+    have hB_swap := hB z₁ z₀
+    rw [add_comm z₁ z₀] at hB_swap
+    -- Taking transpose: v(z₁)ᵀ * B * v(z₀) = (v(z₀)ᵀ * Bᵀ * v(z₁))ᵀ = v(z₁)ᵀ * Bᵀ * v(z₀)
+    -- Actually we need: v(z₀)ᵀ * Bᵀ * v(z₁) for the transpose relation
+    -- From hB_swap: f(z₀+z₁) = v(z₁)ᵀ * B * v(z₀)
+    -- The 1x1 matrix is equal to its transpose, so:
+    -- v(z₁)ᵀ * B * v(z₀) = (v(z₁)ᵀ * B * v(z₀))ᵀ = v(z₀)ᵀ * Bᵀ * v(z₁)
+    have hBT : (of λ (_ _ : Fin 1) => f (z₀ + z₁)) = (transpose (Vec g z₀)) * Bᵀ * (Vec g z₁) := by
+      have h_1x1_transpose : ∀ (M : Matrix (Fin 1) (Fin 1) ℂ), M = Mᵀ := by
+        intro M
+        ext i j
+        have hi : i = 0 := Fin.fin_one_eq_zero i
+        have hj : j = 0 := Fin.fin_one_eq_zero j
+        rw [hi, hj, transpose_apply]
+      rw [h_1x1_transpose (of λ (_ _ : Fin 1) => f (z₀ + z₁))]
+      rw [hB_swap]
+      simp only [transpose_mul, transpose_transpose, Matrix.mul_assoc]
+    -- Average the two equations
+    ext x y
+    simp only [of_apply]
+    have hx : x = 0 := Fin.fin_one_eq_zero x
+    have hy : y = 0 := Fin.fin_one_eq_zero y
+    rw [hx, hy]
+    -- LHS: f(z₀ + z₁)
+    -- RHS: (v(z₀)ᵀ * A * v(z₁))₀₀ = (v(z₀)ᵀ * (1/2)(B + Bᵀ) * v(z₁))₀₀
+    --    = (1/2) * ((v(z₀)ᵀ * B * v(z₁))₀₀ + (v(z₀)ᵀ * Bᵀ * v(z₁))₀₀)
+    have hLHS_B := congrFun (congrFun hB' 0) 0
+    have hLHS_BT := congrFun (congrFun hBT 0) 0
+    simp only [of_apply] at hLHS_B hLHS_BT
+    -- The RHS of our goal
+    have hRHS : ((transpose (Vec g z₀)) * A * (Vec g z₁)) 0 0 =
+                (1/2 : ℂ) * (((transpose (Vec g z₀)) * B * (Vec g z₁)) 0 0 +
+                             ((transpose (Vec g z₀)) * Bᵀ * (Vec g z₁)) 0 0) := by
+      simp only [A, Matrix.smul_mul, Matrix.mul_smul, smul_apply, smul_eq_mul,
+                 Matrix.add_mul, Matrix.mul_add, add_apply]
+    rw [hRHS, ← hLHS_B, ← hLHS_BT]
+    ring
+
+#print axioms ArgumentSumSymmetricMatrixForm

@@ -143,10 +143,197 @@ theorem iteratedDerivSum {𝕜 : Type u} [NontriviallyNormedField 𝕜] {F : Typ
     rw [deriv_sum h₂]
     simp only [iteratedDeriv_succ, Finset.sum_apply]
 
+theorem DiffEq_Solution_Analytic {de : DiffEq} {f : ℂ → ℂ} (h : de.IsSolution f) : AnalyticOnNhd ℂ f Set.univ := by
+  rw [DiffEq.IsSolution] at h
+  exact ContDiff.analyticOnNhd h.1
+
+theorem DiffEq_Zero_IC_Implies_Zero {de : DiffEq} {h : ℂ → ℂ} (h_sol : de.IsSolution h)
+    (h_ic : ∀ k : Fin de.Degree, iteratedDeriv k h 0 = 0) : h = 0 := by
+  have h_ana : AnalyticAt ℂ h 0 := (DiffEq_Solution_Analytic h_sol) 0 trivial
+  have h_derivs : ∀ k, iteratedDeriv k h 0 = 0 := by
+    intro k
+    induction' k using Nat.strong_induction_on with k ih
+    if hk : k < de.Degree then
+      exact h_ic ⟨k, hk⟩
+    else
+      let m := k - de.Degree
+      have hm : m + de.Degree = k := Nat.sub_add_cancel (Nat.le_of_not_lt hk)
+      have h_ode := funext h_sol.2
+      have h_diff_ode : iteratedDeriv m (fun z => ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv j h z) 0 = 0 := by
+        rw [← h_ode]
+        simp only [iteratedDeriv_const, ite_self]
+      have h_smooth : ContDiff ℂ ⊤ h := by
+        rw [← contDiffOn_univ]
+        exact (DiffEq_Solution_Analytic h_sol).analyticOn.contDiffOn uniqueDiffOn_univ
+      have h_iter_sum : iteratedDeriv m (fun z ↦ ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv j h z) =
+                        fun z ↦ ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv (m + j) h z := by
+        induction m with
+        | zero =>
+          ext z
+          simp only [iteratedDeriv_zero, zero_add]
+        | succ m₂ ih₂ =>
+          ext z
+          simp only [iteratedDeriv_succ]
+          rw [ih₂]
+          have h_diff : ∀ j, Differentiable ℂ (fun (w : ℂ) => de.Coeff j * iteratedDeriv (m₂ + ↑j) h w) := by
+            intro j
+            apply Differentiable.const_mul
+            apply h_smooth.differentiable_iteratedDeriv _ (WithTop.coe_lt_top _)
+          have h_sum_eq : (fun z => ∑ j, de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) = ∑ j, (fun z => de.Coeff j * iteratedDeriv (m₂ + ↑j) h z) := by
+             ext
+             simp only [Finset.sum_apply]
+          rw [h_sum_eq, deriv_sum (fun j _ => (h_diff j).differentiableAt)]
+          apply Finset.sum_congr rfl
+          intro j _
+          rw [deriv_const_mul]
+          · congr 1
+            simp only [add_right_comm, iteratedDeriv_succ]
+          · apply (h_smooth.differentiable_iteratedDeriv _ (WithTop.coe_lt_top _)).differentiableAt
+      have h_diff_ode' : ∑ j : Fin (de.Degree + 1), de.Coeff j * iteratedDeriv (m + j) h 0 = 0 := by
+        rw [h_iter_sum] at h_diff_ode
+        exact h_diff_ode
+      rw [Fin.sum_univ_castSucc] at h_diff_ode'
+      have h_lower : ∑ x : Fin de.Degree, de.Coeff (Fin.castSucc x) * iteratedDeriv (m + x) h 0 = 0 := by
+        apply Finset.sum_eq_zero
+        intro x _
+        apply mul_eq_zero_of_right
+        apply ih
+        rw [←hm]
+        apply Nat.add_lt_add_left x.isLt
+      simp only [Fin.val_castSucc, h_lower, Fin.val_last, zero_add] at h_diff_ode'
+      rw [hm] at h_diff_ode'
+      refine eq_zero_of_ne_zero_of_mul_left_eq_zero ?_ h_diff_ode'
+      convert de.LeadCoeffNonZero
+      simp only [Fin.ofNat_eq_cast, Fin.natCast_eq_last]
+  have h_ana_at : AnalyticAt ℂ h 0 := (DiffEq_Solution_Analytic h_sol) 0 trivial
+  have hf_ser := h_ana_at.hasFPowerSeriesAt
+  have h_ser_zero : FormalMultilinearSeries.ofScalars ℂ (fun n ↦ iteratedDeriv n h 0 / n.factorial) = 0 := by
+    ext n
+    simp only [h_derivs n, zero_div, FormalMultilinearSeries.ofScalars_eq_zero_of_scalar_zero,
+      ContinuousMultilinearMap.zero_apply, FormalMultilinearSeries.zero_apply]
+  have h_loc : h =ᶠ[nhds 0] 0 := by
+    rw [h_ser_zero] at hf_ser
+    exact hf_ser.eventually_eq_zero
+  apply AnalyticOnNhd.eq_of_eventuallyEq (DiffEq_Solution_Analytic h_sol)
+  exact analyticOnNhd_const
+  exact h_loc
+
+theorem Wronskian_Invertible {de : DiffEq} (g : (Fin de.Degree) → ℂ → ℂ) (h_basis : de.IsVectorBasis g) :
+    IsUnit (Matrix.of (fun (i j : Fin de.Degree) => iteratedDeriv i (g j) 0)) := by
+  let W : Matrix (Fin de.Degree) (Fin de.Degree) ℂ :=
+    Matrix.of (fun (i j : Fin de.Degree) => iteratedDeriv i (g j) 0)
+  rw [isUnit_iff_isUnit_det]
+  by_contra h_not_unit
+  -- In a field, not IsUnit means zero determinant
+  have h_det_zero : Matrix.det W = 0 := by
+    rwa [isUnit_iff_ne_zero, not_not] at h_not_unit
+  -- If the determinant is zero, there exists a non-zero vector v such that W * v = 0
+  obtain ⟨v, hv_ne, hv_eq⟩ := Matrix.exists_mulVec_eq_zero_iff.mpr h_det_zero
+  let f_zero := fun z => ∑ k, v k * g k z
+  have h_sol_g : ∀ j : Fin de.Degree, g j ∈ de.SetOfSolutions := by
+    unfold DiffEq.IsVectorBasis at h_basis
+    rw [h_basis.left]
+    intro j
+    simp only [Set.mem_setOf_eq]
+    use (fun i => if i = j then 1 else 0)
+    ext z
+    simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
+  have h_f_zero_contdiff : ContDiff ℂ ⊤ f_zero := by
+    apply ContDiff.sum
+    intro i hi
+    apply ContDiff.smul
+    · exact contDiff_const
+    · exact (h_sol_g i).1
+  have h_f_zero_ode : ∀ z : ℂ, 0 = ∑ (k_1 : Fin (de.Degree + 1)), de.Coeff k_1 * iteratedDeriv k_1 f_zero z := by
+    intro z
+    dsimp only [f_zero]
+    have h_smooth : ∀ i ∈ Finset.univ, ContDiff ℂ ⊤ (fun z => v i * g i z) :=
+      fun i _ => ContDiff.mul contDiff_const (h_sol_g i).1
+    simp only [iteratedDerivSum h_smooth]
+    have h_comm : ∀ (n : ℕ) (i : Fin de.Degree) z,
+        iteratedDeriv n (fun z => v i * g i z) z = v i * iteratedDeriv n (g i) z := by
+      intro n i z
+      exact iteratedDeriv_const_mul ((h_sol_g i).1.of_le le_top).contDiffAt (v i)
+    simp_rw [h_comm, Finset.mul_sum]
+    rw [Finset.sum_comm]
+    symm
+    apply sum_eq_zero
+    intro j hj
+    simp_rw [← mul_assoc, mul_comm _ (v j), mul_assoc]
+    rw [← Finset.mul_sum]
+    rw [← (h_sol_g j).2 z]
+    simp only [mul_zero]
+  have h_sol : de.IsSolution f_zero := ⟨h_f_zero_contdiff, h_f_zero_ode⟩
+  have h_ic : ∀ k : Fin de.Degree, iteratedDeriv k f_zero 0 = 0 := by
+    intro k
+    dsimp only [f_zero]
+    have h_smooth : ∀ i ∈ Finset.univ, ContDiff ℂ ⊤ (fun z => v i * g i z) :=
+      fun i _ => ContDiff.mul contDiff_const (h_sol_g i).1
+    rw [iteratedDerivSum h_smooth]
+    simp_rw [iteratedDeriv_const_mul ((h_sol_g _).1.of_le le_top).contDiffAt (v _), mul_comm (v _) _]
+    exact congr_fun hv_eq k
+  have h_fz : f_zero = 0 := DiffEq_Zero_IC_Implies_Zero h_sol h_ic
+  rw [DiffEq.IsVectorBasis] at h_basis
+  have h_span := h_basis.2 (fun _ => 0) v
+  have h_lhs_zero : (fun z => ∑ k : Fin de.Degree, (0 : ℂ) * g k z) = (fun z => 0) := by
+    ext z
+    simp only [zero_mul, sum_const_zero]
+  have h_rhs_f_zero : (fun z => ∑ k : Fin de.Degree, v k * g k z) = f_zero := rfl
+  rw [h_lhs_zero, h_rhs_f_zero, h_fz] at h_span
+  have h_v_zero : v = 0 := Eq.symm (h_span rfl)
+  contradiction
+
 theorem ExtractedFunctionsDifferentiable0 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)
   : ∀ (k : (Fin de.Degree)), Differentiable ℂ (ExtractedFunctions h₁ g h₂ k) := by
-  sorry
+  let W : Matrix (Fin de.Degree) (Fin de.Degree) ℂ := Matrix.of fun i j => iteratedDeriv i (g j) 0
+  have hW : IsUnit W := Wronskian_Invertible g h₂
+  rw [isUnit_iff_isUnit_det] at hW
+  let W_inv := W.nonsingInvUnit hW
+  have h_sol_g : ∀ j : Fin de.Degree, g j ∈ de.SetOfSolutions := by
+    unfold DiffEq.IsVectorBasis at h₂
+    rw [h₂.left]
+    intro j
+    simp only [Set.mem_setOf_eq]
+    use (fun k => if k = j then 1 else 0)
+    simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
+  have h_lin_sys : ∀ z, W.mulVec (fun k => ExtractedFunctions h₁ g h₂ k z) = fun (j : Fin de.Degree) => iteratedDeriv (j : ℕ) f z := by
+    intro z
+    ext j
+    have h_eq := ExtractedFunctionsUse0 h₁ g h₂ z
+    have h_deriv := congr_fun (congr_arg (iteratedDeriv j) h_eq) 0
+    rw [ShiftedIteratedDerivative j z h₁.1] at h_deriv
+    simp only [zero_add] at h_deriv
+    rw [h_deriv]
+    rw [iteratedDerivSum]
+    · dsimp only [mulVec]
+      apply Finset.sum_congr rfl
+      intro x _
+      rw [iteratedDeriv_const_mul ((h_sol_g x).1.of_le le_top).contDiffAt]
+      ring_nf
+      exact CommMonoid.mul_comm (W j x) (ExtractedFunctions h₁ g h₂ x z)
+    · intro i _
+      apply ContDiff.smul
+      · exact contDiff_const
+      · exact (h_sol_g i).1
+  intro k
+  let f_vec := fun z (j : Fin de.Degree) => iteratedDeriv (j : ℕ) f z
+  have h_diff_f_vec : ∀ j, Differentiable ℂ (fun z => f_vec z j) := by
+    intro j
+    have h_smooth : ContDiff ℂ ⊤ f := h₁.1
+    exact h_smooth.differentiable_iteratedDeriv j (WithTop.coe_lt_top _)
+  have h_sol : (ExtractedFunctions h₁ g h₂ k) = fun z => ((W_inv⁻¹ : Units _).val.mulVec (f_vec z)) k := by
+    ext z
+    dsimp only [f_vec]
+    rw [← h_lin_sys z]
+    simp only [Matrix.mulVec_mulVec]
+    have : (W_inv⁻¹ : Units (Matrix (Fin de.Degree) (Fin de.Degree) ℂ)).val * W = 1 := by
+      change (W_inv⁻¹ * W_inv).val = 1
+      simp only [inv_mul_cancel, Units.val_one]
+    rw [this, Matrix.one_mulVec]
+  rw [h_sol]
+  dsimp only [mulVec, dotProduct]
+  fun_prop
 
 theorem ExtractedFunctionsDifferentiable1 {de : DiffEq} {f : ℂ → ℂ}
   (h₁ : f ∈ de.SetOfSolutions) (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g)

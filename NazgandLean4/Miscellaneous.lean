@@ -78,12 +78,78 @@ theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f)
         · apply differentiableAt_const
         · apply differentiableAt_id
 
+theorem SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d > dv d)) :
+  Summable (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
+  -- Each term is bounded by 1 / 2^d since db k ≥ 2 for all k
+  have h_bound : ∀ d, (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k ≤ 1 / 2^d := by
+    intro d
+    have h_num_bound : (dv d : ℝ) ≤ db d - 1 := by
+      have := (h0 d).2
+      have h1 : dv d ≤ db d - 1 := Nat.le_sub_one_of_lt this
+      calc (dv d : ℝ) ≤ (db d - 1 : ℕ) := Nat.cast_le.mpr h1
+        _ = (db d : ℝ) - 1 := by simp [Nat.cast_sub (Nat.one_le_of_lt (h0 d).1)]
+    have h_denom_bound : (2 : ℝ)^(d+1) ≤ ∏ k ∈ Finset.range (d + 1), (db k : ℝ) := by
+      have h1 : (2 : ℝ)^(d+1) = ∏ _k ∈ Finset.range (d + 1), (2 : ℝ) := by
+        simp [Finset.prod_const, Finset.card_range]
+      rw [h1]
+      apply Finset.prod_le_prod
+      · intros k _
+        norm_num
+      · intros k _
+        have := (h0 k).1
+        have h2 : 2 ≤ db k := this
+        exact Nat.ofNat_le_cast.mpr h2
+    -- The bound: dv d / ∏_{k≤d} db(k) < 1 / ∏_{k<d} db(k) ≤ 1/2^d
+    have hprod_pos : (∏ k ∈ Finset.range (d + 1), (db k : ℝ)) > 0 := by
+      apply Finset.prod_pos
+      intros k _
+      exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k).1)
+    have hprod_d_pos : (∏ k ∈ Finset.range d, (db k : ℝ)) > 0 := by
+      apply Finset.prod_pos
+      intros k _
+      exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k).1)
+    have h_prod_d_bound : (2 : ℝ)^d ≤ ∏ k ∈ Finset.range d, (db k : ℝ) := by
+      have h1 : (2 : ℝ)^d = ∏ _k ∈ Finset.range d, (2 : ℝ) := by
+        simp [Finset.prod_const, Finset.card_range]
+      rw [h1]
+      apply Finset.prod_le_prod
+      · intros k _; norm_num
+      · intros k _
+        exact Nat.ofNat_le_cast.mpr (h0 k).1
+    -- Convert ℕ product cast to ℝ product
+    simp only [Nat.cast_prod]
+    -- Now use: dv d / ∏_{k≤d} ≤ (db d - 1) / ∏_{k≤d} < db d / ∏_{k≤d} = 1/∏_{k<d}
+    have hdb_pos : (db d : ℝ) > 0 := by
+      exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 d).1)
+    have hdb_ne : (db d : ℝ) ≠ 0 := ne_of_gt hdb_pos
+    apply le_of_lt
+    calc (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), (db k : ℝ)
+        ≤ (db d - 1) / ∏ k ∈ Finset.range (d + 1), (db k : ℝ) := by
+          apply div_le_div_of_nonneg_right h_num_bound (le_of_lt hprod_pos)
+      _ < (db d : ℝ) / ∏ k ∈ Finset.range (d + 1), (db k : ℝ) := by
+          apply div_lt_div_of_pos_right _ hprod_pos
+          have := (h0 d).1
+          linarith
+      _ = 1 / ∏ k ∈ Finset.range d, (db k : ℝ) := by
+          rw [Finset.prod_range_succ]
+          field_simp [hdb_ne, ne_of_gt hprod_d_pos]
+      _ ≤ 1 / (2 : ℝ)^d := by
+          apply div_le_div_of_nonneg_left _ (by positivity) h_prod_d_bound
+          norm_num
+  apply Summable.of_nonneg_of_le
+  · intro d
+    apply div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
+  · exact h_bound
+  · -- 1/2^d is a convergent geometric series
+    have : Summable (λ d ↦ (1 : ℝ) / 2^d) := by
+      convert summable_geometric_of_lt_one (r := (1/2 : ℝ)) _ _
+      · simp [one_div, inv_pow]
+      · norm_num
+      · norm_num
+    exact this
+
 theorem SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) :
   {r : ℝ | ∃(dv : ℕ → ℕ), ((∀(d : ℕ), db d > dv d) ∧
   r = tsum (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k))}
   = {r : ℝ | r ≥ 0 ∧ r ≤ 1} := by
-  sorry
-
-theorem SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d > dv d)) :
-  Summable (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
   sorry

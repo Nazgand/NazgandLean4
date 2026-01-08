@@ -1,8 +1,10 @@
--- Formalization of this conjecture https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
+/-
+Formalization of this theorem (previously a conjecture)
+https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
+-/
 import Mathlib
 set_option maxHeartbeats 0
-set_option pp.proofs true
-open Complex Classical BigOperators Finset Matrix Polynomial
+open Finset Matrix
 
 structure DiffEq where
   Degree : ℕ+
@@ -50,12 +52,9 @@ theorem ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀
 -- A solution with input shifted by a constant z₁ is still a solution
 theorem ShiftedSolution {de : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (h₀ : f ∈ de.SetOfSolutions) :
   (λ (z₀ : ℂ) => f (z₀ + z₁)) ∈ de.SetOfSolutions := by
-  unfold DiffEq.SetOfSolutions
-  unfold DiffEq.SetOfSolutions at h₀
-  simp only [Set.mem_setOf_eq]
-  simp only [Set.mem_setOf_eq] at h₀
-  unfold DiffEq.IsSolution
-  unfold DiffEq.IsSolution at h₀
+  unfold DiffEq.SetOfSolutions at ⊢ h₀
+  simp only [Set.mem_setOf_eq] at ⊢ h₀
+  unfold DiffEq.IsSolution at ⊢ h₀
   rcases h₀ with ⟨h₁, h₂⟩
   constructor
   · refine Differentiable.contDiff ?left.hf
@@ -408,9 +407,6 @@ theorem ExtractedFunctionsAreSolutions1 {de : DiffEq} {f : ℂ → ℂ} (h₁ : 
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∀ (k : (Fin de.Degree)), (ExtractedFunctions h₁ g h₂ k) ∈ de.SetOfSolutions := by
   intros k
-  rw [DiffEq.SetOfSolutions]
-  simp only [Set.mem_setOf_eq]
-  rw [DiffEq.IsSolution]
   constructor
   · have h0 := ExtractedFunctionsDifferentiable0 h₁ g h₂ k
     exact Differentiable.contDiff h0
@@ -442,7 +438,7 @@ theorem MatrixEntriesUse {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfS
   ∑ (k_1 : (Fin de.Degree)), (MatrixEntries h₁ g h₂ k) k_1 * g k_1 z₁ := by
   exact Classical.choose_spec (MatrixEntriesExist h₁ g h₂ k)
 
-theorem ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumRule2SumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) (z₀ z₁ : ℂ) :
   f (z₀ + z₁) = ∑ (k : (Fin de.Degree)), ∑ (k_1 : (Fin de.Degree)),
   MatrixEntries h₁ g h₂ k k_1 * g k_1 z₁ * g k z₀ := by
@@ -458,7 +454,7 @@ theorem ArgumentSumSumForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetO
 def Vec {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) :
   Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
 
-theorem ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumRule2MatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ),
   ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =
@@ -474,7 +470,7 @@ theorem ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.S
   simp only [Fin.isValue, transpose_apply, of_apply]
   rw [Vec, Vec]
   simp only [Fin.isValue, of_apply]
-  have h2 := ArgumentSumSumForm h₁ g h₂ z₁ z₀
+  have h2 := ArgumentSumRule2SumForm h₁ g h₂ z₁ z₀
   have h3 : (z₁ + z₀) = (z₀ + z₁) := AddCommMagma.add_comm z₁ z₀
   rw [h3] at h2
   rw [h2]
@@ -485,36 +481,24 @@ theorem ArgumentSumMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.S
   ext m
   ring_nf
 
-theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+theorem ArgumentSumRule2SymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
   (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) :
   ∃ (A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ), (A = transpose A ∧
     ∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =
     ((transpose (Vec g z₀)) * A * (Vec g z₁)))) := by
-  -- Get any matrix B that satisfies the equation (not necessarily symmetric)
-  obtain ⟨B, hB⟩ := ArgumentSumMatrixForm h₁ g h₂
-  -- Construct the symmetric matrix A = (B + Bᵀ)/2
+  obtain ⟨B, hB⟩ := ArgumentSumRule2MatrixForm h₁ g h₂
   let A : Matrix (Fin de.Degree) (Fin de.Degree) ℂ := (1/2 : ℂ) • (B + Bᵀ)
   use A
   constructor
-  · -- Prove A = transpose A
-    ext i j
+  · ext i j
     simp only [transpose_apply]
-    -- Need to unfold A to see the symmetry
     show (1 / 2 : ℂ) * (B i j + Bᵀ i j) = (1 / 2 : ℂ) * (B j i + Bᵀ j i)
     simp only [transpose_apply]
     ring
-  · -- Prove the matrix equation holds
-    intro z₀ z₁
-    -- From hB: f(z₀ + z₁) = v(z₀)ᵀ * B * v(z₁)
+  · intro z₀ z₁
     have hB' := hB z₀ z₁
-    -- Also: f(z₀ + z₁) = f(z₁ + z₀) = v(z₁)ᵀ * B * v(z₀)
     have hB_swap := hB z₁ z₀
     rw [add_comm z₁ z₀] at hB_swap
-    -- Taking transpose: v(z₁)ᵀ * B * v(z₀) = (v(z₀)ᵀ * Bᵀ * v(z₁))ᵀ = v(z₁)ᵀ * Bᵀ * v(z₀)
-    -- Actually we need: v(z₀)ᵀ * Bᵀ * v(z₁) for the transpose relation
-    -- From hB_swap: f(z₀+z₁) = v(z₁)ᵀ * B * v(z₀)
-    -- The 1x1 matrix is equal to its transpose, so:
-    -- v(z₁)ᵀ * B * v(z₀) = (v(z₁)ᵀ * B * v(z₀))ᵀ = v(z₀)ᵀ * Bᵀ * v(z₁)
     have hBT : (of λ (_ _ : Fin 1) => f (z₀ + z₁)) = (transpose (Vec g z₀)) * Bᵀ * (Vec g z₁) := by
       have h_1x1_transpose : ∀ (M : Matrix (Fin 1) (Fin 1) ℂ), M = Mᵀ := by
         intro M
@@ -525,19 +509,14 @@ theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f
       rw [h_1x1_transpose (of λ (_ _ : Fin 1) => f (z₀ + z₁))]
       rw [hB_swap]
       simp only [transpose_mul, transpose_transpose, Matrix.mul_assoc]
-    -- Average the two equations
     ext x y
     simp only [of_apply]
     have hx : x = 0 := Fin.fin_one_eq_zero x
     have hy : y = 0 := Fin.fin_one_eq_zero y
     rw [hx, hy]
-    -- LHS: f(z₀ + z₁)
-    -- RHS: (v(z₀)ᵀ * A * v(z₁))₀₀ = (v(z₀)ᵀ * (1/2)(B + Bᵀ) * v(z₁))₀₀
-    --    = (1/2) * ((v(z₀)ᵀ * B * v(z₁))₀₀ + (v(z₀)ᵀ * Bᵀ * v(z₁))₀₀)
     have hLHS_B  := congrFun (congrFun hB' 0) 0
     have hLHS_BT := congrFun (congrFun hBT 0) 0
     simp only [of_apply] at hLHS_B hLHS_BT
-    -- The RHS of our goal
     have hRHS : ((transpose (Vec g z₀)) * A * (Vec g z₁)) 0 0 =
                 (1/2 : ℂ) * (((transpose (Vec g z₀)) * B  * (Vec g z₁)) 0 0 +
                              ((transpose (Vec g z₀)) * Bᵀ * (Vec g z₁)) 0 0) := by
@@ -546,4 +525,99 @@ theorem ArgumentSumSymmetricMatrixForm {de : DiffEq} {f : ℂ → ℂ} (h₁ : f
     rw [hRHS, ← hLHS_B, ← hLHS_BT]
     ring
 
-#print axioms ArgumentSumSymmetricMatrixForm
+def ArgumentSumRule (m : ℕ) {de : DiffEq} {f : ℂ → ℂ} (_ : f ∈ de.SetOfSolutions)
+    (g : (Fin de.Degree) → ℂ → ℂ) (_ : de.IsVectorBasis g) : Prop :=
+  ∃ c : (Fin m → Fin de.Degree) → ℂ, ∀ z : Fin m → ℂ,
+    f (∑ j, z j) = ∑ k, c k * ∏ j, g (k j) (z j)
+
+theorem ArgumentSumRuleProof (m : ℕ) {de : DiffEq} {f : ℂ → ℂ} (h₁ : f ∈ de.SetOfSolutions)
+  (g : (Fin de.Degree) → ℂ → ℂ) (h₂ : de.IsVectorBasis g) : ArgumentSumRule m h₁ g h₂ := by
+  cases m with
+  | zero =>
+    unfold ArgumentSumRule
+    use fun _ => f 0
+    intro z
+    rw [Fin.sum_univ_zero]
+    simp only [Fin.prod_univ_zero, mul_one]
+    have h_unique : Unique (Fin 0 → Fin de.Degree) := Pi.uniqueOfIsEmpty (fun _ => Fin de.Degree)
+    rw [Fintype.sum_unique]
+  | succ m =>
+    revert f h₁
+    induction m with
+    | zero =>
+      intro f h₁
+      unfold ArgumentSumRule
+      rw [DiffEq.IsVectorBasis] at h₂
+      rw [h₂.1] at h₁
+      rcases h₁ with ⟨b, hb⟩
+      use fun k => b (k 0)
+      intro z
+      rw [hb]
+      dsimp only [Fin.isValue]
+      rw [Fin.sum_univ_one]
+      let e : (Fin 1 → Fin de.Degree) ≃ Fin de.Degree := Equiv.funUnique (Fin 1) (Fin de.Degree)
+      rw [← e.sum_comp]
+      apply Finset.sum_congr rfl
+      intro x _
+      rw [Fin.prod_univ_one]
+      rfl
+    | succ m IH =>
+      intro f h₁
+      obtain ⟨A, hA⟩ := ArgumentSumRule2MatrixForm h₁ g h₂
+      have h_basis : ∀ i, g i ∈ de.SetOfSolutions := by
+        intro i
+        rw [h₂.1]
+        use fun j => if j = i then 1 else 0
+        ext z
+        simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
+      have h_IH : ∀ i, ArgumentSumRule (m + 1) (h_basis i) g h₂ := fun i => IH (h_basis i)
+      choose c_basis hc_basis using h_IH
+      let c_new : (Fin (m + 2) → Fin de.Degree) → ℂ := fun k =>
+        ∑ j : Fin de.Degree, A (k (Fin.last (m + 1))) j * c_basis j (Fin.init k)
+      use c_new
+      intro z
+      have h_scalar : ∀ z₀ z₁, f (z₀ + z₁) = ((Vec g z₀)ᵀ * A * Vec g z₁) 0 0 := by
+        intros z₀ z₁
+        have h := hA z₀ z₁
+        exact congr_fun (congr_fun h 0) 0
+      calc f (∑ i : Fin (m + 1 + 1), z i)
+        = f ((∑ j : Fin (m + 1), z (Fin.castSucc j)) + z (Fin.last (m + 1))) := by
+            rw [Fin.sum_univ_castSucc]
+        _ = f (z (Fin.last (m + 1)) + (∑ j : Fin (m + 1), z (Fin.castSucc j))) := by
+            rw [add_comm]
+        _ = ((Vec g (z (Fin.last (m + 1))))ᵀ * A * Vec g (∑ j, z (Fin.castSucc j))) 0 0 := by
+            rw [h_scalar]
+        _ = ∑ p, ∑ q, g p (z (Fin.last (m + 1))) * A p q * g q (∑ j, z (Fin.castSucc j)) := by
+            simp only [Vec, Fin.isValue, mul_apply, transpose_apply, of_apply, sum_mul]
+            exact sum_comm
+        _ = ∑ p : Fin de.Degree, ∑ q : Fin de.Degree,
+              g p (z (Fin.last (m + 1))) * A p q *
+              (∑ k : Fin (m+1) → Fin de.Degree, c_basis q k * ∏ i, g (k i) (z (Fin.castSucc i))) := by
+            simp_rw [hc_basis]
+        _ = ∑ k, c_new k * ∏ j, g (k j) (z j) := by
+            simp only [Finset.mul_sum]
+            conv =>
+              lhs
+              congr
+              rfl
+              ext p
+              rw [Finset.sum_comm]
+            let e : Fin de.Degree × (Fin (m + 1) → Fin de.Degree) ≃ (Fin (m + 2) → Fin de.Degree) :=
+              Fin.snocEquiv (fun _ => Fin de.Degree)
+            rw [← Finset.sum_product', Finset.univ_product_univ, ← Equiv.sum_comp e]
+            apply Finset.sum_congr rfl
+            intro k _
+            dsimp only [Fin.snocEquiv_apply, c_new, e]
+            simp only [Fin.snoc_last]
+            rw [Finset.sum_mul]
+            apply Finset.sum_congr rfl
+            intro q _
+            conv => rhs; rw [Fin.prod_univ_castSucc]
+            simp only [Fin.snoc_last, Fin.snoc_castSucc]
+            have h_arg : Fin.init (e k) = k.2 := by
+              dsimp only [e]
+              simp only [Fin.snocEquiv, Equiv.coe_fn_mk, Fin.init_snoc]
+            rw [h_arg]
+            ring
+
+#print axioms ArgumentSumRuleProof

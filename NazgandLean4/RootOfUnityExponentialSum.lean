@@ -1,13 +1,10 @@
 /-
 PDF document this is based on:
 https://github.com/Nazgand/NazgandMathBook/blob/master/RootOfUnityExponentialSumFunction.pdf
-LEAN 3 code for this:
-https://github.com/Nazgand/NazgandMathBook/blob/master/NazgandLean3/src/RootOfUnityExponentialSum.lean
 -/
 import Mathlib
 set_option maxHeartbeats 0
-set_option linter.unreachableTactic false
-open Complex Classical NormedSpace BigOperators Finset Real
+open Complex Classical NormedSpace Finset Real
 
 theorem ExpTsumForm (z : ℂ) : cexp z = tsum (λ (k : ℕ) => z ^ k / k.factorial) := by
   rw [exp_eq_exp_ℂ, exp_eq_tsum_div]
@@ -835,3 +832,18 @@ theorem EqualsNthDerivRuesDiffSum (f : ℂ → ℂ) (n : ℕ+) (df : Differentia
     exact congr_fun h_eq z
   · intro h
     exact h.trans (hg_sol.trans (congr_arg (iteratedDeriv (↑n)) h).symm)
+
+theorem RuesDiffSumEqRuesDiff (n : ℕ+) (m : ℤ) (z₀ z₁ : ℂ) :
+  ∑ k ∈ range n, RuesDiff n k z₀ * RuesDiff n (m - k) (z₁ - z₀) = RuesDiff n m z₁ := by
+  rw [←RuesDiffArgumentSumRule, add_sub_cancel]
+
+theorem RuesDiffSumIdentity (n : ℕ+) (m : ℤ) (z : ℂ) :
+  ∑ k ∈ range n, RuesDiff n k z * RuesDiff n (m - k) (-z) = ite ((n : ℤ) ∣ m) 1 0 := by
+  rw [← RuesDiffZ0EqualsIte n m, ← RuesDiffSumEqRuesDiff n m z 0, zero_sub]
+
+theorem ExpOfMulRouEqRuesDiffSum (n : ℕ+) (z Rou : ℂ) (hu : Rou ^ (n : ℕ) = 1) :
+    cexp (z * Rou) = ∑ k ∈ range n, Rou⁻¹ ^ k * RuesDiff n k z := by
+  rw [ExpSumOfRuesDiff n (z * Rou)]
+  congr
+  ext k
+  rw [RuesDiffRotationallySymmetric n k z Rou hu, zpow_neg, zpow_natCast, inv_pow]

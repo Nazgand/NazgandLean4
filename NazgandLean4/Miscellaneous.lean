@@ -285,8 +285,8 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
                  intro k _
                  exact Nat.cast_ne_zero.mpr (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 k)))
                have h_Pn_db_ne_zero : P n * (db n : ℝ) ≠ 0 := mul_ne_zero h_Pn_pos h_db_pos
-               rw [div_sub_div _ _ h_Pn_pos h_Pn_db_ne_zero]
-               rw [div_eq_div_iff (mul_ne_zero h_Pn_pos h_Pn_db_ne_zero) h_Pn_db_ne_zero]
+               rw [div_sub_div _ _ h_Pn_pos h_Pn_db_ne_zero,
+                 div_eq_div_iff (mul_ne_zero h_Pn_pos h_Pn_db_ne_zero) h_Pn_db_ne_zero]
                ring_nf
                have h_rem_succ : rem (n + 1) = rem n * db n - dv n := by
                  simp only [rem, dv]
@@ -356,3 +356,6 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
         congr
         funext d
         simp only [Nat.cast_sub, Nat.one_le_of_lt (h0 _), Nat.cast_one]
+
+theorem RearrangeTsum (f : ℕ → ℂ) (b : ℕ → ℕ) (h₀ : Function.Bijective b) :
+  tsum (λ (k : ℕ) ↦ f (b k)) = tsum f := ((Equiv.ofBijective b h₀).tsum_eq f)

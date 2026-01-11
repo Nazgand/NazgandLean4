@@ -985,7 +985,7 @@ theorem «Max🌸Of🌸∈🌸Peano🌸Succ» (k : ℕ) :
 --   have h0 := «💐=🌺IteratedPower🌸≤∃» «🪻0»
 --   constructor
 --   · intro h1
---     simp [h1] at h0
+--     simp? [h1] at h0
 --     choose k h0 using h0
 --     use (k + 1)
 --     rw [Function.iterate_succ', Function.comp_apply, «🌸∈Power🌸»]

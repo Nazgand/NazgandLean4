@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-package «nazgandLean4» {
+package «NazgandLean4» {
   -- add any package configuration options here
 }
 

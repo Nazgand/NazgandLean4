@@ -17,11 +17,12 @@ noncomputable def PolynomialFromCoeffs {k : ℕ} (c : Fin k → ℂ) : Polynomia
 def PolynomialFingerprintFromRoots {k : ℕ} (r : Fin k → ℂ) (p : Polynomial ℂ) :=
   Matrix.of (λ (y : Fin k) (_ : Fin 1) ↦ p.eval (r y))
 
-theorem ModPolynomialFingerprintEqPolynomialFingerprint {k : ℕ} (r : Fin k → ℂ) (p : Polynomial ℂ) :
-  PolynomialFingerprintFromRoots r (p.mod (PolynomialFromRoots r)) = PolynomialFingerprintFromRoots r p := by
+theorem ModPolynomialFingerprintEqPolynomialFingerprint {k : ℕ} (r : Fin k → ℂ)
+  (p : Polynomial ℂ) : PolynomialFingerprintFromRoots r (p.mod (PolynomialFromRoots r)) =
+  PolynomialFingerprintFromRoots r p := by
   sorry
 
-theorem ModPolynomialFromFingerprint {k : ℕ} (h0 : k > 0) (r : Fin k → ℂ) (h1 : r.Injective) (p : Polynomial ℂ) :
-  p.mod (PolynomialFromRoots r) =
-  PolynomialFromCoeffs (λ (k₀ : Fin k) ↦ ((VandermondeMatrix r)⁻¹ * PolynomialFingerprintFromRoots r p) k₀ (0 : Fin 1)) := by
+theorem ModPolynomialFromFingerprint {k : ℕ} (h0 : k > 0) (r : Fin k → ℂ) (h1 : r.Injective)
+  (p : Polynomial ℂ) : p.mod (PolynomialFromRoots r) = PolynomialFromCoeffs (λ (k₀ : Fin k) ↦
+    ((VandermondeMatrix r)⁻¹ * PolynomialFingerprintFromRoots r p) k₀ (0 : Fin 1)) := by
   sorry

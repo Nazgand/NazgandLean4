@@ -32,8 +32,7 @@ theorem GeneralPigeonholePrinciple₁ (k : ℕ) (f : ℕ → ℝ) (slb : ℝ)
     · intros i hi
       exact le_of_lt (h i hi)
     · use 0
-      simp only [Finset.mem_range, Nat.zero_lt_succ, true_and]
-      exact h 0 (Finset.mem_range.mpr (Nat.zero_lt_succ k))
+      simp only [Finset.mem_range, Nat.zero_lt_succ, true_and, h 0]
   simp only [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h1
   have h2 : (↑(k + 1) : ℝ) ≠ 0 := by
     norm_cast
@@ -80,7 +79,6 @@ theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f)
 
 theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d > 1 ∧ db d > dv d)) :
   Summable (λ (d : ℕ) ↦ (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
-  -- Each term is bounded by 1 / 2^d since db k ≥ 2 for all k
   have h_bound : ∀ d, (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k ≤ 1 / 2^d := by
     intro d
     have h_num_bound : (dv d : ℝ) ≤ db d - 1 := by
@@ -94,13 +92,8 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
         simp only [Finset.prod_const, Finset.card_range]
       rw [h1]
       apply Finset.prod_le_prod
-      · intros k _
-        norm_num
-      · intros k _
-        have := (h0 k).1
-        have h2 : 2 ≤ db k := this
-        exact Nat.ofNat_le_cast.mpr h2
-    -- The bound: dv d / ∏_{k≤d} db(k) < 1 / ∏_{k<d} db(k) ≤ 1/2^d
+      · intros k _; norm_num
+      · intros k _; exact Nat.ofNat_le_cast.mpr (h0 k).1
     have hprod_pos : (∏ k ∈ Finset.range (d + 1), (db k : ℝ)) > 0 := by
       apply Finset.prod_pos
       intros k _
@@ -111,18 +104,12 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
       exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k).1)
     have h_prod_d_bound : (2 : ℝ)^d ≤ ∏ k ∈ Finset.range d, (db k : ℝ) := by
       have h1 : (2 : ℝ)^d = ∏ _k ∈ Finset.range d, (2 : ℝ) := by
-        simp [Finset.prod_const, Finset.card_range]
+        simp only [Finset.prod_const, Finset.card_range]
       rw [h1]
       apply Finset.prod_le_prod
       · intros k _; norm_num
-      · intros k _
-        exact Nat.ofNat_le_cast.mpr (h0 k).1
-    -- Convert ℕ product cast to ℝ product
+      · intros k _; exact Nat.ofNat_le_cast.mpr (h0 k).1
     simp only [Nat.cast_prod]
-    -- Now use: dv d / ∏_{k≤d} ≤ (db d - 1) / ∏_{k≤d} < db d / ∏_{k≤d} = 1/∏_{k<d}
-    have hdb_pos : (db d : ℝ) > 0 := by
-      exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 d).1)
-    have hdb_ne : (db d : ℝ) ≠ 0 := ne_of_gt hdb_pos
     apply le_of_lt
     calc (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), (db k : ℝ)
         ≤ (db d - 1) / ∏ k ∈ Finset.range (d + 1), (db k : ℝ) := by
@@ -133,7 +120,8 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
           linarith
       _ = 1 / ∏ k ∈ Finset.range d, (db k : ℝ) := by
           rw [Finset.prod_range_succ]
-          field_simp [hdb_ne, ne_of_gt hprod_d_pos]
+          field_simp [ne_of_gt (Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 d).1)),
+            ne_of_gt hprod_d_pos]
       _ ≤ 1 / (2 : ℝ)^d := by
           apply div_le_div_of_nonneg_left _ (by positivity) h_prod_d_bound
           norm_num
@@ -141,13 +129,10 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
   · intro d
     apply div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
   · exact h_bound
-  · -- 1/2^d is a convergent geometric series
-    have : Summable (λ d ↦ (1 : ℝ) / 2^d) := by
-      convert summable_geometric_of_lt_one (r := (1/2 : ℝ)) _ _
-      · simp only [one_div, inv_pow]
-      · norm_num
-      · norm_num
-    exact this
+  · convert summable_geometric_of_lt_one (r := (1/2 : ℝ)) _ _
+    · simp only [one_div, inv_pow]
+    · norm_num
+    · norm_num
 
 theorem VaryingBase.One (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) : 1 =
   tsum (λ (d : ℕ) ↦ ((db d) - 1 : ℝ) / ∏ k ∈ Finset.range (d + 1), db k) := by
@@ -171,22 +156,19 @@ theorem VaryingBase.One (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1) : 1 =
           exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 k))
         have hdb_pos : (db n : ℝ) ≠ 0 := by
           apply ne_of_gt; exact Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 n))
-        rw [Finset.prod_range_succ, Finset.prod_range_succ]
+        simp only [Finset.prod_range_succ, one_div, mul_inv_rev, Nat.cast_mul, Nat.cast_prod]
         field_simp [hprod_pos, hprod_prev_pos, hdb_pos]
-        simp only [Nat.cast_mul, Nat.cast_prod]
         ring
-    · -- Limit S n -> 1
-      rw [← sub_zero 1]
+    · rw [← sub_zero 1]
       apply Filter.Tendsto.sub tendsto_const_nhds
       have h_le : ∀ n, (2 : ℝ)^n ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
         intro n
         calc (2 : ℝ)^n = ∏ _ ∈ Finset.range n, 2 := by simp only [Finset.prod_const,
           Finset.card_range]
-            _ ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
-              apply Finset.prod_le_prod
-              · intros; norm_num
-              · intros k _; exact Nat.ofNat_le_cast.mpr (h0 k)
-      -- Upper bound limit (1/2)^n -> 0
+          _ ≤ ∏ k ∈ Finset.range n, (db k : ℝ) := by
+            apply Finset.prod_le_prod
+            · intros; norm_num
+            · intros k _; exact Nat.ofNat_le_cast.mpr (h0 k)
       have h_geom : Filter.Tendsto (fun n => (1/2 : ℝ)^n) Filter.atTop (nhds 0) := by
         apply tendsto_pow_atTop_nhds_zero_of_lt_one
         · norm_num
@@ -219,12 +201,10 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
   · rintro ⟨dv, h_dv, rfl⟩
     have h_summable := VaryingBase.SummableSum db dv (λ d ↦ ⟨h0 d, h_dv d⟩)
     constructor
-    · -- r ≥ 0
-      apply tsum_nonneg
+    · apply tsum_nonneg
       intro d
       apply div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _)
-    · -- r ≤ 1
-      rw [VaryingBase.One db h0]
+    · rw [VaryingBase.One db h0]
       apply Summable.tsum_le_tsum
       · intro b
         apply div_le_div_of_nonneg_right
@@ -238,11 +218,9 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
           (fun d ↦ ⟨h0 d, Nat.sub_one_lt (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 d)))⟩) with i
         rw [Nat.cast_sub (Nat.le_of_lt (h0 i))]
         simp only [Nat.cast_one]
-  · -- Reverse direction
-    rintro ⟨h_ge_0, h_le_1⟩
+  · rintro ⟨h_ge_0, h_le_1⟩
     rcases lt_or_eq_of_le h_le_1 with hr_lt | rfl
-    · -- Case r < 1: Construct greedy expansion
-      let rem : ℕ → ℝ := Nat.rec r (λ n x ↦ Int.fract (x * db n))
+    · let rem : ℕ → ℝ := Nat.rec r (λ n x ↦ Int.fract (x * db n))
       let dv : ℕ → ℕ := λ n ↦ ⌊rem n * db n⌋₊
       have h_rem_ge_0 : ∀ n, 0 ≤ rem n := by
         intro n; induction n with
@@ -261,18 +239,17 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
           apply mul_lt_of_lt_one_left (Nat.cast_pos.mpr (Nat.lt_trans Nat.zero_lt_one (h0 d)))
           exact h_rem_lt_1 d
         · apply mul_nonneg (Nat.cast_nonneg _) (h_rem_ge_0 d)
-      · -- Prove convergence
-        symm
+      · symm
         apply HasSum.tsum_eq
         rw [hasSum_iff_tendsto_nat_of_nonneg]
-        · -- Define partial sums and error term
-          let P (n : ℕ) : ℝ := ∏ k ∈ Finset.range n, (db k : ℝ)
+        · let P (n : ℕ) : ℝ := ∏ k ∈ Finset.range n, (db k : ℝ)
           let S (n : ℕ) : ℝ := ∑ i ∈ Finset.range n, ((dv i : ℝ) / P (i + 1))
           have h_error : ∀ n, r - S n = rem n / P n := by
              intro n
              induction n with
              | zero =>
-               dsimp [S, P, rem]
+               dsimp only [Finset.range_zero, Finset.sum_empty, Nat.rec_zero, Finset.prod_empty, S,
+                 P, rem]
                simp only [sub_zero, div_one]
              | succ n ih =>
                simp only [S] at *
@@ -298,10 +275,9 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
                    exact Nat.floor_le (mul_nonneg (h_rem_ge_0 n) (Nat.cast_nonneg _))
                  · norm_cast
                    convert Nat.lt_floor_add_one (rem n * (db n : ℝ))
-                   simp [rem]
+                   simp only [Nat.cast_add, Nat.cast_one, rem]
                rw [add_comm 1 n, h_rem_succ]
                ring
-          -- Use error equation to prove limit
           have h_eq : ∀ n, S n = r - (rem n / P n) := by
             intro n
             rw [← h_error n]
@@ -316,10 +292,8 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
             refine Filter.Tendsto.sub ?_ ?_
             · simp only [sub_zero]
               apply tendsto_const_nhds
-            -- rem n / P n -> 0
             apply tendsto_of_tendsto_of_tendsto_of_le_of_le (tendsto_const_nhds (x := 0))
-            · -- Upper bound
-              apply Filter.Tendsto.comp (tendsto_inv_atTop_zero)
+            · apply Filter.Tendsto.comp (tendsto_inv_atTop_zero)
               apply tendsto_pow_atTop_atTop_of_one_lt (r := 2)
               norm_num
             · intro n
@@ -347,8 +321,7 @@ theorem VaryingBase.SameInterval (db : ℕ → ℕ) (h0 : ∀(d : ℕ), db d > 1
           apply div_nonneg (Nat.cast_nonneg _)
           rw [Nat.cast_prod]
           apply Finset.prod_nonneg; intros; exact Nat.cast_nonneg _
-    · -- Case r = 1
-      use (fun d ↦ db d - 1)
+    · use (fun d ↦ db d - 1)
       constructor
       · intro d
         exact Nat.sub_one_lt (ne_of_gt (Nat.lt_trans Nat.zero_lt_one (h0 d)))

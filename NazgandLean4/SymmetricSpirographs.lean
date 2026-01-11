@@ -3,9 +3,11 @@ import NazgandLean4.IntegerInduction
 set_option maxHeartbeats 0
 open Complex Classical Real
 
--- Example Mathematica code to show a table of spirographs with 9-fold symmetry and 5 winding speed
--- g[t_,m_]:=FullSimplify[Sum[Exp[I*(9*k+5)*t]*1.5^-k ,{k,0,m}]]
--- Table[ParametricPlot[{Re[g[u,m]],Im[g[u,m]]}, {u, 0, 2 Pi}],{m,0,15}]
+/-
+Example Mathematica code to show a table of spirographs with 9-fold symmetry and 5 winding speed
+g[t_,m_]:=FullSimplify[Sum[Exp[I*(9*k+5)*t]*1.5^-k ,{k,0,m}]]
+Table[ParametricPlot[{Re[g[u,m]],Im[g[u,m]]}, {u, 0, 2 Pi}],{m,0,15}]
+-/
 
 --declare a Set Of Complex Spirograph functions with k-fold symmetry with m winding speed.
 def SetSpiro (k : ℕ+) (m : ℤ) :

@@ -271,11 +271,11 @@ theorem ExtractedFunctionsSpec {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.Se
     simp only [Pi.sub_apply, hb₁, hb₂, Pi.sub_apply, sub_mul, Finset.sum_sub_distrib, Diff]
   have h_Diff_IC : ∀ k : Fin ↑DE.Degree, iteratedDeriv k Diff 0 = 0 := by
     intro i
-    dsimp [Diff]
+    dsimp only [Diff]
     rw [iteratedDeriv_sub ((ShiftedSolution z₁ hf).1.contDiffAt.of_le le_top) ((h_rhs_sol.1.contDiffAt).of_le le_top)]
     simp only [sub_eq_zero]
     rw [ShiftedIteratedDerivative i z₁ hf.1]
-    dsimp [h_rhs]
+    dsimp only [h_rhs]
     simp only [zero_add]
     have h_iter_sum : iteratedDeriv i (fun z => ∑ k, C k * g k z) 0 =
         ∑ k, C k * iteratedDeriv i (g k) 0 := by
@@ -631,7 +631,7 @@ theorem ExistsUniqueArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ →
               · simp only [mem_univ, imp_self, implies_true]
               · simp only [mem_univ, EmbeddingLike.apply_eq_iff_eq,
                 Prod.mk.injEq, and_imp, forall_const, Prod.forall, forall_eq', Prod.mk.eta]
-              · simp [mem_univ, exists_const, Prod.exists, forall_const]
+              · simp only [mem_univ, exists_const, Prod.exists, forall_const]
                 intro Position
                 let preimage := e.symm Position
                 use preimage.2, preimage.1
@@ -684,7 +684,7 @@ theorem SymmetricArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → �
     rw [← Equiv.sum_comp (PermutePositions PermuteAxes)]
     congr
     ext Pos
-    simp [← Equiv.prod_comp PermuteAxes (λ (j : Fin Dim) ↦ g (Pos j) (z j))]
+    simp only [← Equiv.prod_comp PermuteAxes (λ (j : Fin Dim) ↦ g (Pos j) (z j))]
     rfl
   intro PermuteAxes Position
   nth_rw 2 [← hSymmetryOfArgumentSumRuleTensorIsArgumentSumRuleTensor PermuteAxes]

@@ -60,8 +60,7 @@ theorem WavelengthGcd (p : ℤ → Prop) (k₀ k₁ : ℤ) :
   ((∀ (m : ℤ), p m ↔ p (m + k₀)) ∧ (∀ (m : ℤ), p m ↔ p (m + k₁))) := by
   constructor
   · intros h₀
-    rw [WavelengthRestate] at h₀
-    rw [WavelengthRestate]
+    rw [WavelengthRestate] at h₀ ⊢
     constructor
     · have h₁ : ↑(k₀.gcd k₁) ∣ k₀ := Int.gcd_dvd_left k₀ k₁
       obtain ⟨w, hw⟩ := h₁

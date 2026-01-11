@@ -355,11 +355,11 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₂ : Soqw4pin1₀ = Soqw4pin1₂ := by
       · rw [re_mul]
         have hImVecSq : ‖(q * q).im‖ ^ 2 = 1 := by
           have h : ‖q * q‖ ^ 2 = (q * q).re ^ 2 + ‖(q * q).im‖ ^ 2 := by
-            rw [pow_two ‖q * q‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def']
-            rw [pow_two ‖(q * q).im‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def]
-            simp only [re_mul, imI_mul, imJ_mul, imK_mul, im, QuaternionAlgebra.re_im, re_star,
-              mul_zero, QuaternionAlgebra.imI_im, imI_star, neg_sub, zero_sub,
-              QuaternionAlgebra.imJ_im, imJ_star, neg_add_rev, QuaternionAlgebra.imK_im, imK_star]
+            rw [pow_two ‖q * q‖, ←normSq_eq_norm_mul_self, Quaternion.normSq_def', pow_two ‖(q * q).im‖]
+            simp only [re_mul, imI_mul, imJ_mul, imK_mul, im, ← normSq_eq_norm_mul_self, normSq_def,
+              QuaternionAlgebra.re_im, re_star, mul_zero, QuaternionAlgebra.imI_im, imI_star,
+              neg_sub, zero_sub, QuaternionAlgebra.imJ_im, imJ_star, neg_add_rev,
+              QuaternionAlgebra.imK_im, imK_star]
             ring
           rw [hq2Norm, hq2Re] at h
           simp only [one_pow, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
@@ -394,33 +394,28 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
   dsimp only [Soqw4pin1₀, Set.mem_setOf_eq, Soqw4pin1₁]
   constructor
   · intro h
-    -- From the other theorem, we know ‖q‖ = 1 and q.re ^ 2 = 1/2
     have hMem : ⟨r, x, y, z⟩ ∈ Soqw4pin1₂ := by
       rw [← EqualSetsSoqw4pin1₀AndSoqw4pin1₂]
       exact h
     simp only [Soqw4pin1₂, Set.mem_setOf_eq, one_div] at hMem
     rcases hMem with ⟨hNorm, hReSq⟩
-    -- q.re ^ 2 = 1/2 means q.re = ±1/√2, so q.re * √2 = ±1
     use x * Real.sqrt 2
     use y * Real.sqrt 2
     use z * Real.sqrt 2
     use r * Real.sqrt 2
     constructor
-    · -- Pm1 ^ 2 = 1, i.e., (r * √2)² = 1
-      have h2pos : (0 : ℝ) < 2 := by norm_num
+    · have h2pos : (0 : ℝ) < 2 := by norm_num
       rw [pow_two, mul_mul_mul_comm]
       rw [Real.mul_self_sqrt (le_of_lt h2pos)]
       rw [mul_comm, ← pow_two]
       rw [hReSq]
       norm_num
     constructor
-    · -- q * √2 = ⟨Pm1, rx, ry, rz⟩
-      have h2 : (Real.sqrt 2 : ℍ) = ↑(Real.sqrt 2 : ℝ) := rfl
+    · have h2 : (Real.sqrt 2 : ℍ) = ↑(Real.sqrt 2 : ℝ) := rfl
       rw [h2]
       ext <;> simp only [re_mul, re_coe, imI_coe, imJ_coe, imK_coe, sub_zero, imI_mul, mul_zero,
         add_zero, imJ_mul, imK_mul] <;> ring
-    · -- rx² + ry² + rz² = 1
-      have h2pos : (0 : ℝ) < 2 := by norm_num
+    · have h2pos : (0 : ℝ) < 2 := by norm_num
       have hSqrt2Sq : Real.sqrt 2 ^ 2 = 2 := Real.sq_sqrt (le_of_lt h2pos)
       have hNormSq : r ^ 2 + x ^ 2 + y ^ 2 + z ^ 2 = 1 := by
         have h1 := congrArg (fun n => n * n) hNorm
@@ -436,8 +431,6 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
       _ = 1 := by rw [hReSq']; norm_num
   · intro h
     rcases h with ⟨rx, ry, rz, Pm1, hPm1Sq, hq, hSphere⟩
-    -- We need to show -1 = q ^ 4
-    -- First establish that q satisfies the Soqw4pin1₂ characterization
     have hMem : ⟨r, x, y, z⟩ ∈ Soqw4pin1₂ := by
       simp only [Soqw4pin1₂, Set.mem_setOf_eq, one_div]
       have h2 : (Real.sqrt 2 : ℍ) = ↑(Real.sqrt 2 : ℝ) := rfl
@@ -447,8 +440,7 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
         imJ_mul, imJ_coe, imK_mul, imK_coe] at hqExt
       rcases hqExt with ⟨hr, hx, hy, hz⟩
       constructor
-      · -- ‖q‖ = 1
-        have h2pos : (0 : ℝ) < 2 := by norm_num
+      · have h2pos : (0 : ℝ) < 2 := by norm_num
         have hSqrt2Ne0 : Real.sqrt 2 ≠ 0 := Real.sqrt_ne_zero'.mpr h2pos
         have hr' : r = Pm1 / Real.sqrt 2 := by field_simp at hr ⊢; linarith
         have hx' : x = rx / Real.sqrt 2 := by field_simp at hx ⊢; linarith
@@ -460,22 +452,19 @@ theorem EqualSetsSoqw4pin1₀AndSoqw4pin1₁ : Soqw4pin1₀ = Soqw4pin1₁ := by
         have hSpherePow : rx ^ 2 + ry ^ 2 + rz ^ 2 = 1 := by
           calc rx ^ 2 + ry ^ 2 + rz ^ 2 = rx * rx + ry * ry + rz * rz := by ring
           _ = 1 := hSphere
-        -- Compute normSq = 1
         have hNormSqVal : (Pm1 / Real.sqrt 2) ^ 2 + (rx / Real.sqrt 2) ^ 2 +
             (ry / Real.sqrt 2) ^ 2 + (rz / Real.sqrt 2) ^ 2 = 1 := by
           field_simp
           rw [hSqrt2Sq]
           have h1 : Pm1 ^ 2 + rx ^ 2 + ry ^ 2 + rz ^ 2 = 2 := by linarith
           linarith
-        -- Use that ‖q‖² = normSq q = sum of squares
         let q' : ℍ[ℝ] := ⟨Pm1 / Real.sqrt 2, rx / Real.sqrt 2, ry / Real.sqrt 2, rz / Real.sqrt 2⟩
         have hNormMulSelf : ‖q'‖ * ‖q'‖ = 1 := by
           rw [← normSq_eq_norm_mul_self, normSq_def']
           exact hNormSqVal
         have hNormNonneg : 0 ≤ ‖q'‖ := norm_nonneg _
         nlinarith [sq_nonneg ‖q'‖]
-      · -- q.re ^ 2 = 1/2
-        have h2pos : (0 : ℝ) < 2 := by norm_num
+      · have h2pos : (0 : ℝ) < 2 := by norm_num
         have hSqrt2Ne0 : Real.sqrt 2 ≠ 0 := Real.sqrt_ne_zero'.mpr h2pos
         have hr' : r = Pm1 / Real.sqrt 2 := by field_simp at hr ⊢; linarith
         simp only [hr', pow_two, div_mul_div_comm]
@@ -492,30 +481,26 @@ theorem EqualSetsSoqw4pin1₁AndSoqw4pin1₃ : Soqw4pin1₁ = Soqw4pin1₃ := by
   ext ⟨r, x, y, z⟩
   dsimp only [Soqw4pin1₁, Set.mem_setOf_eq, Soqw4pin1₃, Soqtstn1₁]
   constructor
-  · -- Forward: Soqw4pin1₁ → Soqw4pin1₃
-    intro ⟨rx, ry, rz, Pm1, hPm1Sq, hq, hSphere⟩
+  · intro ⟨rx, ry, rz, Pm1, hPm1Sq, hq, hSphere⟩
     use ⟨0, rx, ry, rz⟩
     use Pm1
     constructor
     · exact hPm1Sq
     constructor
     · use rx, ry, rz
-    · -- q * √2 = Pm1 + qim
-      rw [hq]
+    · rw [hq]
       ext
       · simp only [re_add, re_coe, add_zero]
       · simp only [imI_add, imI_coe, zero_add]
       · simp only [imJ_add, imJ_coe, zero_add]
       · simp only [imK_add, imK_coe, zero_add]
-  · -- Backward: Soqw4pin1₃ → Soqw4pin1₁
-    intro ⟨qim, Pm1, hPm1Sq, hQim, hq⟩
+  · intro ⟨qim, Pm1, hPm1Sq, hQim, hq⟩
     rcases hQim with ⟨rx, ry, rz, hQimEq, hSphere⟩
     use rx, ry, rz, Pm1
     constructor
     · exact hPm1Sq
     constructor
-    · -- q * √2 = ⟨Pm1, rx, ry, rz⟩
-      rw [hq, hQimEq]
+    · rw [hq, hQimEq]
       ext
       · simp only [re_add, re_coe, add_zero]
       · simp only [imI_add, imI_coe, zero_add]

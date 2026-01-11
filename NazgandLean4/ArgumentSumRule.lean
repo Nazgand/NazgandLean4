@@ -564,7 +564,7 @@ theorem TensorProductBasisLinearIndependence (Dim : ℕ) {DE : DiffEq}
     rw [hk_decomp]
     exact congrFun (h_c'_zero (k 0)) (k ∘ Fin.succ)
 
-def PermuteOutputsByReorderingInputs {α : Type} (Perm : Equiv.Perm α) (β : Type) :
+def PermuteFunctionsByReorderingInputs {α : Type} (Perm : Equiv.Perm α) (β : Type) :
   Equiv.Perm (α → β) := Perm.symm.arrowCongr (Equiv.refl β)
 
 def IsArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (_ : f ∈ DE.SetOfSolutions)
@@ -657,15 +657,15 @@ theorem ExistsUniqueArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ →
 
 def SymmetricTensor {α : Type} {Dim Edge : ℕ} (Tensor : (Fin Dim → Fin Edge) → α) : Prop :=
     (∀ (Perm : Equiv.Perm (Fin Dim)) (Position : (Fin Dim → Fin Edge)),
-     Tensor ((PermuteOutputsByReorderingInputs Perm (Fin Edge)) Position) = Tensor Position)
+     Tensor ((PermuteFunctionsByReorderingInputs Perm (Fin Edge)) Position) = Tensor Position)
 
 theorem SymmetricArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
   (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
   SymmetricTensor (ArgumentSumRuleTensor Dim hf g hg) := by
   let PermutePositions := λ (PermuteAxes : Equiv.Perm (Fin Dim)) ↦
-    (PermuteOutputsByReorderingInputs PermuteAxes (Fin ↑DE.Degree))
+    (PermuteFunctionsByReorderingInputs PermuteAxes (Fin ↑DE.Degree))
   let SymmetryOfArgumentSumRuleTensor := λ (PermuteAxes : Equiv.Perm (Fin Dim)) ↦
-    (PermuteOutputsByReorderingInputs (PermutePositions PermuteAxes) ℂ) (ArgumentSumRuleTensor Dim hf g hg)
+    (PermuteFunctionsByReorderingInputs (PermutePositions PermuteAxes) ℂ) (ArgumentSumRuleTensor Dim hf g hg)
   have hSymmetryOfArgumentSumRuleTensorIsArgumentSumRuleTensor : ∀ (PermuteAxes : Equiv.Perm (Fin Dim)),
     SymmetryOfArgumentSumRuleTensor PermuteAxes = (ArgumentSumRuleTensor Dim hf g hg) := by
     intro PermuteAxes
@@ -675,8 +675,8 @@ theorem SymmetricArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → �
     have hSpec : IsArgumentSumRuleTensor Dim hf g hg (ArgumentSumRuleTensor Dim hf g hg) := by
       grind only [ExistsUniqueArgumentSumRuleTensor]
     rw [IsArgumentSumRuleTensor] at hSpec
-    specialize hSpec ((PermuteOutputsByReorderingInputs PermuteAxes ℂ) z)
-    have h0 : (∑ j, (PermuteOutputsByReorderingInputs PermuteAxes ℂ) z j) = (∑ j, z j) := by
+    specialize hSpec ((PermuteFunctionsByReorderingInputs PermuteAxes ℂ) z)
+    have h0 : (∑ j, (PermuteFunctionsByReorderingInputs PermuteAxes ℂ) z j) = (∑ j, z j) := by
       rw [← Equiv.sum_comp PermuteAxes z]
       rfl
     rw [← h0, hSpec]

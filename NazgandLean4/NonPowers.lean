@@ -71,7 +71,52 @@ theorem NonPowerNatPrimeExponentsGcdEq1 :
 
 theorem OverUnityNatUniqueNonPowerNatBase (k : ℕ) (h : k ∈ OverUnityNat) :
   ∃! (a : ℕ), (a ∈ NonPowerNat ∧ ∃ (b : ℕ), k = a ^ b) := by
-  sorry
+  have hk0 : k ≠ 0 := by
+    intro hk
+    rw [OverUnityNat, hk] at h
+    simp only [gt_iff_lt, Set.mem_setOf_eq, not_lt_zero] at h
+  let g := PrimeExponentsGcd k
+  have hg_pos : g > 0 := by
+    rw [gt_iff_lt, Nat.pos_iff_ne_zero, Ne]
+    intro hg0
+    simp only [g, PrimeExponentsGcd] at hg0
+    rw [Finset.gcd_eq_zero_iff] at hg0
+    have : k = 1 := by
+       rw [← Nat.factorization_prod_pow_eq_self hk0]
+       apply Finset.prod_eq_one
+       intro p hp
+       simp only [hg0 p hp, pow_zero]
+    subst this
+    simp only [OverUnityNat, gt_iff_lt, Set.mem_setOf_eq, lt_self_iff_false] at h
+  let a := k.factorization.support.prod (λ p => p ^ (k.factorization p / g))
+  have hk_eq : k = a ^ g := by
+    rw [← Finset.prod_pow]
+    nth_rw 1 [← Nat.factorization_prod_pow_eq_self hk0]
+    refine Finset.prod_congr rfl (λ p hp => ?_)
+    rw [← Nat.pow_mul]
+    congr 1
+    exact (Nat.div_mul_cancel (Finset.gcd_dvd hp)).symm
+  use a
+  constructor
+  · constructor
+    · rw [NonPowerNatPrimeExponentsGcdEq1]
+      simp only [Set.mem_setOf_eq]
+      have hg : g = g * PrimeExponentsGcd a := by
+         conv_lhs => simp only [g]
+         rw [hk_eq, PrimeExponentsGcdOfPower]
+      nth_rw 1 [← mul_one g] at hg
+      exact Nat.mul_left_cancel hg_pos hg
+    · use g
+  · intro a' ⟨ha', ⟨b', h_eq⟩⟩
+    rw [NonPowerNatPrimeExponentsGcdEq1] at ha'
+    simp only [Set.mem_setOf_eq] at ha'
+    have hb' : b' = g := by
+      simp only [g]
+      rw [h_eq, PrimeExponentsGcdOfPower, ha'.symm, mul_one]
+    subst hb'
+    rw [h_eq] at hk_eq
+    have h_ne_zero : g ≠ 0 := Nat.pos_iff_ne_zero.mp hg_pos
+    exact (Nat.pow_left_inj h_ne_zero).mp hk_eq
 
 theorem OverUnityNatEqNonPowerNatToThePowerOfPosNat :
   OverUnityNat = {k : ℕ | ∃ a b : ℕ, a ∈ NonPowerNat ∧ b ∈ PosNat ∧ k = a ^ b} :=

@@ -145,9 +145,23 @@ theorem OverUnityNatEqNonPowerNatToThePowerOfPosNat :
 
 theorem NonPowerNatToThePowerOfPosNatUniqueRepresentation (a₀ b₀ a₁ b₁ : ℕ)
   (h0 : a₀ ∈ NonPowerNat) (h1 : b₀ ∈ PosNat)
-  (h2 : a₁ ∈ NonPowerNat) (h3 : b₁ ∈ PosNat)
-  (h4 : a₀ ^ b₀ = a₁ ^ b₁) : a₀ = a₁ ∧ b₀ = b₁ :=
-  sorry
+  (h2 : a₁ ∈ NonPowerNat) (h4 : a₀ ^ b₀ = a₁ ^ b₁) : a₀ = a₁ ∧ b₀ = b₁ := by
+  have ha0_gt_1 : a₀ > 1 := by
+    by_contra ha
+    simp only [not_lt] at ha
+    simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at h0
+    rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ha with rfl | rfl
+    · specialize h0 0 2 (by simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow])
+      linarith
+    · specialize h0 1 2 (by simp only [one_pow]); linarith
+  have hk_gt_1 : a₀ ^ b₀ > 1 := Nat.one_lt_pow (Nat.ne_of_gt h1) ha0_gt_1
+  have h_unique := OverUnityNatUniqueNonPowerNatBase (a₀ ^ b₀) hk_gt_1
+  obtain ⟨a, _, h_uniq⟩ := h_unique
+  have ha0_eq : a₀ = a := h_uniq a₀ ⟨h0, b₀, rfl⟩
+  have ha1_eq : a₁ = a := h_uniq a₁ ⟨h2, b₁, h4⟩
+  subst ha0_eq ha1_eq
+  refine ⟨rfl, ?_⟩
+  apply Nat.pow_right_injective ha0_gt_1 h4
 
 def PowerTower (list : List ℕ) : ℕ :=
   match list with

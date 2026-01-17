@@ -10,8 +10,18 @@ def PrimeExponentsGcd (k : ℕ) : ℕ := k.factorization.support.gcd k.factoriza
 
 theorem PrimeExponentsGcdOfPower (a b : ℕ) :
   PrimeExponentsGcd (a ^ b) = b * PrimeExponentsGcd a := by
-  -- Use Nat.factorization_pow
-  sorry
+  unfold PrimeExponentsGcd
+  by_cases hb : b = 0
+  · rw [hb, pow_zero, Nat.zero_mul, Nat.factorization_one, Finsupp.support_zero, Finset.gcd_empty]
+  · have h_supp : (b • a.factorization).support = a.factorization.support := by
+      ext x
+      simp only [Finsupp.mem_support_iff, Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
+      rw [mul_ne_zero_iff, and_iff_right hb]
+    have h_coe : ⇑(b • a.factorization) = fun x => b * a.factorization x := by
+      ext
+      simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul]
+    rw [Nat.factorization_pow, h_coe, Finset.gcd_mul_left, h_supp, normalize_eq,
+      Nat.support_factorization]
 
 theorem NonPowerNatPrimeExponentsGcdEq1 :
   NonPowerNat = {k : ℕ | 1 = PrimeExponentsGcd k} := by

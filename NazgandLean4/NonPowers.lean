@@ -119,8 +119,29 @@ theorem OverUnityNatUniqueNonPowerNatBase (k : ℕ) (h : k ∈ OverUnityNat) :
     exact (Nat.pow_left_inj h_ne_zero).mp hk_eq
 
 theorem OverUnityNatEqNonPowerNatToThePowerOfPosNat :
-  OverUnityNat = {k : ℕ | ∃ a b : ℕ, a ∈ NonPowerNat ∧ b ∈ PosNat ∧ k = a ^ b} :=
-  sorry
+  OverUnityNat = {k : ℕ | ∃ a b : ℕ, a ∈ NonPowerNat ∧ b ∈ PosNat ∧ k = a ^ b} := by
+  ext k
+  constructor
+  · intro hk
+    obtain ⟨a, ha, b, rfl⟩ := (OverUnityNatUniqueNonPowerNatBase k hk).exists
+    use a, b
+    refine ⟨ha, ?_, rfl⟩
+    by_contra hb
+    simp only [PosNat, Set.mem_setOf_eq, not_lt, Nat.le_zero_eq] at hb
+    rw [hb, pow_zero] at hk
+    simp only [OverUnityNat, gt_iff_lt, Set.mem_setOf_eq, lt_self_iff_false] at hk
+  · rintro ⟨a, b, ha, hb, rfl⟩
+    simp only [OverUnityNat, gt_iff_lt, Set.mem_setOf_eq]
+    simp only [PosNat, gt_iff_lt, Set.mem_setOf_eq] at hb
+    simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at ha
+    have ha_gt_1 : a > 1 := by
+      by_contra ha_le
+      simp only [not_lt] at ha_le
+      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ha_le with rfl | rfl
+      · specialize ha 0 2 (by simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+          zero_pow]); linarith
+      · specialize ha 1 2 (by simp only [one_pow]); linarith
+    exact Nat.one_lt_pow (Nat.ne_zero_of_lt hb) ha_gt_1
 
 theorem NonPowerNatToThePowerOfPosNatUniqueRepresentation (a₀ b₀ a₁ b₁ : ℕ)
   (h0 : a₀ ∈ NonPowerNat) (h1 : b₀ ∈ PosNat)

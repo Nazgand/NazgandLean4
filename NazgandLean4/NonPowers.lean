@@ -174,5 +174,91 @@ def ListOfNonPowers (list : List ℕ) : Prop :=
   | h :: t => (h ∈ NonPowerNat) ∧ ListOfNonPowers t
 
 theorem PosNatExistsUniqueNonPowerPowerTower (k : ℕ) (h0 : k ∈ PosNat) :
-  ∃! (list : List ℕ), ListOfNonPowers list ∧ PowerTower list = k :=
-  sorry
+  ∃! (list : List ℕ), ListOfNonPowers list ∧ PowerTower list = k := by
+  have PosNonPowerPowerTower : ∀ (l : List ℕ), ListOfNonPowers l → 0 < PowerTower l := by
+    intro l hl
+    induction l with
+    | nil => simp only [PowerTower, zero_lt_one]
+    | cons h t ih =>
+      rw [ListOfNonPowers] at hl
+      simp only [PowerTower]
+      have h_gt_0 : h > 0 := by
+        have h9 := hl.1
+        simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at h9
+        by_contra hz
+        simp only [gt_iff_lt, not_lt, nonpos_iff_eq_zero] at hz
+        subst hz
+        specialize h9 0 2 (by simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow])
+        linarith
+      apply Nat.pow_pos h_gt_0
+  induction k using Nat.strong_induction_on with | h k ih =>
+  by_cases h1 : k = 1
+  · subst h1
+    use []
+    simp only [ListOfNonPowers, PowerTower, true_and]
+    rintro list ⟨hl, hp⟩
+    match list with
+    | [] => rfl
+    | h :: t =>
+      exfalso
+      have h_np : h ∈ NonPowerNat := hl.1
+      have h_gt_1 : h > 1 := by
+        by_contra h_le
+        simp only [not_lt] at h_le
+        rcases Nat.le_one_iff_eq_zero_or_eq_one.mp h_le with rfl | rfl
+        · simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at h_np
+          specialize h_np 0 2 (by simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+            zero_pow]); linarith
+        · simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at h_np
+          specialize h_np 1 2 (by simp only [one_pow]); linarith
+      simp only [PowerTower, pow_eq_one_iff] at hp
+      have : PowerTower t = 0 := by
+        by_contra h_nz
+        have t_pos : PowerTower t > 0 := Nat.pos_of_ne_zero h_nz
+        have h_pow_gt : h ^ PowerTower t > 1 := Nat.one_lt_pow (ne_of_gt t_pos) h_gt_1
+        grind only
+      have pt_pos : PowerTower t > 0 := PosNonPowerPowerTower t hl.2
+      linarith
+  · have k_gt_1 : k > 1 := Nat.lt_of_le_of_ne (h0) (Ne.symm h1)
+    have h_unique := OverUnityNatUniqueNonPowerNatBase k k_gt_1
+    obtain ⟨a, ⟨ha, b, rfl⟩, h_uniq_base⟩ := h_unique
+    have b_pos : b ∈ PosNat := by
+       by_contra hb
+       simp only [PosNat, gt_iff_lt, Set.mem_setOf_eq, not_lt, nonpos_iff_eq_zero] at hb
+       have : b = 0 := by linarith
+       subst this
+       rw [pow_zero] at h1
+       exact h1 rfl
+    have b_lt_k : b < a ^ b := by
+       apply Nat.lt_pow_self
+       by_contra ha_le
+       simp only [not_lt] at ha_le
+       rcases Nat.le_one_iff_eq_zero_or_eq_one.mp ha_le with rfl | rfl
+       · simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at ha
+         specialize ha 0 2 (by simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow])
+         linarith
+       · simp only [NonPowerNat, gt_iff_lt, not_exists, not_and, not_lt, Set.mem_setOf_eq] at ha
+         specialize ha 1 2 (by simp only [one_pow]); linarith
+    obtain ⟨tl, htl_prop, htl_uniq⟩ := ih b b_lt_k b_pos
+    use a :: tl
+    constructor
+    · simp only [ListOfNonPowers, PowerTower]
+      constructor
+      · simp only [ha, htl_prop, and_self]
+      · simp only [htl_prop]
+    · intro l' ⟨hl', hp'⟩
+      match l' with
+      | [] =>
+        simp only [PowerTower] at hp'
+        rw [hp'] at k_gt_1
+        linarith
+      | h' :: t' =>
+        simp only [ListOfNonPowers, PowerTower] at hl' hp'
+        have pt_pos : PowerTower t' ∈ PosNat := PosNonPowerPowerTower t' hl'.2
+        have h4 : a ^ b = h' ^ PowerTower t' := by rw [hp']
+        have h_base_eq : a = h' ∧ b = PowerTower t' :=
+           NonPowerNatToThePowerOfPosNatUniqueRepresentation a b h' (PowerTower t') ha b_pos hl'.1 h4
+        rcases h_base_eq with ⟨rfl, rfl⟩
+        congr
+        apply htl_uniq t'
+        exact ⟨hl'.2, rfl⟩

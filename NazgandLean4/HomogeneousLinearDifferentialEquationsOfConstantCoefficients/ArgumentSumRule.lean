@@ -1,71 +1,11 @@
 /-
 Formalization of this theorem (previously a conjecture)
-https://github.com/Nazgand/NazgandMathBook/blob/master/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficientsConjecture.pdf
+https://github.com/Nazgand/NazgandMathBook/blob/master/PDFs/ArgumentSumRulesFromHomogeneousLinearDifferentialEquationsOfConstantCoefficients.pdf
 -/
 import Mathlib
+import NazgandLean4.HomogeneousLinearDifferentialEquationsOfConstantCoefficients.Basic
 set_option maxHeartbeats 0
 open Finset Matrix
-
-structure DiffEq where
-  Degree : ℕ+
-  Coeff : (Fin (Degree + 1)) → ℂ
-  LeadCoeffNonZero : Coeff (Fin.ofNat (Degree + 1) Degree) ≠ 0
-
-def DiffEq.IsSolution (DE : DiffEq) (f : ℂ → ℂ) : Prop :=
-  ContDiff ℂ ⊤ f ∧ ∀ (z : ℂ), 0 =
-  ∑ (k : (Fin (DE.Degree + 1))), (DE.Coeff k) * (iteratedDeriv k f z)
-
-def DiffEq.SetOfSolutions (DE : DiffEq) : Set (ℂ → ℂ) := {h : ℂ → ℂ | DE.IsSolution h}
-
-def DiffEq.IsVectorBasis (DE : DiffEq) (g : (Fin ↑DE.Degree) → ℂ → ℂ) : Prop :=
-  (DE.SetOfSolutions =
-    {h : ℂ → ℂ | ∃ (b : (Fin ↑DE.Degree) → ℂ),
-      h = λ (z : ℂ) => ∑ (k : (Fin ↑DE.Degree)), b k * g k z} ∧
-    (∀ (b₀ b₁ : (Fin ↑DE.Degree) → ℂ),
-      (λ (z : ℂ) => ∑ (k : (Fin ↑DE.Degree)), b₀ k * g k z) =
-      (λ (z : ℂ) => ∑ (k : (Fin ↑DE.Degree)), b₁ k * g k z) → b₀ = b₁))
-
--- simplify the shifted iterated derivative
-theorem ShiftedIteratedDerivative (k : ℕ) (z₁ : ℂ) {f : ℂ → ℂ} (h₀ : ContDiff ℂ ⊤ f) :
-    iteratedDeriv k (fun z₀ => f (z₀ + z₁)) = (fun z₀ => iteratedDeriv k f (z₀ + z₁)) := by
-  induction' k with K Kih
-  · simp only [iteratedDeriv_zero]
-  · rw [iteratedDeriv_succ, Kih]
-    ext z
-    let h₂ := iteratedDeriv K f
-    let h := fun z₀ => (z₀ + z₁)
-    have hh₂ : DifferentiableAt ℂ h₂ (h z) := by
-      refine Differentiable.differentiableAt ?h
-      exact (ContDiff.differentiable_iteratedDeriv K h₀ (WithTop.coe_lt_top (K : ℕ∞)))
-    have hh : DifferentiableAt ℂ h z := by
-      exact differentiableAt_id.add (differentiableAt_const z₁)
-    have hcomp := deriv_comp z hh₂ hh
-    have hrwh₂ : h₂ = iteratedDeriv K f := rfl
-    have hrwh : h = fun z₀ => z₀ + z₁ := rfl
-    rw [hrwh₂, hrwh] at hcomp
-    simp only [← iteratedDeriv_succ, differentiableAt_fun_id,
-      differentiableAt_const, deriv_fun_add,
-      deriv_id'', deriv_const', add_zero, mul_one] at hcomp
-    rw [←hcomp]
-    rfl
-
--- A solution with input shifted by a constant z₁ is still a solution
-theorem ShiftedSolution {DE : DiffEq} {f : ℂ → ℂ} (z₁ : ℂ) (hf : f ∈ DE.SetOfSolutions) :
-  (λ (z₀ : ℂ) => f (z₀ + z₁)) ∈ DE.SetOfSolutions := by
-  unfold DiffEq.SetOfSolutions at ⊢ hf
-  simp only [Set.mem_setOf_eq] at ⊢ hf
-  unfold DiffEq.IsSolution at ⊢ hf
-  rcases hf with ⟨h₁, h₂⟩
-  constructor
-  · refine Differentiable.contDiff ?left.hf
-    exact (h₁.differentiable (by simp)).comp (differentiable_id.add (differentiable_const z₁))
-  · have hShID : ∀ (k : ℕ), (iteratedDeriv k fun z₀ => f (z₀ + z₁)) =
-      fun z₀ => iteratedDeriv k f (z₀ + z₁) := by
-      intros k
-      rw [ShiftedIteratedDerivative k z₁ h₁]
-    simp_rw [hShID]
-    intros z₀
-    exact h₂ (z₀ + z₁)
 
 noncomputable def KeyDifferentialOperator (DE : DiffEq) (f : ℂ → ℂ) : ℂ → ℂ :=
   λ (z: ℂ) => ∑ (k : (Fin (DE.Degree + 1))), (DE.Coeff k) * (iteratedDeriv k f z)
@@ -167,15 +107,7 @@ theorem DiffEq_Zero_IC_Implies_Zero {DE : DiffEq} {h : ℂ → ℂ} (h_sol : DE.
   exact analyticOnNhd_const
   exact h_loc
 
-theorem BasisInSetOfSolutions {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
-    ∀ j, g j ∈ DE.SetOfSolutions := by
-  unfold DiffEq.IsVectorBasis at hg
-  rw [hg.1]
-  intro j
-  use fun k => if k = j then 1 else 0
-  simp only [ite_mul, one_mul, zero_mul, sum_ite_eq', mem_univ, ↓reduceIte]
-
-theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
+theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) :
     IsUnit (Matrix.of (fun (i j : Fin ↑DE.Degree) => iteratedDeriv i (g j) 0)) := by
   let W : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ :=
     Matrix.of (fun (i j : Fin ↑DE.Degree) => iteratedDeriv i (g j) 0)
@@ -186,7 +118,7 @@ theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → �
   obtain ⟨v, hv_ne, hv_eq⟩ := Matrix.exists_mulVec_eq_zero_iff.mpr h_det_zero
   let f_zero := fun z => ∑ k, v k * g k z
   have h_sol_g : ∀ j : Fin ↑DE.Degree, g j ∈ DE.SetOfSolutions := by
-    unfold DiffEq.IsVectorBasis at hg
+    unfold DiffEq.IsBasis at hg
     rw [hg.1]
     intro j
     simp only [Set.mem_setOf_eq]
@@ -228,7 +160,7 @@ theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → �
     simp_rw [iteratedDeriv_const_mul ((h_sol_g _).1.of_le le_top).contDiffAt (v _), mul_comm (v _) _]
     exact congr_fun hv_eq k
   have h_fz : f_zero = 0 := DiffEq_Zero_IC_Implies_Zero h_sol h_ic
-  rw [DiffEq.IsVectorBasis] at hg
+  rw [DiffEq.IsBasis] at hg
   have h_span := hg.2 (fun _ => 0) v
   have h_lhs_zero : (fun z => ∑ k : Fin ↑DE.Degree, (0 : ℂ) * g k z) = (fun z => 0) := by
     ext z
@@ -239,14 +171,14 @@ theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → �
   contradiction
 
 noncomputable def ExtractedFunctions {DE : DiffEq} {f : ℂ → ℂ}
-  (_ : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (_ : DE.IsVectorBasis g)
+  (_ : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (_ : DE.IsBasis g)
   (k : Fin ↑DE.Degree) (z₁ : ℂ) : ℂ :=
   let W : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ := Matrix.of fun i j => iteratedDeriv i (g j) 0
   let F : Fin ↑DE.Degree → ℂ := fun i => iteratedDeriv i f z₁
   (W⁻¹ *ᵥ F) k
 
 theorem ExtractedFunctionsSpec {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) (z₀ z₁ : ℂ) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) (z₀ z₁ : ℂ) :
   f (z₀ + z₁) = ∑ (k : (Fin ↑DE.Degree)), (ExtractedFunctions hf g hg k z₁) * g k z₀ := by
   let W : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ := Matrix.of fun i j => iteratedDeriv i (g j) 0
   let hW : IsUnit W.det := (isUnit_iff_isUnit_det W).mp (Wronskian_Invertible g hg)
@@ -299,14 +231,14 @@ theorem ExtractedFunctionsSpec {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.Se
   exact sub_eq_zero.mp (congrFun h_Diff_eq_zero z₀)
 
 theorem ExtractedFunctionsDifferentiable {DE : DiffEq} {f : ℂ → ℂ}
-  (hf : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g)
+  (hf : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g)
   : ∀ (k : (Fin ↑DE.Degree)), Differentiable ℂ (ExtractedFunctions hf g hg k) := by
   let W : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ := Matrix.of fun i j => iteratedDeriv i (g j) 0
   have hW : IsUnit W := Wronskian_Invertible g hg
   rw [isUnit_iff_isUnit_det] at hW
   let W_inv := W.nonsingInvUnit hW
   have h_sol_g : ∀ j : Fin ↑DE.Degree, g j ∈ DE.SetOfSolutions := by
-    unfold DiffEq.IsVectorBasis at hg
+    unfold DiffEq.IsBasis at hg
     rw [hg.1]
     intro j
     simp only [Set.mem_setOf_eq]
@@ -351,7 +283,7 @@ theorem ExtractedFunctionsDifferentiable {DE : DiffEq} {f : ℂ → ℂ}
   fun_prop
 
 theorem AppliedDifferentialOperator {DE : DiffEq} {f : ℂ → ℂ}
-  (hf : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
+  (hf : f ∈ DE.SetOfSolutions) (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) :
   ∀ (z₀ z₁ : ℂ), 0 = ∑ (k : (Fin ↑DE.Degree)),
   (KeyDifferentialOperator DE (ExtractedFunctions hf g hg k) z₁ * g k z₀) := by
   intros z₀ z₁
@@ -398,7 +330,7 @@ theorem AppliedDifferentialOperator {DE : DiffEq} {f : ℂ → ℂ}
   ring
 
 theorem ExtractedFunctionsAreSolutions {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) :
   ∀ (k : (Fin ↑DE.Degree)), (ExtractedFunctions hf g hg k) ∈ DE.SetOfSolutions := by
   intros k
   constructor
@@ -418,14 +350,14 @@ theorem ExtractedFunctionsAreSolutions {DE : DiffEq} {f : ℂ → ℂ} (hf : f �
     exact h1
 
 noncomputable def MatrixEntries {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) (k : (Fin ↑DE.Degree)) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) (k : (Fin ↑DE.Degree)) :
   (Fin ↑DE.Degree) → ℂ :=
   let W : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ := Matrix.of fun i j => iteratedDeriv i (g j) 0
   let ek : Fin ↑DE.Degree → ℂ := fun i => iteratedDeriv i (ExtractedFunctions hf g hg k) 0
   (W⁻¹ *ᵥ ek)
 
 theorem MatrixEntriesUse {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) (k : (Fin ↑DE.Degree)) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) (k : (Fin ↑DE.Degree)) :
   ExtractedFunctions hf g hg k = fun z₁ =>
   ∑ (k_1 : (Fin ↑DE.Degree)), (MatrixEntries hf g hg k) k_1 * g k_1 z₁ := by
   have hEk := ExtractedFunctionsAreSolutions hf g hg k
@@ -438,7 +370,7 @@ theorem MatrixEntriesUse {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSol
   congr 1
 
 noncomputable def ArgumentSumRule2Matrix {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) :
   Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ :=
   of λ (y : Fin ↑DE.Degree) (x : Fin ↑DE.Degree) => MatrixEntries hf g hg x y
 
@@ -447,7 +379,7 @@ def Vec {n : ℕ+} (g : (Fin n) → ℂ → ℂ) (z : ℂ) :
   Matrix (Fin n) (Fin 1) ℂ := of λ (y : Fin n) (_ : Fin 1) => g y z
 
 theorem ExistsUniqueArgumentSumRuleMatrix {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g)
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g)
   (A : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ) : A = ArgumentSumRule2Matrix hf g hg ↔
   (∀ (z₀ z₁ : ℂ), ((of λ (_ _ : Fin 1) => f (z₀ + z₁)) =
     ((transpose (Vec g z₀)) * A * (Vec g z₁)))) := by
@@ -492,7 +424,7 @@ theorem ExistsUniqueArgumentSumRuleMatrix {DE : DiffEq} {f : ℂ → ℂ} (hf : 
 #print axioms ExistsUniqueArgumentSumRuleMatrix
 
 theorem SymmetricArgumentSumRuleMatrix {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g)
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g)
   (A : Matrix (Fin ↑DE.Degree) (Fin ↑DE.Degree) ℂ) : A = ArgumentSumRule2Matrix hf g hg →
   A = Aᵀ := by
   intro hA
@@ -511,7 +443,7 @@ theorem SymmetricArgumentSumRuleMatrix {DE : DiffEq} {f : ℂ → ℂ} (hf : f �
 #print axioms SymmetricArgumentSumRuleMatrix
 
 theorem TensorProductBasisLinearIndependence (Dim : ℕ) {DE : DiffEq}
-    (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g)
+    (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g)
     (c : (Fin Dim → Fin ↑DE.Degree) → ℂ)
     (hc : ∀ z : Fin Dim → ℂ, ∑ k, c k * ∏ j, g (k j) (z j) = 0) : c = 0 := by
   induction Dim with
@@ -568,13 +500,13 @@ def PermuteFunctionsByReorderingInputs {α : Type} (Perm : Equiv.Perm α) (β : 
   Equiv.Perm (α → β) := Perm.symm.arrowCongr (Equiv.refl β)
 
 def IsArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (_ : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (_ : DE.IsVectorBasis g)
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (_ : DE.IsBasis g)
   (Tensor : (Fin Dim → Fin ↑DE.Degree) → ℂ) : Prop :=
   (∀ (z : Fin Dim → ℂ), f (∑ (j : Fin Dim), (z j)) =
     ∑ (k : Fin Dim → Fin ↑DE.Degree), (Tensor k * ∏ (j : Fin Dim), (g (k j) (z j))))
 
 noncomputable def ArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-    (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) : (Fin Dim → Fin ↑DE.Degree) → ℂ :=
+    (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) : (Fin Dim → Fin ↑DE.Degree) → ℂ :=
   match Dim with
   | 0 => fun _ => f 0
   | Dim' + 1 =>
@@ -583,7 +515,7 @@ noncomputable def ArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → �
     fun k => ∑ j : Fin ↑DE.Degree, A (k (Fin.last Dim')) j * c_basis j (Fin.init k)
 
 theorem ExistsUniqueArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) (T₀ : (Fin Dim → Fin ↑DE.Degree) → ℂ) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) (T₀ : (Fin Dim → Fin ↑DE.Degree) → ℂ) :
   IsArgumentSumRuleTensor Dim hf g hg T₀ ↔ T₀ = ArgumentSumRuleTensor Dim hf g hg := by
   have hExist : IsArgumentSumRuleTensor Dim hf g hg (ArgumentSumRuleTensor Dim hf g hg) := by
     induction Dim generalizing f hf with
@@ -660,7 +592,7 @@ def SymmetricTensor {α : Type} {Dim Edge : ℕ} (Tensor : (Fin Dim → Fin Edge
      Tensor ((PermuteFunctionsByReorderingInputs Perm (Fin Edge)) Position) = Tensor Position)
 
 theorem SymmetricArgumentSumRuleTensor (Dim : ℕ) {DE : DiffEq} {f : ℂ → ℂ} (hf : f ∈ DE.SetOfSolutions)
-  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsVectorBasis g) :
+  (g : (Fin ↑DE.Degree) → ℂ → ℂ) (hg : DE.IsBasis g) :
   SymmetricTensor (ArgumentSumRuleTensor Dim hf g hg) := by
   let PermutePositions := λ (PermuteAxes : Equiv.Perm (Fin Dim)) ↦
     (PermuteFunctionsByReorderingInputs PermuteAxes (Fin ↑DE.Degree))

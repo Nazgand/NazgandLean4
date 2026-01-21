@@ -1,2 +1,8 @@
 /build
 /lake-packages/*
+*.c
+*.hash
+*.ilean
+*.olean
+*.trace
+*.setup.json

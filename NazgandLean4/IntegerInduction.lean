@@ -44,9 +44,9 @@ theorem associated_gcd_gcd (a b : ℤ) :
 theorem GcdLinearCombination (k₀ k₁ : ℤ) :
   (∃ (m₀ m₁ : ℤ), (Int.gcd k₀ k₁ = m₀ * k₀ + m₁ * k₁)) := by
   obtain ⟨m, n, h⟩ := IsBezout.gcd_eq_sum k₀ k₁
-  have := associated_gcd_gcd k₀ k₁
-  rw [Int.associated_iff] at this
-  cases this with
+  have h0 := associated_gcd_gcd k₀ k₁
+  rw [Int.associated_iff] at h0
+  cases h0 with
   | inl h' =>
     use m, n
     rw [h, Int.coe_gcd, h']

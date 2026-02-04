@@ -5,8 +5,8 @@ open Complex Classical Real
 
 /-
 Example Mathematica code to show a table of spirographs with 9-fold symmetry and 5 winding speed
-g[t_,m_]:=FullSimplify[Sum[Exp[I*(9*k+5)*t]*1.5^-k ,{k,0,m}]]
-Table[ParametricPlot[{Re[g[u,m]],Im[g[u,m]]}, {u, 0, 2 Pi}],{m,0,15}]
+g[t_, m_]:=FullSimplify[Sum[Exp[I*(9*k+5)*t]*1.5^-k , {k, 0, m}]]
+Table[ParametricPlot[{Re[g[u, m]], Im[g[u, m]]}, {u, 0, 2 Pi}], {m, 0, 15}]
 -/
 
 --declare a Set Of Complex Spirograph functions with k-fold symmetry with m winding speed.
@@ -39,14 +39,14 @@ theorem SpiroPseudoPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpir
     · intros h₁ t
       rw [(show t + 2 * (↑m₁ + 1) * ↑π / ↑↑k = t + 2 * ↑m₁ * ↑π / ↑↑k + 2 * ↑π / ↑↑k by ring), h₀, h₁]
       rw [(show (I * 2 * ↑m * ↑π / ↑↑k).exp * ((I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t) =
-        (I * 2 * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t by ring), ←Complex.exp_add]
+        (I * 2 * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * f₀ t by ring), ← Complex.exp_add]
       ring_nf
     · intros h₁ t
       rw [(show t + 2 * ↑m₁ * ↑π / ↑↑k = (t - 2 * ↑π / ↑↑k) + 2 * (↑m₁ + 1) * ↑π / ↑↑k by ring), h₁]
       rw [(show f₀ t = f₀ ((t - 2 * ↑π / ↑↑k) + 2 * ↑π / ↑↑k) by ring_nf), h₀]
       rw [(show (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * ((I * 2 * ↑m * ↑π / ↑↑k).exp * f₀ (t - 2 * ↑π / ↑↑k)) =
         (I * 2 * ↑m₁ * ↑m * ↑π / ↑↑k).exp * (I * 2 * ↑m * ↑π / ↑↑k).exp *
-        f₀ (t - 2 * ↑π / ↑↑k) by ring_nf), ←Complex.exp_add]
+        f₀ (t - 2 * ↑π / ↑↑k) by ring_nf), ← Complex.exp_add]
       ring_nf
 
 theorem SpiroPeriodic {f₀} (k : ℕ+) (m : ℤ) (h₀ : f₀ ∈ SetSpiro k m) : ∀ (t : ℂ), f₀ (t + 2 * π) = f₀ t := by
@@ -126,7 +126,7 @@ theorem SetSpiroRelated {f₀} (k₀ k₁ : ℕ+) (m : ℤ) (h₀ : f₀ ∈ Set
   intros t
   field_simp
   rw [(show (t * ↑↑k₁ + 2 * ↑π) / ↑↑k₀ = t * ↑↑k₁ / ↑↑k₀ + 2 * ↑π / ↑↑k₀ by ring), h₀,
-    mul_pow, ←Complex.exp_nat_mul]
+    mul_pow, ← Complex.exp_nat_mul]
   congr 1
   congr 1
   ring_nf
@@ -139,6 +139,6 @@ theorem SetSpiroRelated2 {f₀} (k: ℕ+) (m₀ m₁ : ℤ) (h₀ : f₀ ∈ Set
   intros t
   rw [h₀]
   ring_nf
-  rw [←Complex.exp_add, (show f₀ t * (I * ↑π * (↑↑k)⁻¹ * ↑m₁ * 2).exp * (I * t * ↑m₁ - I * t * ↑m₀).exp =
-    f₀ t * ((I * ↑π * (↑↑k)⁻¹ * ↑m₁ * 2).exp * (I * t * ↑m₁ - I * t * ↑m₀).exp) by ring), ←Complex.exp_add]
+  rw [← Complex.exp_add, (show f₀ t * (I * ↑π * (↑↑k)⁻¹ * ↑m₁ * 2).exp * (I * t * ↑m₁ - I * t * ↑m₀).exp =
+    f₀ t * ((I * ↑π * (↑↑k)⁻¹ * ↑m₁ * 2).exp * (I * t * ↑m₁ - I * t * ↑m₀).exp) by ring), ← Complex.exp_add]
   ring_nf

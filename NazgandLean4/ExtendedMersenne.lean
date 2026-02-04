@@ -103,7 +103,7 @@ theorem ExtendedMersennePrimeImp (b k : ℕ) :
     have hy2 : y ≥ 2 := by
       by_contra hy_lt
       rw [not_le] at hy_lt
-      have : y = 1 := by
+      have h0 : y = 1 := by
         cases y with
         | zero =>
            simp only [mul_zero, not_lt_zero] at hy
@@ -113,7 +113,7 @@ theorem ExtendedMersennePrimeImp (b k : ℕ) :
            · simp_all only [ge_iff_le, Nat.add_eq_right, Nat.add_eq_zero_iff,
              one_ne_zero, and_false]
              linarith
-      subst this
+      subst h0
       simp only [mul_one, lt_self_iff_false] at hy
     have h1 : ExtendedMersenne (m + 1) x > 1 :=
       ExtendedMersenneGt1IfBGt0KGt1 _ _ (Nat.succ_pos _) (by linarith [hx2])

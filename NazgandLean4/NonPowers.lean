@@ -33,7 +33,7 @@ theorem NonPowerNatPrimeExponentsGcdEq1 :
     let g := PrimeExponentsGcd k
     have hg_ne_1 : g ≠ 1 := by exact Ne.symm (Ne.intro h_g)
     by_cases hg0 : g = 0
-    · have : k = 0 ∨ k = 1 := by
+    · have hk : k = 0 ∨ k = 1 := by
         simp only [g, PrimeExponentsGcd] at hg0
         by_cases hk : k = 0; · left; exact hk
         right
@@ -43,7 +43,7 @@ theorem NonPowerNatPrimeExponentsGcdEq1 :
         intro p hp
         exfalso
         exact (Finsupp.mem_support_iff.mp hp) (hg0 p hp)
-      rcases this with rfl | rfl
+      rcases hk with rfl | rfl
       · apply h_np; use 0, 2; simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow,
         gt_iff_lt, Nat.one_lt_ofNat, and_self]
       · apply h_np; use 1, 2; simp only [one_pow, gt_iff_lt, Nat.one_lt_ofNat, and_self]
@@ -81,12 +81,12 @@ theorem OverUnityNatUniqueNonPowerNatBase (k : ℕ) (h : k ∈ OverUnityNat) :
     intro hg0
     simp only [g, PrimeExponentsGcd] at hg0
     rw [Finset.gcd_eq_zero_iff] at hg0
-    have : k = 1 := by
+    have h9 : k = 1 := by
        rw [← Nat.factorization_prod_pow_eq_self hk0]
        apply Finset.prod_eq_one
        intro p hp
        simp only [hg0 p hp, pow_zero]
-    subst this
+    subst h9
     simp only [OverUnityNat, gt_iff_lt, Set.mem_setOf_eq, lt_self_iff_false] at h
   let a := k.factorization.support.prod (λ p => p ^ (k.factorization p / g))
   have hk_eq : k = a ^ g := by
@@ -225,8 +225,7 @@ theorem PosNatExistsUniqueNonPowerPowerTower (k : ℕ) (h0 : k ∈ PosNat) :
     have b_pos : b ∈ PosNat := by
        by_contra hb
        simp only [PosNat, gt_iff_lt, Set.mem_setOf_eq, not_lt, nonpos_iff_eq_zero] at hb
-       have : b = 0 := by linarith
-       subst this
+       subst hb
        rw [pow_zero] at h1
        exact h1 rfl
     have b_lt_k : b < a ^ b := by

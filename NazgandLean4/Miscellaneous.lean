@@ -66,11 +66,11 @@ theorem MiscDiffEq (f : ℂ → ℂ) (h0 : Differentiable ℂ f)
       have hk : (k : ℂ) ≠ 0 := by
         norm_cast
         exact Nat.pos_iff_ne_zero.mp h1
-      rw [mul_pow, ←Complex.exp_nat_mul]
+      rw [mul_pow, ← Complex.exp_nat_mul]
       field_simp [hk]
       ring_nf
       have h_pow : k - 1 + 1 = k := Nat.sub_add_cancel (Nat.succ_le_of_lt h1)
-      rw [←pow_succ', h_pow]
+      rw [← pow_succ', h_pow]
     · apply DifferentiableAt.comp
       · apply Complex.differentiableAt_exp
       · apply DifferentiableAt.mul
@@ -82,8 +82,8 @@ theorem VaryingBase.SummableSum (db dv : ℕ → ℕ) (h0 : ∀(d : ℕ), (db d 
   have h_bound : ∀ d, (dv d : ℝ) / ∏ k ∈ Finset.range (d + 1), db k ≤ 1 / 2^d := by
     intro d
     have h_num_bound : (dv d : ℝ) ≤ db d - 1 := by
-      have := (h0 d).2
-      have h1 : dv d ≤ db d - 1 := Nat.le_sub_one_of_lt this
+      have h9 := (h0 d).2
+      have h1 : dv d ≤ db d - 1 := Nat.le_sub_one_of_lt h9
       calc (dv d : ℝ) ≤ (db d - 1 : ℕ) := Nat.cast_le.mpr h1
         _ = (db d : ℝ) - 1 := by simp only [Nat.cast_sub (Nat.one_le_of_lt (h0 d).1),
           Nat.cast_one]

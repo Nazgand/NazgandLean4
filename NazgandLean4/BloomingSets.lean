@@ -1015,7 +1015,7 @@ theorem «Max🌸Of🌸∈Peano🌸» (k : ℕ) :
 noncomputable def AsymmMin («🪻0» «🪻1» : «🌸») := «PropSub🌸» (λ («🪻2» : «🌸») ↦ «🌸∈» «🪻2» «🪻1») «🪻0»
 
 theorem «Sub🌸PropSub🌸» (p : («🌸» → Prop)) («🪻» : «🌸») : «Sub🌸» («PropSub🌸» p «🪻») «🪻» := by
-  rw [«Sub🌸»,← «Same🌸s🌸∈∧💐=💐↔=», «Same🌸s🌸∈»]
+  rw [«Sub🌸», ← «Same🌸s🌸∈∧💐=💐↔=», «Same🌸s🌸∈»]
   simp_rw [«🌸∈Max🌸»]
   constructor
   · intro «🪻0»

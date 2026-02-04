@@ -212,7 +212,7 @@ theorem StandardBasisIsBasis (DE : DiffEq) : DE.IsBasis (DE.StandardBasis) := by
     have h_smooth : ∀ b : Fin DE.Degree → ℂ, ∀ i : Fin DE.Degree, Differentiable ℂ (fun z => b i * DE.StandardBasis i z) := by
       intro b i; apply Differentiable.const_mul; exact (StandardBasisIsSolution DE i).1
     simp_rw [ComplexIteratedDerivSum (fun i _ => h_smooth _ i),
-      iteratedDeriv_const_mul ((StandardBasisIsSolution DE _).1.contDiff.contDiffAt.of_le le_top),
+      iteratedDeriv_const_mul _ ((StandardBasisIsSolution DE _).1.contDiff.contDiffAt.of_le le_top),
       StandardBasisInitialConditions] at h_deriv_k
     simp only [mul_ite, mul_one, mul_zero, sum_ite_eq, mem_univ, ↓reduceIte] at h_deriv_k
     exact h_deriv_k

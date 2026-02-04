@@ -75,7 +75,7 @@ theorem ComplexIteratedDerivSumConstMul {m : ℕ} (g : Fin m → ℂ → ℂ)
   rw [ComplexIteratedDerivSum hA i]
   dsimp only
   congr with k
-  rw [iteratedDeriv_const_mul]
+  rw [iteratedDeriv_const_mul (C k)]
   exact (h k).contDiff.contDiffAt
 
 theorem iteratedDeriv_iteratedDeriv {f : ℂ → ℂ} (n k : ℕ) :

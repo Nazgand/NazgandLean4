@@ -33,7 +33,7 @@ theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → �
     have h_comm : ∀ (n : ℕ) (i : Fin ↑DE.Degree) z,
         iteratedDeriv n (fun z => v i * g i z) z = v i * iteratedDeriv n (g i) z := by
       intro n i z
-      exact iteratedDeriv_const_mul ((h_sol_g i).1.contDiff.of_le le_top).contDiffAt (v i)
+      exact iteratedDeriv_const_mul (v i) ((h_sol_g i).1.contDiff.of_le le_top).contDiffAt
     simp_rw [h_comm, Finset.mul_sum]
     rw [Finset.sum_comm]
     symm
@@ -51,7 +51,7 @@ theorem Wronskian_Invertible {DE : DiffEq} (g : (Fin ↑DE.Degree) → ℂ → �
     have h_smooth : ∀ i ∈ Finset.univ, Differentiable ℂ (fun z => v i * g i z) :=
       fun i _ => Differentiable.const_mul (h_sol_g i).1 (v i)
     rw [ComplexIteratedDerivSum (fun i hi => h_smooth i hi)]
-    simp_rw [iteratedDeriv_const_mul ((h_sol_g _).1.contDiff.of_le le_top).contDiffAt (v _), mul_comm (v _) _]
+    simp_rw [iteratedDeriv_const_mul (v _) ((h_sol_g _).1.contDiff.of_le le_top).contDiffAt, mul_comm (v _) _]
     exact congr_fun hv_eq k
   have h_fz : f_zero = 0 := DiffEq_Zero_IC_Implies_Zero h_sol h_ic
   rw [DiffEq.IsBasis] at hg

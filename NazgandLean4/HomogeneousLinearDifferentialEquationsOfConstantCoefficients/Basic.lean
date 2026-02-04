@@ -57,7 +57,7 @@ theorem KeyDifferentialOperator.ConstMul {DE : DiffEq} {f : ℂ → ℂ} (c : �
     intro k _
     have h_smul : c • f = fun z => c * f z := by ext; simp only [Pi.smul_apply, smul_eq_mul]
     rw [h_smul,
-      iteratedDeriv_const_mul (hf.contDiff.contDiffAt.of_le le_top)]
+      iteratedDeriv_const_mul c (hf.contDiff.contDiffAt.of_le le_top)]
     ring
   · rw [Finset.mul_sum]
 
